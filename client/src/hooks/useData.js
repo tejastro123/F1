@@ -1,0 +1,140 @@
+import { useState, useEffect, useCallback } from 'react';
+import api from '../services/api.js';
+
+export function useDrivers() {
+  const [drivers, setDrivers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const fetchDrivers = useCallback(async () => {
+    try {
+      setLoading(true);
+      const { data } = await api.get('/drivers');
+      setDrivers(data);
+      setError(null);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchDrivers();
+    const handler = () => fetchDrivers();
+    window.addEventListener('f1-data-updated', handler);
+    return () => window.removeEventListener('f1-data-updated', handler);
+  }, [fetchDrivers]);
+
+  return { drivers, loading, error, refetch: fetchDrivers };
+}
+
+export function useConstructors() {
+  const [constructors, setConstructors] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const fetchConstructors = useCallback(async () => {
+    try {
+      setLoading(true);
+      const { data } = await api.get('/constructors');
+      setConstructors(data);
+      setError(null);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchConstructors();
+    const handler = () => fetchConstructors();
+    window.addEventListener('f1-data-updated', handler);
+    return () => window.removeEventListener('f1-data-updated', handler);
+  }, [fetchConstructors]);
+
+  return { constructors, loading, error, refetch: fetchConstructors };
+}
+
+export function useRaces() {
+  const [races, setRaces] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const fetchRaces = useCallback(async () => {
+    try {
+      setLoading(true);
+      const { data } = await api.get('/races');
+      setRaces(data);
+      setError(null);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchRaces();
+    const handler = () => fetchRaces();
+    window.addEventListener('f1-data-updated', handler);
+    return () => window.removeEventListener('f1-data-updated', handler);
+  }, [fetchRaces]);
+
+  return { races, loading, error, refetch: fetchRaces };
+}
+
+export function usePredictions(round) {
+  const [predictions, setPredictions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const fetchPredictions = useCallback(async () => {
+    try {
+      setLoading(true);
+      const params = round ? `?round=${round}` : '';
+      const { data } = await api.get(`/predictions${params}`);
+      setPredictions(data);
+      setError(null);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, [round]);
+
+  useEffect(() => {
+    fetchPredictions();
+  }, [fetchPredictions]);
+
+  return { predictions, loading, error, refetch: fetchPredictions };
+}
+
+export function useStats() {
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const fetchStats = useCallback(async () => {
+    try {
+      setLoading(true);
+      const { data } = await api.get('/stats/overview');
+      setStats(data);
+      setError(null);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchStats();
+    const handler = () => fetchStats();
+    window.addEventListener('f1-data-updated', handler);
+    return () => window.removeEventListener('f1-data-updated', handler);
+  }, [fetchStats]);
+
+  return { stats, loading, error, refetch: fetchStats };
+}

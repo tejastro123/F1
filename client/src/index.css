@@ -1,0 +1,74 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --f1-red: #E10600;
+    --f1-dark: #0F0F13;
+    --f1-panel: #16161F;
+    --f1-card: #1C1C28;
+    --f1-gold: #F5C518;
+  }
+
+  body {
+    @apply bg-f1-dark text-white;
+    overflow-x: hidden;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-f1-dark;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-f1-card rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-f1-red;
+  }
+}
+
+@layer components {
+  .skeleton {
+    @apply bg-f1-card rounded;
+    background: linear-gradient(90deg, #1C1C28 25%, #2a2a3a 50%, #1C1C28 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+
+  .glass-card {
+    @apply bg-f1-card/80 backdrop-blur-md border border-white/5 rounded-xl;
+  }
+
+  .gradient-border {
+    position: relative;
+  }
+  .gradient-border::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(135deg, var(--f1-red), transparent 60%);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+  }
+}
+
+/* Light theme overrides */
+.light body,
+.light .bg-f1-dark {
+  background-color: #FAFAFA;
+  color: #1A1A2E;
+}
+.light .bg-f1-panel {
+  background-color: #EEEEF0;
+}
+.light .bg-f1-card {
+  background-color: #FFFFFF;
+}

@@ -1,0 +1,17 @@
+node_modules/
+.env
+dist/
+.DS_Store
+*.log
+
+# Temp/scratch files
+prompt_text.txt
+excel_output.txt
+excel_full.txt
+read_excel.py
+read_excel2.py
+task.md
+
+# Large binary files
+*.pdf
+*.xlsx
