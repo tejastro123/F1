@@ -114,10 +114,22 @@ router.patch('/predictions/:id', async (req, res, next) => {
     if (isCorrect !== undefined) update.isCorrect = isCorrect;
     if (actualResult !== undefined) update.actualResult = actualResult;
 
-    const prediction = await Prediction.findByIdAndUpdate(req.params.id, update, { new: true, runValidators: true });
+    const prediction = await Prediction.findByIdAndUpdate(req.params.id, update, { new: true, runValidators: true }).populate('user', 'displayName email avatarUrl');
     if (!prediction) return res.status(404).json({ error: 'Prediction not found' });
 
     res.json(prediction);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// GET /api/v1/admin/predictions — Fetch all predictions across all users
+router.get('/predictions', async (req, res, next) => {
+  try {
+    const predictions = await Prediction.find()
+      .populate('user', 'displayName email avatarUrl')
+      .sort({ round: -1, createdAt: -1 });
+    res.json(predictions);
   } catch (error) {
     next(error);
   }

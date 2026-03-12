@@ -39,33 +39,54 @@ export default function AdminPredictions() {
         </Card>
 
         {loading ? <SkeletonLoader lines={8} /> : (
-          <div className="space-y-3">
+          <div className="space-y-4">
             {predictions.map((pred) => (
-              <Card key={pred._id} hover={false} className="!p-4">
-                <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-                  <div className="flex-1">
-                    <div className="text-xs text-gray-500">Round {pred.round} · {pred.grandPrixName}</div>
-                    <div className="font-medium text-white">{pred.category}</div>
-                    <div className="text-sm text-gray-400 mt-1">
-                      Prediction: <span className="text-f1-gold">{pred.prediction}</span>
-                      {pred.actualResult !== 'TBD' && <> · Actual: <span className="text-white">{pred.actualResult}</span></>}
+              <Card key={pred._id} hover={false} className="!p-0 border-white/5 bg-f1-card/40 overflow-hidden">
+                <div className="flex flex-col sm:flex-row divide-y sm:divide-y-0 sm:divide-x divide-white/5">
+                  {/* User Profile Info */}
+                  <div className="p-4 sm:w-48 bg-white/5 flex flex-row sm:flex-col items-center sm:items-start gap-3">
+                    <img 
+                      src={pred.user?.avatarUrl || `https://ui-avatars.com/api/?name=${pred.user?.displayName || 'User'}`} 
+                      alt="" 
+                      className="w-8 h-8 rounded-full border border-white/10"
+                    />
+                    <div className="min-w-0">
+                      <div className="text-[10px] text-white font-black uppercase tracking-wider truncate">{pred.user?.displayName || 'Unknown'}</div>
+                      <div className="text-[9px] text-gray-500 truncate">{pred.user?.email}</div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant={pred.isCorrect === true ? 'primary' : 'secondary'}
-                      size="sm"
-                      onClick={() => toggle(pred, pred.isCorrect === true ? null : true)}
-                    >
-                      ✓ Correct
-                    </Button>
-                    <Button
-                      variant={pred.isCorrect === false ? 'primary' : 'secondary'}
-                      size="sm"
-                      onClick={() => toggle(pred, pred.isCorrect === false ? null : false)}
-                    >
-                      ✗ Wrong
-                    </Button>
+
+                  {/* Prediction Content */}
+                  <div className="flex-1 p-4 flex flex-col sm:flex-row sm:items-center gap-4">
+                    <div className="flex-1 min-w-0">
+                      <div className="text-[10px] text-gray-500 font-bold mb-1">ROUND {pred.round} · {pred.grandPrixName}</div>
+                      <div className="font-bold text-f1-gold text-sm uppercase tracking-wide">{pred.category}</div>
+                      <div className="text-base font-black text-white mt-0.5 truncate">{pred.prediction}</div>
+                      {pred.actualResult !== 'TBD' && (
+                        <div className="text-[10px] text-gray-400 font-medium mt-1">
+                          ACTUAL: <span className="text-white">{pred.actualResult}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant={pred.isCorrect === true ? 'gold' : 'secondary'}
+                        size="sm"
+                        onClick={() => toggle(pred, true)}
+                        className="flex-1 sm:flex-initial !py-1.5 h-auto text-[10px] font-black"
+                      >
+                        ✓ CORRECT
+                      </Button>
+                      <Button
+                        variant={pred.isCorrect === false ? 'auth' : 'secondary'}
+                        size="sm"
+                        onClick={() => toggle(pred, false)}
+                        className="flex-1 sm:flex-initial !py-1.5 h-auto text-[10px] font-black"
+                      >
+                        ✗ WRONG
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </Card>
