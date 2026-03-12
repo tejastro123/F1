@@ -1,4 +1,4 @@
-import { useRef, useMemo } from 'react';
+import { useRef, useMemo, Suspense } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Line, Html, Environment, Text } from '@react-three/drei';
 import * as THREE from 'three';
@@ -98,22 +98,24 @@ export default function CircuitViewer({ trackData }) {
       </div>
       
       <Canvas camera={{ position: [0, 4, 6], fov: 50 }}>
-        {/* Adds studio lighting reflections */}
-        <Environment preset="city" />
-        <ambientLight intensity={0.5} />
-        <directionalLight position={[10, 10, 5]} intensity={1} />
-        
-        <Circuit trackData={trackData} />
-        
-        {/* Allow users to click and drag to orbit the camera */}
-        <OrbitControls 
-          enablePan={false} 
-          minPolarAngle={Math.PI / 6} 
-          maxPolarAngle={Math.PI / 2.1} 
-          minDistance={3}
-          maxDistance={12}
-          autoRotate={false}
-        />
+        <Suspense fallback={null}>
+          {/* Adds studio lighting reflections */}
+          <Environment preset="city" />
+          <ambientLight intensity={0.5} />
+          <directionalLight position={[10, 10, 5]} intensity={1} />
+          
+          <Circuit trackData={trackData} />
+          
+          {/* Allow users to click and drag to orbit the camera */}
+          <OrbitControls 
+            enablePan={false} 
+            minPolarAngle={Math.PI / 6} 
+            maxPolarAngle={Math.PI / 2.1} 
+            minDistance={3}
+            maxDistance={12}
+            autoRotate={false}
+          />
+        </Suspense>
       </Canvas>
     </div>
   );
