@@ -43,7 +43,7 @@ router.post('/login', authRateLimiter, async (req, res, next) => {
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
@@ -75,7 +75,7 @@ router.post('/refresh', async (req, res, next) => {
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
@@ -90,7 +90,11 @@ router.post('/refresh', async (req, res, next) => {
 
 // POST /api/v1/auth/logout
 router.post('/logout', (_req, res) => {
-  res.clearCookie('refreshToken');
+  res.clearCookie('refreshToken', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+  });
   res.json({ message: 'Logged out successfully.' });
 });
 
