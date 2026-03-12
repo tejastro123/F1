@@ -9,7 +9,7 @@ import {
   RoomAudioRenderer,
   StartAudio
 } from '@livekit/components-react';
-import { Track } from 'livekit-client';
+import { Track, VideoQuality } from 'livekit-client';
 import '@livekit/components-styles';
 
 import api from '../services/api.js';
@@ -71,11 +71,22 @@ function LiveViewerContent({ viewerName }) {
   const [chatMessages, setChatMessages] = useState([]);
   const [chatInput, setChatInput] = useState('');
   const chatEndRef = useRef(null);
+
+  // VOD & Quality State
+  const [isRecording, setIsRecording] = useState(false);
+  const [quality, setQuality] = useState('high');
+  const mediaRecorderRef = useRef(null);
+  const recordedChunks = useRef([]);
   
   // Use LiveKit hooks to find any tracks published by the Admin (Screen + Camera)
   const tracks = useTracks([
     { source: Track.Source.ScreenShare, withPlaceholder: false },
     { source: Track.Source.Camera, withPlaceholder: false }
+  ]);
+  
+  const audioTracks = useTracks([
+    { source: Track.Source.Microphone, withPlaceholder: false },
+    { source: Track.Source.ScreenShareAudio, withPlaceholder: false }
   ]);
   
   const screenTrack = tracks.find(t => t.source === Track.Source.ScreenShare);
@@ -125,6 +136,74 @@ function LiveViewerContent({ viewerName }) {
     }
   };
 
+  const toggleRecording = () => {
+    if (isRecording) {
+      mediaRecorderRef.current?.stop();
+      setIsRecording(false);
+    } else {
+      const tracksToRecord = [];
+      
+      if (screenTrack?.publication?.track?.mediaStreamTrack) {
+        tracksToRecord.push(screenTrack.publication.track.mediaStreamTrack);
+      }
+      if (camTrack?.publication?.track?.mediaStreamTrack) {
+        tracksToRecord.push(camTrack.publication.track.mediaStreamTrack);
+      }
+      
+      audioTracks.forEach(t => {
+        if (t.publication?.track?.mediaStreamTrack) {
+          tracksToRecord.push(t.publication.track.mediaStreamTrack);
+        }
+      });
+      
+      if (tracksToRecord.length === 0) return alert('No active stream to record.');
+      
+      const finalStream = new MediaStream(tracksToRecord);
+      recordedChunks.current = [];
+      
+      try {
+        const mediaRecorder = new MediaRecorder(finalStream, { mimeType: 'video/webm' });
+        mediaRecorderRef.current = mediaRecorder;
+        
+        mediaRecorder.ondataavailable = (event) => {
+          if (event.data.size > 0) recordedChunks.current.push(event.data);
+        };
+        
+        mediaRecorder.onstop = () => {
+           const blob = new Blob(recordedChunks.current, { type: 'video/webm' });
+           const url = URL.createObjectURL(blob);
+           const a = document.createElement('a');
+           a.href = url;
+           a.download = `f1-live-vod-${new Date().toISOString()}.webm`;
+           a.click();
+           URL.revokeObjectURL(url);
+        };
+        
+        mediaRecorder.start();
+        setIsRecording(true);
+      } catch (e) {
+        console.error('Error recording', e);
+        alert('Browser does not support VOD capture of this stream.');
+      }
+    }
+  };
+
+  const handleQualityChange = (e) => {
+    const newQuality = e.target.value;
+    setQuality(newQuality);
+    
+    let lkQuality = VideoQuality.HIGH;
+    if (newQuality === 'medium') lkQuality = VideoQuality.MEDIUM;
+    if (newQuality === 'low') lkQuality = VideoQuality.LOW;
+    
+    if (screenTrack?.publication) {
+      screenTrack.publication.setVideoQuality(lkQuality);
+    }
+    if (camTrack?.publication) {
+      camTrack.publication.setVideoQuality(lkQuality);
+    }
+  };
+
   return (
     <>
       <Helmet>
@@ -150,6 +229,33 @@ function LiveViewerContent({ viewerName }) {
                 <Badge color={isLiveStreamActive ? 'red' : 'gray'}>{isLiveStreamActive ? 'LIVE' : 'OFFLINE'}</Badge>
               </div>
             </Card>
+
+            {/* Viewer Stream Controls */}
+            {isLiveStreamActive && (
+              <div className="flex items-center justify-between bg-black/30 border border-white/5 p-3 rounded-lg mb-4">
+                <div className="flex items-center gap-3">
+                  <span className="text-sm text-gray-400">Stream Quality:</span>
+                  <select 
+                    value={quality}
+                    onChange={handleQualityChange}
+                    className="bg-black/80 border border-white/20 rounded px-2 py-1 text-white text-sm outline-none cursor-pointer focus:border-red-500 transition-colors"
+                  >
+                    <option value="high">1080p (Source)</option>
+                    <option value="medium">720p (Data Saver)</option>
+                    <option value="low">480p (Low Bandwidth)</option>
+                  </select>
+                </div>
+                
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  className={`border-white/20 ${isRecording ? 'text-white bg-red-600 border-red-500 animate-pulse' : 'text-gray-300 hover:bg-white/10'}`} 
+                  onClick={toggleRecording}
+                >
+                  {isRecording ? '⏸ Stop Recording' : '⏺ Record VOD'}
+                </Button>
+              </div>
+            )}
 
             {/* Live Video Player */}
             <Card className={`mb-8 p-0 overflow-hidden transition-all duration-500 ${isLiveStreamActive ? 'ring-2 ring-red-500/50' : 'opacity-80'}`}>
