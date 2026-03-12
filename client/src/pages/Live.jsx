@@ -22,6 +22,7 @@ export default function Live() {
     if (!socket) return;
 
     socket.on('broadcaster', () => {
+      console.log('Broadcaster is active! Requesting to watch...');
       socket.emit('watcher');
     });
 
@@ -37,6 +38,7 @@ export default function Live() {
         });
 
       peerConnection.current.ontrack = (event) => {
+        console.log('Received remote track!', event.streams);
         setIsLiveStreamActive(true);
         if (videoRef.current) {
           videoRef.current.srcObject = event.streams[0];
@@ -59,6 +61,7 @@ export default function Live() {
     });
 
     socket.on('disconnectPeer', () => {
+      console.log('Broadcaster disconnected.');
       if (peerConnection.current) {
         peerConnection.current.close();
       }
@@ -74,6 +77,7 @@ export default function Live() {
     };
 
     // When first mounting, ask if there is an active broadcaster
+    console.log('Emitting watcher request...');
     socket.emit('watcher');
 
     return () => {
@@ -126,7 +130,10 @@ export default function Live() {
               <div className="absolute flex flex-col items-center justify-center text-gray-500 z-10 w-full h-full bg-black/80">
                 <span className="text-5xl mb-4 opacity-50">📡</span>
                 <p className="text-xl font-bold font-f1 tracking-wider uppercase">Live Stream Offline</p>
-                <p className="text-sm mt-2 opacity-70">Waiting for admin to start broadcasting...</p>
+                <p className="text-sm mt-2 opacity-70 mb-4">Waiting for admin to start broadcasting...</p>
+                <Button variant="outline" size="sm" onClick={() => socket?.emit('watcher')}>
+                  Refresh Connection
+                </Button>
               </div>
             )}
 
