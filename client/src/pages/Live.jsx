@@ -7,10 +7,15 @@ import { Card, Badge, SectionHeader, Button } from '../components/ui.jsx';
 export default function Live() {
   const { isConnected, broadcasts, lastBroadcast, socket } = useSocket();
   const videoRef = useRef(null);
+  const pipVideoRef = useRef(null);
   const playerContainerRef = useRef(null);
   const peerConnection = useRef(null);
+  const chatEndRef = useRef(null);
   const [isLiveStreamActive, setIsLiveStreamActive] = useState(false);
+  const [hasPip, setHasPip] = useState(false);
   const [userInteracted, setUserInteracted] = useState(false);
+  const [chatMessages, setChatMessages] = useState([]);
+  const [chatInput, setChatInput] = useState('');
 
   const config = {
     iceServers: [
@@ -42,6 +47,19 @@ export default function Live() {
       socket.emit('watcher');
     });
 
+    socket.on('chat_history', (history) => {
+      setChatMessages(history);
+    });
+
+    socket.on('receive_chat', (msg) => {
+      setChatMessages(prev => [...prev, msg]);
+    });
+
+    socket.on('kicked', () => {
+      alert('You have been removed from the live stream by the admin.');
+      window.location.href = '/';
+    });
+
     socket.on('offer', (id, description) => {
       peerConnection.current = new RTCPeerConnection(config);
       
@@ -56,12 +74,28 @@ export default function Live() {
       peerConnection.current.ontrack = (event) => {
         console.log('[Viewer] Track received:', event.track.kind, event.streams);
         setIsLiveStreamActive(true);
-        if (videoRef.current) {
-          if (videoRef.current.srcObject !== event.streams[0]) {
-            videoRef.current.srcObject = event.streams[0];
+        const incomingStream = event.streams[0];
+
+        const updateVideoSources = () => {
+          if (!videoRef.current) return;
+          const vTracks = incomingStream.getVideoTracks();
+          const aTracks = incomingStream.getAudioTracks();
+
+          if (vTracks.length > 1) {
+            setHasPip(true);
+            videoRef.current.srcObject = new MediaStream([vTracks[0], ...aTracks]);
+            if (pipVideoRef.current) pipVideoRef.current.srcObject = new MediaStream([vTracks[1]]);
+            if (pipVideoRef.current) pipVideoRef.current.play().catch(e => console.warn('PiP Autoplay prevented:', e));
+          } else {
+            setHasPip(false);
+            videoRef.current.srcObject = incomingStream;
           }
           videoRef.current.play().catch(e => console.warn('Autoplay prevented:', e));
-        }
+        };
+
+        updateVideoSources();
+        incomingStream.onaddtrack = updateVideoSources;
+        incomingStream.onremovetrack = updateVideoSources;
       };
 
       peerConnection.current.oniceconnectionstatechange = () => {
@@ -69,6 +103,7 @@ export default function Live() {
         if (peerConnection.current.iceConnectionState === 'disconnected' || peerConnection.current.iceConnectionState === 'failed') {
              console.warn('[Viewer] Connection lost. Attempting to restart.');
              setIsLiveStreamActive(false);
+             setHasPip(false);
              if (videoRef.current) videoRef.current.srcObject = null;
         }
       };
@@ -107,10 +142,15 @@ export default function Live() {
 
     // When first mounting, ask if there is an active broadcaster
     console.log('Emitting watcher request...');
-    socket.emit('watcher');
+    const viewerName = localStorage.getItem('viewerName') || 'Viewer ' + Math.floor(Math.random() * 1000);
+    localStorage.setItem('viewerName', viewerName); // Persist for chat
+    socket.emit('watcher', { name: viewerName });
 
     return () => {
       socket.off('broadcaster');
+      socket.off('chat_history');
+      socket.off('receive_chat');
+      socket.off('kicked');
       socket.off('offer');
       socket.off('candidate');
       socket.off('disconnectPeer');
@@ -127,6 +167,9 @@ export default function Live() {
       videoRef.current.play();
       videoRef.current.muted = false; // Unmute on explicit play
     }
+    if (pipVideoRef.current && hasPip) {
+      pipVideoRef.current.play();
+    }
   };
 
   const toggleFullScreen = () => {
@@ -139,6 +182,26 @@ export default function Live() {
     }
   };
 
+  useEffect(() => {
+    if (chatEndRef.current) {
+      chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [chatMessages]);
+
+  const sendChatMessage = (e) => {
+    e.preventDefault();
+    if (!chatInput.trim() || !socket) return;
+    
+    const viewerName = localStorage.getItem('viewerName') || 'Viewer ' + Math.floor(Math.random() * 1000);
+    
+    socket.emit('send_chat', {
+      senderName: viewerName,
+      message: chatInput.trim(),
+      isAdmin: false
+    });
+    setChatInput('');
+  };
+
   return (
     <>
       <Helmet>
@@ -146,8 +209,12 @@ export default function Live() {
         <meta name="description" content="Live F1 race updates and broadcasts" />
       </Helmet>
 
-      <div className="pt-24 pb-16 px-4 max-w-4xl mx-auto">
-        <SectionHeader title="Live Feed" subtitle="Real-time race updates and live video broadcast" />
+      <div className="pt-24 pb-16 px-4 max-w-7xl mx-auto">
+        <SectionHeader title="Live Feed" subtitle="Real-time race updates, live video, and community chat" />
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left Column: Video & Announcements */}
+          <div className="lg:col-span-2 space-y-6">
 
         {/* Connection Status */}
         <Card className="mb-6 flex justify-between items-center bg-black/40 border-white/5 p-4 rounded-xl">
@@ -173,7 +240,10 @@ export default function Live() {
                 <span className="text-5xl mb-4 opacity-50">📡</span>
                 <p className="text-xl font-bold font-f1 tracking-wider uppercase">Live Stream Offline</p>
                 <p className="text-sm mt-2 opacity-70 mb-4">Waiting for admin to start broadcasting...</p>
-                <Button variant="outline" size="sm" onClick={() => socket?.emit('watcher')}>
+                <Button variant="outline" size="sm" onClick={() => {
+                  const viewerName = localStorage.getItem('viewerName') || 'Viewer ' + Math.floor(Math.random() * 1000);
+                  socket?.emit('watcher', { name: viewerName });
+                }}>
                   Refresh Connection
                 </Button>
               </div>
@@ -187,6 +257,13 @@ export default function Live() {
               muted // Start muted to bypass initial autoplay restrictions
               className={`w-full h-full object-cover rounded-lg ${!isLiveStreamActive ? 'hidden' : ''}`}
             />
+
+            {/* Viewer PiP Overlay */}
+            {hasPip && (
+              <div className="absolute bottom-4 right-4 w-1/4 max-w-[200px] aspect-video bg-black rounded-lg border-2 border-white/20 overflow-hidden shadow-2xl z-20">
+                <video ref={pipVideoRef} autoPlay muted playsInline className="w-full h-full object-cover" />
+              </div>
+            )}
 
             {/* Play Overlay (for unmuting/interaction policy) */}
             {isLiveStreamActive && !userInteracted && (
@@ -269,6 +346,61 @@ export default function Live() {
             </AnimatePresence>
           </div>
         )}
+          </div>
+
+          {/* Right Column: Live Chat */}
+          <div className="lg:col-span-1">
+            <Card className="flex flex-col h-[600px] lg:h-[calc(100vh-8rem)] sticky top-24 p-0 overflow-hidden border-white/10">
+              <div className="bg-f1-dark border-b border-white/5 p-4 flex items-center justify-between">
+                <h3 className="font-bold text-white flex items-center gap-2">
+                  <span className="text-xl">💬</span> Live Chat
+                </h3>
+                <Badge color="gray">{chatMessages.length} Messages</Badge>
+              </div>
+              
+              <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar bg-black/20">
+                {chatMessages.length === 0 ? (
+                  <div className="text-center text-gray-500 py-8 text-sm italic">
+                    Welcome to the live chat! Be the first to say hello.
+                  </div>
+                ) : (
+                  chatMessages.map((msg, idx) => (
+                    <div key={msg.id || idx} className={`flex flex-col ${msg.isAdmin ? 'items-start' : 'items-start'}`}>
+                      <div className="flex items-baseline gap-2 mb-1">
+                        <span className={`text-xs font-bold ${msg.isAdmin ? 'text-f1-red' : 'text-gray-400'}`}>
+                          {msg.isAdmin ? '👑 Admin' : msg.senderName}
+                        </span>
+                        <span className="text-[10px] text-gray-600">
+                          {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                      </div>
+                      <div className={`px-3 py-2 rounded-lg text-sm ${msg.isAdmin ? 'bg-f1-red/20 text-white border border-f1-red/30' : 'bg-white/5 text-gray-200'}`}>
+                        {msg.message}
+                      </div>
+                    </div>
+                  ))
+                )}
+                <div ref={chatEndRef} />
+              </div>
+
+              <div className="p-4 bg-f1-dark border-t border-white/5">
+                <form onSubmit={sendChatMessage} className="flex gap-2">
+                  <input
+                    type="text"
+                    value={chatInput}
+                    onChange={(e) => setChatInput(e.target.value)}
+                    placeholder="Send a message..."
+                    className="flex-1 bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-f1-red/50 transition-colors"
+                    maxLength={200}
+                  />
+                  <Button type="submit" variant="admin" className="px-4" disabled={!chatInput.trim()}>
+                    Send
+                  </Button>
+                </form>
+              </div>
+            </Card>
+          </div>
+        </div>
       </div>
     </>
   );
