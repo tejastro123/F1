@@ -22,6 +22,7 @@ import PollWidget from '../components/Live/PollWidget.jsx';
 import TrackStatusPanel from '../components/Live/TrackStatusPanel.jsx';
 import SectorFeed from '../components/Live/SectorFeed.jsx';
 import PredictionHeatmap from '../components/Live/PredictionHeatmap.jsx';
+import AdvancedPlayer from '../components/Live/AdvancedPlayer.jsx';
 
 export default function Live() {
   const [token, setToken] = useState(null);
@@ -78,6 +79,8 @@ function LiveViewerContent({ viewerName }) {
   const [chatMessages, setChatMessages] = useState([]);
   const [chatInput, setChatInput] = useState('');
   const chatEndRef = useRef(null);
+
+  const [isTheaterMode, setIsTheaterMode] = useState(false);
 
   // VOD & Quality State
   const [isRecording, setIsRecording] = useState(false);
@@ -235,25 +238,39 @@ function LiveViewerContent({ viewerName }) {
           </Badge>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:gap-8 items-start">
+        <div className={`grid grid-cols-1 gap-6 lg:gap-8 items-start transition-all duration-500 ${isTheaterMode ? 'lg:grid-cols-1' : 'lg:grid-cols-4'}`}>
           
           {/* Main Content Area - Video & Primary Interactions */}
-          <div className="lg:col-span-2 order-1 lg:order-2 space-y-6">
+          <div className={`${isTheaterMode ? 'lg:col-span-1' : 'lg:col-span-2'} order-1 lg:order-2 space-y-6`}>
              
              {/* Sticky Video Container */}
-             <div className={`transition-all duration-500 z-40 ${isSticky ? 'fixed top-16 left-0 right-0 px-0 md:relative md:top-0 md:px-0' : 'relative'}`}>
+             <div className={`transition-all duration-500 z-40 ${isSticky && !isTheaterMode ? 'fixed top-16 left-0 right-0 px-0 md:relative md:top-0 md:px-0' : 'relative'}`}>
                <Card 
                   className={`p-0 overflow-hidden transition-all duration-500 ${
-                    isSticky ? 'rounded-none border-b border-white/10 shadow-2xl' : 'rounded-[2rem] md:rounded-[3rem] border-white/5 ring-1 ring-white/10'
-                  } ${isLiveStreamActive ? 'shadow-[0_0_50px_rgba(255,0,0,0.15)]' : ''}`}
-                  glass={!isSticky}
-                  hover={!isSticky}
+                    isSticky && !isTheaterMode ? 'rounded-none border-b border-white/10 shadow-2xl' : 'rounded-[2rem] md:rounded-[3rem] border-white/5 ring-1 ring-white/10'
+                  } ${isLiveStreamActive ? 'shadow-[0_0_50px_rgba(255,0,0,0.15)]' : ''} ${isTheaterMode ? 'aspect-[21/9] max-h-[80vh]' : 'aspect-video'}`}
+                  glass={!isSticky || isTheaterMode}
+                  hover={!isSticky && !isTheaterMode}
                 >
                 <div 
                   ref={playerContainerRef}
-                  className={`bg-black aspect-video relative flex items-center justify-center group ${isSticky ? 'max-h-[30vh] md:max-h-none' : ''}`}
+                  className={`bg-black w-full h-full relative flex items-center justify-center group`}
                 >
-                  {!isLiveStreamActive && (
+                  {screenTrack ? (
+                     <AdvancedPlayer 
+                        trackRef={screenTrack} 
+                        isLive={isLiveStreamActive} 
+                        isTheaterMode={isTheaterMode}
+                        onTheaterMode={() => setIsTheaterMode(!isTheaterMode)}
+                        onQualityChange={(q) => {
+                           let lkQuality = VideoQuality.HIGH;
+                           if (q === 'medium') lkQuality = VideoQuality.MEDIUM;
+                           if (q === 'low') lkQuality = VideoQuality.LOW;
+                           screenTrack.publication?.setVideoQuality(lkQuality);
+                           camTrack?.publication?.setVideoQuality(lkQuality);
+                        }}
+                     />
+                  ) : !isLiveStreamActive && (
                     <div className="absolute flex flex-col items-center justify-center text-gray-500 z-10 w-full h-full bg-black/80 backdrop-blur-sm">
                       <motion.span 
                         animate={{ scale: [1, 1.1, 1] }}
@@ -264,22 +281,9 @@ function LiveViewerContent({ viewerName }) {
                     </div>
                   )}
 
-                  {screenTrack && (
-                     <VideoTrack trackRef={screenTrack} className="w-full h-full object-contain" />
-                  )}
-
                   {camTrack && (
-                    <div className="absolute bottom-4 right-4 w-1/4 max-w-[160px] aspect-video bg-black rounded-2xl border-2 border-white/20 overflow-hidden shadow-2xl z-20">
+                    <div className="absolute bottom-4 right-4 w-1/4 max-w-[160px] aspect-video bg-black rounded-2xl border-2 border-white/20 overflow-hidden shadow-2xl z-40 pointer-events-none">
                       <VideoTrack trackRef={camTrack} className="w-full h-full object-cover" />
-                    </div>
-                  )}
-                  
-                  {isLiveStreamActive && (
-                    <div className="absolute top-4 left-4 z-10 flex gap-2">
-                      <Badge color="red" className="backdrop-blur-md bg-red-600/20 border-red-500/50">LIVE</Badge>
-                      <button onClick={toggleFullScreen} className="bg-black/40 hover:bg-black/60 p-2 rounded-xl backdrop-blur opacity-0 group-hover:opacity-100 transition-all active:scale-90">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5"><path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 00 2-2v-3M3 16v3a2 2 0 00 2 2h3" /></svg>
-                      </button>
                     </div>
                   )}
 
@@ -297,42 +301,38 @@ function LiveViewerContent({ viewerName }) {
             <div className={`md:hidden transition-all duration-300 ${isSticky ? 'h-[30vh]' : 'h-0'}`} />
 
             {/* Live Stats Overlay Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <PollWidget />
-              <PredictionHeatmap round={20} />
-            </div>
+            {!isTheaterMode && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <PollWidget />
+                <PredictionHeatmap round={20} />
+              </div>
+            )}
 
             {/* Quality Controls for Desktop */}
             <div className="hidden lg:block">
               <Card glass className="flex justify-between items-center py-4 px-6 rounded-2xl">
                 <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Edge Node: FRA-01</span>
                 <div className="flex items-center gap-4">
-                  <span className="text-[10px] font-black text-white uppercase tracking-widest">Buffer: 0.2s</span>
-                  {isLiveStreamActive && (
-                    <select 
-                      value={quality}
-                      onChange={handleQualityChange}
-                      className="bg-white/5 border border-white/10 rounded-xl px-3 py-1.5 text-[10px] font-black text-white outline-none cursor-pointer focus:border-red-500 transition-all uppercase tracking-widest"
-                    >
-                      <option value="high">4K Source</option>
-                      <option value="medium">1080p</option>
-                      <option value="low">Data Saver</option>
-                    </select>
-                  )}
+                  <span className="text-[10px] font-black text-white uppercase tracking-widest text-center">
+                    {isTheaterMode ? 'THEATER MODE ACTIVE (T to exit)' : 'STANDARD GRID VIEW'}
+                  </span>
                 </div>
               </Card>
             </div>
           </div>
 
           {/* Left Sidebar: Telemetry & Sector Feed */}
-          <div className="lg:col-span-1 order-2 lg:order-1 space-y-6">
-            <TrackStatusPanel />
-            <SectorFeed />
-          </div>
+          {!isTheaterMode && (
+            <div className="lg:col-span-1 order-2 lg:order-1 space-y-6">
+              <TrackStatusPanel />
+              <SectorFeed />
+            </div>
+          )}
 
           {/* Right Sidebar: Chat */}
-          <div className="lg:col-span-1 order-3">
-            <Card className="flex flex-col h-[500px] lg:h-[calc(100vh-14rem)] sticky top-24 p-0 overflow-hidden bg-white/[0.02] border-white/5 backdrop-blur-3xl rounded-[2.5rem]">
+          {!isTheaterMode && (
+            <div className="lg:col-span-1 order-3">
+              <Card className="flex flex-col h-[500px] lg:h-[calc(100vh-14rem)] sticky top-24 p-0 overflow-hidden bg-white/[0.02] border-white/5 backdrop-blur-3xl rounded-[2.5rem]">
               <div className="p-6 border-b border-white/10 flex items-center justify-between bg-white/[0.02]">
                 <h3 className="text-[10px] font-black text-white uppercase tracking-[0.2em] flex items-center gap-3">
                   <span className="w-2.5 h-2.5 bg-green-500 rounded-full shadow-[0_0_10px_rgba(34,197,94,0.5)]" /> 
@@ -395,6 +395,7 @@ function LiveViewerContent({ viewerName }) {
               </div>
             </Card>
           </div>
+          )}
         </div>
       </div>
     </>
