@@ -88,19 +88,26 @@ function LiveViewerContent({ viewerName }) {
   const mediaRecorderRef = useRef(null);
   const recordedChunks = useRef([]);
   
-  // Use LiveKit hooks to find any tracks published by the Admin (Screen + Camera)
+  // Discover ALL tracks (Camera & ScreenShare)
   const tracks = useTracks([
     { source: Track.Source.ScreenShare, withPlaceholder: false },
     { source: Track.Source.Camera, withPlaceholder: false }
   ]);
   
+  const [activeTrackId, setActiveTrackId] = useState(null);
+
+  // Auto-select first track if none selected
+  useEffect(() => {
+    if (tracks.length > 0 && !activeTrackId) {
+      setActiveTrackId(tracks[0].publication.trackSid);
+    }
+  }, [tracks, activeTrackId]);
+
   const audioTracks = useTracks([
     { source: Track.Source.Microphone, withPlaceholder: false },
     { source: Track.Source.ScreenShareAudio, withPlaceholder: false }
   ]);
   
-  const screenTrack = tracks.find(t => t.source === Track.Source.ScreenShare);
-  const camTrack = tracks.find(t => t.source === Track.Source.Camera);
   const isLiveStreamActive = tracks.length > 0;
 
   // Listen for admin chat messages
@@ -256,9 +263,11 @@ function LiveViewerContent({ viewerName }) {
                   ref={playerContainerRef}
                   className={`bg-black w-full h-full relative flex items-center justify-center group`}
                 >
-                  {screenTrack ? (
+                  {isLiveStreamActive ? (
                      <AdvancedPlayer 
-                        trackRef={screenTrack} 
+                        tracks={tracks}
+                        activeTrackId={activeTrackId}
+                        onSelectTrack={setActiveTrackId}
                         isLive={isLiveStreamActive} 
                         isTheaterMode={isTheaterMode}
                         onTheaterMode={() => setIsTheaterMode(!isTheaterMode)}
@@ -266,11 +275,10 @@ function LiveViewerContent({ viewerName }) {
                            let lkQuality = VideoQuality.HIGH;
                            if (q === 'medium') lkQuality = VideoQuality.MEDIUM;
                            if (q === 'low') lkQuality = VideoQuality.LOW;
-                           screenTrack.publication?.setVideoQuality(lkQuality);
-                           camTrack?.publication?.setVideoQuality(lkQuality);
+                           tracks.forEach(t => t.publication?.setVideoQuality(lkQuality));
                         }}
                      />
-                  ) : !isLiveStreamActive && (
+                  ) : (
                     <div className="absolute flex flex-col items-center justify-center text-gray-500 z-10 w-full h-full bg-black/80 backdrop-blur-sm">
                       <motion.span 
                         animate={{ scale: [1, 1.1, 1] }}
@@ -278,12 +286,6 @@ function LiveViewerContent({ viewerName }) {
                         className="text-6xl mb-4 opacity-30"
                       >📡</motion.span>
                       <p className="text-xl font-black tracking-tighter uppercase italic text-white/40">Telemetry Offline</p>
-                    </div>
-                  )}
-
-                  {camTrack && (
-                    <div className="absolute bottom-4 right-4 w-1/4 max-w-[160px] aspect-video bg-black rounded-2xl border-2 border-white/20 overflow-hidden shadow-2xl z-40 pointer-events-none">
-                      <VideoTrack trackRef={camTrack} className="w-full h-full object-cover" />
                     </div>
                   )}
 

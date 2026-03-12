@@ -59,23 +59,47 @@ function AdminBroadcastContent() {
   const room = useRoomContext();
   const { localParticipant } = useLocalParticipant();
   
-  const [message, setMessage] = useState('');
-  const [history, setHistory] = useState([]);
-  const [sending, setSending] = useState(false);
-  
-  const [chatMessages, setChatMessages] = useState([]);
-  const [chatInput, setChatInput] = useState('');
-  const [isRecording, setIsRecording] = useState(false);
-  const [pipActive, setPipActive] = useState(false);
-  
-  const chatEndRef = useRef(null);
-  const mediaRecorderRef = useRef(null);
-  const recordedChunks = useRef([]);
-  const videoRef = useRef(null);
-  const pipVideoRef = useRef(null);
+  // Multi-Viewpoint State
+  const [viewpoints, setViewpoints] = useState([
+    { id: 'main', label: 'Main Feed', active: false, source: 'screen_share' },
+    { id: 'onboard1', label: 'Onboard 1', active: false, source: 'camera' },
+    { id: 'pitlane', label: 'Pit Lane', active: false, source: 'camera' },
+    { id: 'data', label: 'Telemetry', active: false, source: 'screen_share' }
+  ]);
 
-  // LiveKit WebRTC Hooks
-  const isStreaming = localParticipant?.isScreenShareEnabled || localParticipant?.isCameraEnabled;
+  const toggleViewpoint = async (viewId) => {
+    const vp = viewpoints.find(v => v.id === viewId);
+    if (!vp) return;
+
+    try {
+      if (vp.active) {
+        // Stop specific track
+        if (vp.source === 'screen_share') {
+           await localParticipant.setScreenShareEnabled(false);
+        } else {
+           await localParticipant.setCameraEnabled(false);
+        }
+        setViewpoints(prev => prev.map(v => v.id === viewId ? { ...v, active: false } : v));
+      } else {
+        // Start specific track
+        if (vp.source === 'screen_share') {
+           await localParticipant.setScreenShareEnabled(true, { 
+             audio: false,
+             name: vp.label // Label the track for users
+           });
+        } else {
+           await localParticipant.setCameraEnabled(true, {
+             name: vp.label
+           });
+        }
+        setViewpoints(prev => prev.map(v => v.id === viewId ? { ...v, active: true } : v));
+      }
+    } catch (err) {
+      console.error('Failed to toggle viewpoint', err);
+    }
+  };
+
+  const isStreaming = viewpoints.some(v => v.active);
 
   // Listen to incoming chat messages from DataChannel
   useDataChannel('chat', (msg) => {
@@ -112,55 +136,11 @@ function AdminBroadcastContent() {
     setChatInput('');
   };
 
-  const startStream = async (withPip = false) => {
-    try {
-      // 1. Publish Screen
-      await localParticipant.setScreenShareEnabled(true, { audio: true });
-
-      // 2. Publish Camera
-      if (withPip) {
-        await localParticipant.setCameraEnabled(true);
-        await localParticipant.setMicrophoneEnabled(true);
-        setPipActive(true);
-      }
-
-      // Tie streams to local video elements for preview & VOD recording
-      setTimeout(() => {
-        const screenTrack = Array.from(localParticipant.videoTrackPublications.values())
-          .find(p => p.source === 'screen_share')?.track;
-          
-        if (screenTrack && videoRef.current) {
-           videoRef.current.srcObject = new MediaStream([screenTrack.mediaStreamTrack]);
-        }
-        
-        if (withPip) {
-          const camTrack = Array.from(localParticipant.videoTrackPublications.values())
-            .find(p => p.source === 'camera')?.track;
-            
-          if (camTrack && pipVideoRef.current) {
-             pipVideoRef.current.srcObject = new MediaStream([camTrack.mediaStreamTrack]);
-          }
-        }
-      }, 500);
-
-    } catch (error) {
-      console.error('Error starting stream.', error);
-    }
-  };
-
-  const stopStream = async () => {
-    if (isRecording) {
-      mediaRecorderRef.current?.stop();
-      setIsRecording(false);
-    }
-    
+  const stopAllStreams = async () => {
     await localParticipant.setScreenShareEnabled(false);
     await localParticipant.setCameraEnabled(false);
     await localParticipant.setMicrophoneEnabled(false);
-    
-    setPipActive(false);
-    if (videoRef.current) videoRef.current.srcObject = null;
-    if (pipVideoRef.current) pipVideoRef.current.srcObject = null;
+    setViewpoints(prev => prev.map(v => ({ ...v, active: false })));
   };
 
   const toggleRecording = () => {
@@ -236,43 +216,32 @@ function AdminBroadcastContent() {
               Live Video Stream
             </h3>
             
-            <div className="bg-black/50 aspect-video rounded-lg overflow-hidden border border-white/5 mb-4 relative flex items-center justify-center">
-              {!isStreaming && (
-                <div className="absolute inset-0 flex flex-col justify-center items-center text-gray-500 p-4 text-center">
-                  <span className="text-4xl mb-2">💻</span>
-                  <p>Screen sharing is currently off</p>
-                </div>
-              )}
-              {/* Note: We use raw HTML videos for Broadcaster preview since local track linking is tricky */}
-              <video ref={videoRef} autoPlay muted playsInline className={`w-full h-full object-cover ${isStreaming ? 'opacity-100' : 'opacity-0'}`} />
-              
-              <div className={`absolute bottom-4 right-4 w-1/4 aspect-video bg-black rounded-lg border-2 border-f1-red overflow-hidden shadow-2xl transition-opacity duration-300 ${pipActive ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-                 <video ref={pipVideoRef} autoPlay muted playsInline className="w-full h-full object-cover" />
-                 <Badge color="red" className="absolute top-2 left-2 !text-[10px] px-1.5 py-0.5">CAMERA</Badge>
+            <div className="space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+                {viewpoints.map(vp => (
+                  <button
+                    key={vp.id}
+                    onClick={() => toggleViewpoint(vp.id)}
+                    className={`p-6 rounded-2xl border-2 transition-all flex flex-col items-center gap-3 ${
+                      vp.active 
+                        ? 'bg-f1-red/10 border-f1-red text-white shadow-[0_0_20px_rgba(225,6,0,0.2)]' 
+                        : 'bg-white/5 border-white/5 text-gray-500 hover:border-white/20'
+                    }`}
+                  >
+                    <span className="text-3xl">{vp.source === 'screen_share' ? '🖥️' : '🎥'}</span>
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em]">{vp.label}</span>
+                    <Badge color={vp.active ? 'red' : 'gray'}>{vp.active ? 'BROADCASTING' : 'OFFLINE'}</Badge>
+                  </button>
+                ))}
               </div>
-            </div>
 
-            <div className="flex items-center justify-between">
-              <div className="text-sm text-gray-400">
-                SFU Transcoding Active
-              </div>
-              
-              <div className="flex gap-3">
-                {isStreaming ? (
-                  <>
-                    <Button variant="outline" className={`border-white/20 ${isRecording ? 'text-white bg-red-600 border-red-500' : 'text-gray-300 hover:bg-white/10'}`} onClick={toggleRecording}>
-                      {isRecording ? '⏸ Stop Recording' : '⏺ Record VOD'}
-                    </Button>
-                    <Button variant="outline" className="text-red-400 border-red-500/30 hover:bg-red-500/10" onClick={stopStream}>
-                      ⏹ Stop Stream
-                    </Button>
-                  </>
-                ) : (
-                  <>
-                    <Button variant="outline" onClick={() => startStream(false)}>▶ Screen Only</Button>
-                    <Button variant="admin" onClick={() => startStream(true)}>▶ Screen + Camera</Button>
-                  </>
-                )}
+              <div className="flex items-center justify-between pt-4 border-t border-white/5">
+                <div className="text-sm text-gray-400">
+                  Click a viewpoint to toggle live transmission
+                </div>
+                <Button variant="outline" className="text-red-400 border-red-500/30 hover:bg-red-500/10" onClick={stopAllStreams}>
+                  ⏹ Emergency Stop All
+                </Button>
               </div>
             </div>
           </Card>

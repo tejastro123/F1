@@ -3,8 +3,17 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { VideoTrack } from '@livekit/components-react';
 import { VideoQuality } from 'livekit-client';
 import { Badge, Button } from '../ui.jsx';
+import StreamSwitcher from './StreamSwitcher.jsx';
 
-export default function AdvancedPlayer({ trackRef, isLive, onQualityChange, onTheaterMode, isTheaterMode }) {
+export default function AdvancedPlayer({ 
+  tracks = [], 
+  activeTrackId, 
+  onSelectTrack,
+  isLive, 
+  onQualityChange, 
+  onTheaterMode, 
+  isTheaterMode 
+}) {
   const [showControls, setShowControls] = useState(true);
   const [isMuted, setIsMuted] = useState(false);
   const [volume, setVolume] = useState(1);
@@ -68,6 +77,9 @@ export default function AdvancedPlayer({ trackRef, isLive, onQualityChange, onTh
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
+  // Get active track reference
+  const activeTrack = tracks.find(t => t.publication.trackSid === activeTrackId);
+
   return (
     <div 
       ref={containerRef}
@@ -76,11 +88,13 @@ export default function AdvancedPlayer({ trackRef, isLive, onQualityChange, onTh
       data-show={showControls}
     >
       {/* Actual Video */}
-      <VideoTrack 
-        trackRef={trackRef} 
-        className="w-full h-full object-contain"
-        muted={isMuted}
-      />
+      {activeTrack && (
+        <VideoTrack 
+          trackRef={activeTrack} 
+          className="w-full h-full object-contain"
+          muted={isMuted}
+        />
+      )}
 
       {/* Overlay: Custom Controls */}
       <AnimatePresence>
@@ -97,10 +111,23 @@ export default function AdvancedPlayer({ trackRef, isLive, onQualityChange, onTh
                 {isLive && (
                   <Badge color="red" className="animate-pulse bg-red-600/20 ring-1 ring-red-500/50">LIVE</Badge>
                 )}
-                <span className="text-[10px] font-black text-white/50 uppercase tracking-[0.3em] drop-shadow-lg">
-                  F1 Edge Network: Signal Optimized
-                </span>
+                <div className="flex flex-col">
+                  <span className="text-[10px] font-black text-white uppercase tracking-[0.3em] drop-shadow-lg">
+                    {activeTrack?.publication?.trackName || 'Main Feed'}
+                  </span>
+                  <span className="text-[8px] font-bold text-white/40 uppercase tracking-widest">
+                    F1 Edge Network: Signal Optimized
+                  </span>
+                </div>
               </div>
+
+              {/* Multi-Stream Switcher in Overlay */}
+              <StreamSwitcher 
+                tracks={tracks} 
+                activeTrackId={activeTrackId} 
+                onSelect={onSelectTrack}
+                isTheaterMode={isTheaterMode}
+              />
             </div>
 
             {/* Bottom Bar Controls */}
