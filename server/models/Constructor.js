@@ -22,6 +22,13 @@ const constructorSchema = new mongoose.Schema({
   podiums: { type: Number, default: 0 },
   primaryColor: { type: String, default: '#FFFFFF' },
   secondaryColor: { type: String, default: '#000000' },
+  bio: { type: String, default: '' },
+  history: { type: String, default: '' },
+  base: { type: String, default: 'TBD' },
+  teamPrincipal: { type: String, default: 'TBD' },
+  powerUnit: { type: String, default: 'TBD' },
+  achievements: [{ type: String }],
+  foundedYear: { type: Number },
 }, { timestamps: true });
 
 constructorSchema.index({ points: -1 });

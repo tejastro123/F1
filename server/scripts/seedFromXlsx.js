@@ -43,6 +43,7 @@ function parseDrivers(workbook) {
       wins: row[6] || 0,
       podiums: row[7] || 0,
       gridPosition: row[8] || 0,
+      driverNumber: row[9] || null,
       photoUrl: null,
     });
   }

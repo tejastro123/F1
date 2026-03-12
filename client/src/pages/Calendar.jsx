@@ -144,8 +144,9 @@ export default function Calendar() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         race={selectedRace}
+        initialCategory="GP_WINNER"
         onPredicted={() => {
-          // Could show a toast or trigger a refresh in the future
+          // Refresh or notification logic here
         }}
       />
       <CircuitDetailModal 

@@ -24,8 +24,19 @@ export default function AdminPredictions() {
     } catch { /* */ }
   };
 
-  const correct = predictions.filter(p => p.isCorrect === true).length;
-  const total = predictions.length;
+  const categoriesMap = {
+    'GP_WINNER': '🏆 GPRIX WIN',
+    'GP_POLE': '🏁 GPRIX POLE',
+    'TOP1': '🥇 TOP1',
+    'TOP2': '🥈 TOP2',
+    'TOP3': '🥉 TOP3',
+    'SPRINT_WIN': '🏎 SPRINT WIN',
+    'SPRINT_POLE': '⚡ SPRINT POLE',
+    'GOOD_SURPRISE': '🌟 GOOD SURPRISE',
+    'BIG_FLOP': '💥 BIG FLOP',
+    'P_WHAT': '❓ PWHAT?',
+    'CRAZY_CALL': '🤯 CRAZY'
+  };
 
   return (
     <>
@@ -60,7 +71,7 @@ export default function AdminPredictions() {
                   <div className="flex-1 p-4 flex flex-col sm:flex-row sm:items-center gap-4">
                     <div className="flex-1 min-w-0">
                       <div className="text-[10px] text-gray-500 font-bold mb-1">ROUND {pred.round} · {pred.grandPrixName}</div>
-                      <div className="font-bold text-f1-gold text-sm uppercase tracking-wide">{pred.category}</div>
+                      <div className="font-bold text-f1-gold text-sm uppercase tracking-wide">{categoriesMap[pred.category] || pred.category}</div>
                       <div className="text-base font-black text-white mt-0.5 truncate">{pred.prediction}</div>
                       {pred.actualResult !== 'TBD' && (
                         <div className="text-[10px] text-gray-400 font-medium mt-1">
@@ -79,7 +90,7 @@ export default function AdminPredictions() {
                         ✓ CORRECT
                       </Button>
                       <Button
-                        variant={pred.isCorrect === false ? 'auth' : 'secondary'}
+                        variant={pred.isCorrect === false ? 'primary' : 'secondary'}
                         size="sm"
                         onClick={() => toggle(pred, false)}
                         className="flex-1 sm:flex-initial !py-1.5 h-auto text-[10px] font-black"

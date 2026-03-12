@@ -13,6 +13,7 @@ const Home = lazy(() => import('./pages/Home.jsx'));
 const Drivers = lazy(() => import('./pages/Drivers.jsx'));
 const DriverDetail = lazy(() => import('./pages/DriverDetail.jsx'));
 const Constructors = lazy(() => import('./pages/Constructors.jsx'));
+const ConstructorDetail = lazy(() => import('./pages/ConstructorDetail.jsx'));
 const Calendar = lazy(() => import('./pages/Calendar.jsx'));
 const Predictions = lazy(() => import('./pages/Predictions.jsx'));
 const Leaderboard = lazy(() => import('./pages/Leaderboard.jsx'));
@@ -60,6 +61,7 @@ function AnimatedRoutes() {
           <Route path="/drivers" element={<PageTransition><Drivers /></PageTransition>} />
           <Route path="/drivers/:id" element={<PageTransition><DriverDetail /></PageTransition>} />
           <Route path="/constructors" element={<PageTransition><Constructors /></PageTransition>} />
+          <Route path="/constructors/:id" element={<PageTransition><ConstructorDetail /></PageTransition>} />
           <Route path="/calendar" element={<PageTransition><Calendar /></PageTransition>} />
           <Route path="/predictions" element={<PageTransition><Predictions /></PageTransition>} />
           <Route path="/leaderboard" element={<PageTransition><Leaderboard /></PageTransition>} />

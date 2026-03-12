@@ -37,17 +37,17 @@ export default function Predictions() {
   }, [predictions]);
 
   const categoriesMap = {
-    'GP_WINNER': '🏆 Winner',
-    'GP_POLE': '🏁 Pole',
-    'PODIUM_P1': '🥇 P1',
-    'PODIUM_P2': '🥈 P2',
-    'PODIUM_P3': '🥉 P3',
-    'SPRINT_WIN': '🏎 Sprint Win',
-    'SPRINT_POLE': '⚡ Sprint Pole',
-    'GOOD_SURPRISE': '🌟 Surprise',
-    'BIG_FLOP': '💥 Flop',
-    'P_WHAT': '❓ P-What?',
-    'CRAZY_CALL': '🤯 Crazy Call'
+    'GP_WINNER': '🏆 GPRIX WIN',
+    'GP_POLE': '🏁 GPRIX POLE',
+    'TOP1': '🥇 TOP1',
+    'TOP2': '🥈 TOP2',
+    'TOP3': '🥉 TOP3',
+    'SPRINT_WIN': '🏎 SPRINT WIN',
+    'SPRINT_POLE': '⚡ SPRINT POLE',
+    'GOOD_SURPRISE': '🌟 GOOD SURPRISE',
+    'BIG_FLOP': '💥 BIG FLOP',
+    'P_WHAT': '❓ PWHAT?',
+    'CRAZY_CALL': '🤯 CRAZY'
   };
 
   const statusColor = (isCorrect) => {

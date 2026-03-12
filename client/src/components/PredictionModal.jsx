@@ -6,60 +6,66 @@ import { useAuth } from '../context/AuthContext.jsx';
 import api from '../services/api.js';
 import { getTeamColor } from '../utils/teamColors.js';
 
-export default function PredictionModal({ isOpen, onClose, race, onPredicted }) {
+export default function PredictionModal({ isOpen, onClose, race, onPredicted, initialCategory = 'GP_WINNER' }) {
   const { drivers, loading: driversLoading } = useDrivers();
   const { isAuthenticated } = useAuth();
   const [selectedDriver, setSelectedDriver] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState(initialCategory);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
 
+  const categories = [
+    { id: 'GP_WINNER', label: '🏆 GPRIX WIN', emoji: '🏆' },
+    { id: 'GP_POLE', label: '🏁 GPRIX POLE', emoji: '🏁' },
+    { id: 'TOP1', label: '🥇 TOP1', emoji: '🥇' },
+    { id: 'TOP2', label: '🥈 TOP2', emoji: '🥈' },
+    { id: 'TOP3', label: '🥉 TOP3', emoji: '🥉' },
+    { id: 'SPRINT_WIN', label: '🏎 SPRINT WIN', emoji: '🏎' },
+    { id: 'SPRINT_POLE', label: '⚡ SPRINT POLE', emoji: '⚡' },
+    { id: 'GOOD_SURPRISE', label: '🌟 GOOD SURPRISE', emoji: '🌟' },
+    { id: 'BIG_FLOP', label: '💥 BIG FLOP', emoji: '💥' },
+    { id: 'P_WHAT', label: '❓ PWHAT?', emoji: '❓' },
+    { id: 'CRAZY_CALL', label: '🤯 CRAZY', emoji: '🤯' },
+  ];
+
+  // Effect to handle initial category when opening from different places
+  useEffect(() => {
+    if (isOpen) {
+      setSelectedCategory(initialCategory);
+    }
+  }, [isOpen, initialCategory]);
+
   if (!isOpen || !race) return null;
 
-    const categories = [
-      { id: 'GP_WINNER', label: '🏆 GP Race Winner', emoji: '🏆' },
-      { id: 'GP_POLE', label: '🏁 GP Pole Position', emoji: '🏁' },
-      { id: 'PODIUM_P1', label: '🥇 Podium P1', emoji: '🥇' },
-      { id: 'PODIUM_P2', label: '🥈 Podium P2', emoji: '🥈' },
-      { id: 'PODIUM_P3', label: '🥉 Podium P3', emoji: '🥉' },
-      { id: 'SPRINT_WIN', label: '🏎 Sprint Win', emoji: '🏎' },
-      { id: 'SPRINT_POLE', label: '⚡ Sprint Pole', emoji: '⚡' },
-      { id: 'GOOD_SURPRISE', label: '🌟 Good Surprise', emoji: '🌟' },
-      { id: 'BIG_FLOP', label: '💥 Big Flop', emoji: '💥' },
-      { id: 'P_WHAT', label: '❓ P-What? (longshot)', emoji: '❓' },
-      { id: 'CRAZY_CALL', label: '🤯 Crazy Call', emoji: '🤯' },
-    ];
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!isAuthenticated) {
+      window.location.href = `${import.meta.env.VITE_API_URL}/api/v1/auth/google`;
+      return;
+    }
 
-    const [selectedCategory, setSelectedCategory] = useState(categories[0].id);
+    if (!selectedDriver) {
+      setError('Please select a driver.');
+      return;
+    }
 
-    const handleSubmit = async (e) => {
-      e.preventDefault();
-      if (!isAuthenticated) {
-        window.location.href = `${import.meta.env.VITE_API_URL}/api/v1/auth/google`;
-        return;
-      }
-
-      if (!selectedDriver) {
-        setError('Please select a driver.');
-        return;
-      }
-
-      try {
-        setSubmitting(true);
-        setError(null);
-        await api.post('/predictions', {
-          round: race.round,
-          category: selectedCategory,
-          prediction: selectedDriver,
-          grandPrixName: race.grandPrixName
-        });
-        onPredicted();
-        onClose();
-      } catch (err) {
-        setError(err.response?.data?.error || 'Failed to save prediction');
-      } finally {
-        setSubmitting(false);
-      }
-    };
+    try {
+      setSubmitting(true);
+      setError(null);
+      await api.post('/predictions', {
+        round: race.round,
+        category: selectedCategory,
+        prediction: selectedDriver,
+        grandPrixName: race.grandPrixName
+      });
+      onPredicted();
+      onClose();
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to save prediction');
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
     return (
       <AnimatePresence>

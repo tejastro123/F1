@@ -65,7 +65,10 @@ export default function DriverDetail() {
                     <div className="text-white/60 text-lg font-medium">{driver.nationality}</div>
                   </div>
                   <h1 className="text-5xl md:text-7xl font-black text-white leading-tight uppercase italic">{driver.fullName}</h1>
-                  <Badge color="gold" className="mt-4 px-4 py-1 text-base">{driver.team}</Badge>
+                  <div className="flex items-center gap-4 mt-4">
+                    <Badge color="gold" className="px-4 py-1 text-base">{driver.team}</Badge>
+                    <span className="text-2xl font-black text-f1-red">#{driver.driverNumber || '??'}</span>
+                  </div>
                 </motion.div>
               </div>
               

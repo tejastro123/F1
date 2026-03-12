@@ -104,8 +104,9 @@ export default function Drivers() {
                               className="w-10 h-10 object-cover rounded-full border border-white/10 bg-f1-dark"
                             />
                           )}
-                          <span className="font-semibold text-white group-hover:text-f1-red transition-colors">
-                            {driver.fullName}
+                          <span className="font-semibold text-white group-hover:text-f1-red transition-colors flex items-center gap-2">
+                            {driver.fullName} 
+                            <span className="text-gray-600 text-xs font-black">#{driver.driverNumber || '??'}</span>
                           </span>
                         </div>
                       </td>

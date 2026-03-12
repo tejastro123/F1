@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
@@ -8,6 +9,7 @@ import { getTeamColor } from '../utils/teamColors.js';
 
 export default function Constructors() {
   const { constructors, loading } = useConstructors();
+  const navigate = useNavigate();
   const [search, setSearch] = useState('');
 
   const filtered = useMemo(() => {
@@ -99,7 +101,8 @@ export default function Constructors() {
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: idx * 0.05 }}
-                  className="bg-f1-card rounded-xl border border-white/5 overflow-hidden"
+                  onClick={() => navigate(`/constructors/${team._id}`)}
+                  className="bg-f1-card rounded-xl border border-white/5 overflow-hidden cursor-pointer hover:border-white/20 hover:bg-white/5 transition-all active:scale-[0.99]"
                 >
                   <div className="flex items-stretch">
                     {/* Team color bar */}
