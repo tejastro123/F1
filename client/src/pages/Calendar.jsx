@@ -5,7 +5,7 @@ import { useRaces } from '../hooks/useData.js';
 import useCountdown from '../hooks/useCountdown.js';
 import { Card, Badge, RaceStatusBadge, SectionHeader, SkeletonCard, Button } from '../components/ui.jsx';
 import PredictionModal from '../components/PredictionModal.jsx';
-import CircuitViewer from '../components/CircuitViewer.jsx';
+import CircuitImage from '../components/CircuitImage.jsx';
 import { formatDate } from '../utils/formatDate.js';
 
 function RaceCountdown({ dateStr }) {
@@ -57,7 +57,7 @@ export default function Calendar() {
                 animate={{ opacity: 1, height: 'auto' }}
                 className="mb-8 w-full aspect-video md:aspect-[21/9] rounded-2xl overflow-hidden shadow-2xl border border-white/20"
               >
-                <CircuitViewer trackData={selectedRace} />
+                <CircuitImage trackData={selectedRace} />
               </motion.div>
             )}
 
