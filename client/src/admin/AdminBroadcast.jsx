@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../services/api.js';
-import { Card, Button, SectionHeader } from '../components/ui.jsx';
+import { Card, Button, SectionHeader, Badge } from '../components/ui.jsx';
 import { useSocket } from '../context/SocketContext.jsx'; // Assuming this exists
 
 export default function AdminBroadcast() {
