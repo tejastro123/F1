@@ -7,6 +7,7 @@ import { Card, Badge, SectionHeader, Button } from '../components/ui.jsx';
 export default function Live() {
   const { isConnected, broadcasts, lastBroadcast, socket } = useSocket();
   const videoRef = useRef(null);
+  const playerContainerRef = useRef(null);
   const peerConnection = useRef(null);
   const [isLiveStreamActive, setIsLiveStreamActive] = useState(false);
   const [userInteracted, setUserInteracted] = useState(false);
@@ -128,6 +129,16 @@ export default function Live() {
     }
   };
 
+  const toggleFullScreen = () => {
+    if (!document.fullscreenElement) {
+      playerContainerRef.current?.requestFullscreen().catch(err => {
+        console.error(`Error attempting to enable fullscreen: ${err.message}`);
+      });
+    } else {
+      document.exitFullscreen();
+    }
+  };
+
   return (
     <>
       <Helmet>
@@ -152,7 +163,10 @@ export default function Live() {
 
         {/* Live Video Player */}
         <Card className={`mb-8 overflow-hidden transition-all duration-500 ${isLiveStreamActive ? 'ring-2 ring-red-500/50' : 'opacity-80'}`}>
-          <div className="bg-black aspect-video relative flex items-center justify-center rounded-lg border border-white/10 group">
+          <div 
+            ref={playerContainerRef}
+            className="bg-black aspect-video relative flex items-center justify-center rounded-lg border border-white/10 group"
+          >
             
             {!isLiveStreamActive && (
               <div className="absolute flex flex-col items-center justify-center text-gray-500 z-10 w-full h-full bg-black/80">
@@ -190,6 +204,18 @@ export default function Live() {
                   LIVE
                 </Badge>
               </div>
+            )}
+
+            {isLiveStreamActive && (
+              <button 
+                onClick={toggleFullScreen}
+                className="absolute bottom-4 right-4 z-30 bg-black/60 hover:bg-black/80 text-white p-2.5 rounded-lg backdrop-blur-sm transition-all duration-300 opacity-0 group-hover:opacity-100 focus:opacity-100 hover:scale-105"
+                title="Toggle Fullscreen"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+                </svg>
+              </button>
             )}
           </div>
         </Card>
