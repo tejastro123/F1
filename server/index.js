@@ -32,6 +32,7 @@ import adminRouter from './routes/admin.js';
 import streamRouter from './routes/stream.js';
 
 const app = express();
+app.set('trust proxy', 1); // Enable proxy support for Render/Vercel
 const httpServer = createServer(app);
 
 // Socket.io

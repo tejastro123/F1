@@ -12,6 +12,7 @@ passport.use(
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || 'placeholder_secret',
       callbackURL: '/api/v1/auth/google/callback',
       scope: ['profile', 'email'],
+      proxy: true,
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
@@ -59,6 +60,7 @@ passport.use(
       clientSecret: process.env.DISCORD_CLIENT_SECRET || 'placeholder_secret',
       callbackURL: '/api/v1/auth/discord/callback',
       scope: ['identify', 'email'],
+      proxy: true,
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
