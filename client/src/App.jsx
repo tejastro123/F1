@@ -6,6 +6,7 @@ import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 import { SocketProvider } from './context/SocketContext.jsx';
 import { ThemeProvider } from './context/ThemeContext.jsx';
 import Navbar from './components/Navbar.jsx';
+import LiveBanner from './components/LiveBanner.jsx';
 import { LoadingSpinner } from './components/ui.jsx';
 
 // Lazy-loaded pages
@@ -94,6 +95,7 @@ export default function App() {
           <SocketProvider>
             <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
               <Navbar />
+              <LiveBanner />
               <main>
                 <AnimatedRoutes />
               </main>

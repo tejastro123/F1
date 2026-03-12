@@ -194,6 +194,71 @@ export default function Home() {
           </div>
         </section>
       )}
+
+      {/* Onboarding Section */}
+      <section className="py-20 px-4 mb-20">
+        <div className="max-w-7xl mx-auto">
+          <SectionHeader title="How it Works" subtitle="Master the 11 prediction categories and climb the leaderboard" />
+          
+          <div className="grid md:grid-cols-3 gap-8">
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="space-y-4"
+            >
+              <div className="w-12 h-12 bg-f1-red/10 rounded-xl flex items-center justify-center text-2xl">✍️</div>
+              <h3 className="text-xl font-bold text-white">1. Secure Your Entry</h3>
+              <p className="text-gray-400 text-sm leading-relaxed">
+                Log in via Google or Discord to start your campaign. Your predictions are securely tied to your profile across all devices.
+              </p>
+            </motion.div>
+
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+              className="space-y-4"
+            >
+              <div className="w-12 h-12 bg-f1-gold/10 rounded-xl flex items-center justify-center text-2xl">🔮</div>
+              <h3 className="text-xl font-bold text-white">2. Make Your Calls</h3>
+              <p className="text-gray-400 text-sm leading-relaxed">
+                Predict winners, poles, and surprises for every race. From <span className="text-f1-red font-bold">BIG FLOP</span> to the legendary <span className="text-f1-gold font-bold">CRAZY</span> call.
+              </p>
+            </motion.div>
+
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
+              className="space-y-4"
+            >
+              <div className="w-12 h-12 bg-green-500/10 rounded-xl flex items-center justify-center text-2xl">🏅</div>
+              <h3 className="text-xl font-bold text-white">3. Climb the Ranks</h3>
+              <p className="text-gray-400 text-sm leading-relaxed">
+                Admins score races live. Track your accuracy on the community leaderboard and prove you're the ultimate F1 strategist.
+              </p>
+            </motion.div>
+          </div>
+
+          <div className="mt-16 bg-f1-card/30 border border-white/5 rounded-3xl p-8 md:p-12 text-center">
+            <h3 className="text-2xl font-black text-white mb-6 uppercase tracking-tight">The 11 Categories</h3>
+            <div className="flex flex-wrap justify-center gap-2">
+              {[
+                'GPRIX WIN', 'GPRIX POLE', 'TOP1', 'TOP2', 'TOP3', 
+                'SPRINT WIN', 'SPRINT POLE', 'GOOD SURPRISE', 'BIG FLOP', 
+                'PWHAT?', 'CRAZY'
+              ].map(cat => (
+                <span key={cat} className="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-[10px] font-black text-f1-gold uppercase tracking-widest hover:border-f1-gold/50 transition-colors">
+                  {cat}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
     </>
   );
 }
