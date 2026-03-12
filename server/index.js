@@ -26,6 +26,7 @@ import predictionsRouter from './routes/predictions.js';
 import statsRouter from './routes/stats.js';
 import authRouter from './routes/auth.js';
 import adminRouter from './routes/admin.js';
+import streamRouter from './routes/stream.js';
 
 const app = express();
 const httpServer = createServer(app);
@@ -61,6 +62,7 @@ app.use('/api/v1/races', racesRouter);
 app.use('/api/v1/predictions', predictionsRouter);
 app.use('/api/v1/stats', statsRouter);
 app.use('/api/v1/admin', adminRouter);
+app.use('/api/v1/stream', streamRouter);
 
 // Health check
 app.get('/api/health', (req, res) => {
