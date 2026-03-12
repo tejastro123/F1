@@ -1,10 +1,100 @@
+import { useRef, useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
 import { useSocket } from '../context/SocketContext.jsx';
-import { Card, Badge, SectionHeader } from '../components/ui.jsx';
+import { Card, Badge, SectionHeader, Button } from '../components/ui.jsx';
 
 export default function Live() {
-  const { isConnected, broadcasts, lastBroadcast } = useSocket();
+  const { isConnected, broadcasts, lastBroadcast, socket } = useSocket();
+  const videoRef = useRef(null);
+  const peerConnection = useRef(null);
+  const [isLiveStreamActive, setIsLiveStreamActive] = useState(false);
+  const [userInteracted, setUserInteracted] = useState(false);
+
+  const config = {
+    iceServers: [
+      { urls: 'stun:stun.l.google.com:19302' },
+      { urls: 'stun:stun1.l.google.com:19302' }
+    ]
+  };
+
+  useEffect(() => {
+    if (!socket) return;
+
+    socket.on('broadcaster', () => {
+      socket.emit('watcher');
+    });
+
+    socket.on('offer', (id, description) => {
+      peerConnection.current = new RTCPeerConnection(config);
+      
+      peerConnection.current
+        .setRemoteDescription(description)
+        .then(() => peerConnection.current.createAnswer())
+        .then((sdp) => peerConnection.current.setLocalDescription(sdp))
+        .then(() => {
+          socket.emit('answer', id, peerConnection.current.localDescription);
+        });
+
+      peerConnection.current.ontrack = (event) => {
+        setIsLiveStreamActive(true);
+        if (videoRef.current) {
+          videoRef.current.srcObject = event.streams[0];
+          // Autoplay policy might block this if user hasn't interacted
+          videoRef.current.play().catch(e => console.warn('Autoplay prevented:', e));
+        }
+      };
+
+      peerConnection.current.onicecandidate = (event) => {
+        if (event.candidate) {
+          socket.emit('candidate', id, event.candidate);
+        }
+      };
+    });
+
+    socket.on('candidate', (id, candidate) => {
+      peerConnection.current
+        .addIceCandidate(new RTCIceCandidate(candidate))
+        .catch(e => console.error(e));
+    });
+
+    socket.on('disconnectPeer', () => {
+      if (peerConnection.current) {
+        peerConnection.current.close();
+      }
+      setIsLiveStreamActive(false);
+      if (videoRef.current) videoRef.current.srcObject = null;
+    });
+
+    window.onunload = window.onbeforeunload = () => {
+      if (peerConnection.current) {
+        peerConnection.current.close();
+      }
+      socket.close();
+    };
+
+    // When first mounting, ask if there is an active broadcaster
+    socket.emit('watcher');
+
+    return () => {
+      socket.off('broadcaster');
+      socket.off('offer');
+      socket.off('candidate');
+      socket.off('disconnectPeer');
+      if (peerConnection.current) {
+        peerConnection.current.close();
+      }
+    };
+  }, [socket]);
+
+  // Browsers often block autoplaying video with sound until the user interacts with the page
+  const handlePlayClick = () => {
+    setUserInteracted(true);
+    if (videoRef.current && isLiveStreamActive) {
+      videoRef.current.play();
+      videoRef.current.muted = false; // Unmute on explicit play
+    }
+  };
 
   return (
     <>
@@ -14,14 +104,57 @@ export default function Live() {
       </Helmet>
 
       <div className="pt-24 pb-16 px-4 max-w-4xl mx-auto">
-        <SectionHeader title="Live Feed" subtitle="Real-time race updates and admin broadcasts" />
+        <SectionHeader title="Live Feed" subtitle="Real-time race updates and live video broadcast" />
 
         {/* Connection Status */}
-        <Card className="mb-6">
+        <Card className="mb-6 flex justify-between items-center bg-black/40 border-white/5 p-4 rounded-xl">
           <div className="flex items-center gap-3">
             <span className={`w-3 h-3 rounded-full ${isConnected ? 'bg-green-500 animate-live-pulse' : 'bg-red-500'}`} />
-            <span className="font-medium">{isConnected ? 'Connected' : 'Disconnected'}</span>
-            <Badge color={isConnected ? 'green' : 'red'}>{isConnected ? 'LIVE' : 'OFFLINE'}</Badge>
+            <span className="font-medium text-gray-300">Server: {isConnected ? 'Connected' : 'Disconnected'}</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="font-medium text-gray-300">Video Stream:</span>
+            <Badge color={isLiveStreamActive ? 'red' : 'gray'}>{isLiveStreamActive ? 'LIVE' : 'OFFLINE'}</Badge>
+          </div>
+        </Card>
+
+        {/* Live Video Player */}
+        <Card className={`mb-8 overflow-hidden transition-all duration-500 ${isLiveStreamActive ? 'ring-2 ring-red-500/50' : 'opacity-80'}`}>
+          <div className="bg-black aspect-video relative flex items-center justify-center rounded-lg border border-white/10 group">
+            
+            {!isLiveStreamActive && (
+              <div className="absolute flex flex-col items-center justify-center text-gray-500 z-10 w-full h-full bg-black/80">
+                <span className="text-5xl mb-4 opacity-50">📡</span>
+                <p className="text-xl font-bold font-f1 tracking-wider uppercase">Live Stream Offline</p>
+                <p className="text-sm mt-2 opacity-70">Waiting for admin to start broadcasting...</p>
+              </div>
+            )}
+
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              muted // Start muted to bypass initial autoplay restrictions
+              className={`w-full h-full object-cover rounded-lg ${!isLiveStreamActive ? 'hidden' : ''}`}
+            />
+
+            {/* Play Overlay (for unmuting/interaction policy) */}
+            {isLiveStreamActive && !userInteracted && (
+              <div className="absolute inset-0 bg-black/60 flex items-center justify-center rounded-lg z-20 backdrop-blur-sm">
+                <Button variant="admin" size="lg" onClick={handlePlayClick} className="shadow-2xl shadow-red-500/20">
+                  <span className="text-xl mr-2">🔊</span> Tap to Unmute & Play
+                </Button>
+              </div>
+            )}
+            
+            {isLiveStreamActive && (
+              <div className="absolute top-4 left-4 z-10">
+                <Badge color="red" className="animate-live-pulse bg-red-600/80 backdrop-blur border-red-400">
+                  <span className="w-2 h-2 rounded-full bg-white mr-2 inline-block animate-pulse"></span>
+                  LIVE
+                </Badge>
+              </div>
+            )}
           </div>
         </Card>
 
@@ -34,7 +167,7 @@ export default function Live() {
           >
             <div className="flex items-center gap-2 mb-2">
               <span className="w-2 h-2 bg-f1-red rounded-full animate-live-pulse" />
-              <span className="text-f1-red text-sm font-bold uppercase">Latest Broadcast</span>
+              <span className="text-f1-red text-sm font-bold uppercase">Latest Announcement</span>
             </div>
             <p className="text-xl font-bold text-white">{lastBroadcast.message}</p>
             <p className="text-xs text-gray-400 mt-2">
@@ -44,12 +177,12 @@ export default function Live() {
         )}
 
         {/* Broadcast History */}
-        <h3 className="text-lg font-bold mb-4 text-gray-300">Broadcast History</h3>
+        <h3 className="text-lg font-bold mb-4 text-gray-300">Announcement History</h3>
         {broadcasts.length === 0 ? (
           <Card className="text-center py-12">
-            <div className="text-4xl mb-3">📡</div>
-            <p className="text-gray-400">No broadcasts yet</p>
-            <p className="text-gray-500 text-sm mt-1">Updates will appear here when your admin sends a broadcast</p>
+            <div className="text-4xl mb-3 opacity-50">📰</div>
+            <p className="text-gray-400">No announcements yet</p>
+            <p className="text-gray-500 text-sm mt-1">Updates will appear here when your admin sends a message</p>
           </Card>
         ) : (
           <div className="space-y-3">
