@@ -7,6 +7,7 @@ import {
   useTracks,
   useDataChannel,
   RoomAudioRenderer,
+  StartAudio
 } from '@livekit/components-react';
 import { Track } from 'livekit-client';
 import '@livekit/components-styles';
@@ -56,6 +57,9 @@ export default function Live() {
     >
       <LiveViewerContent viewerName={viewerName} />
       <RoomAudioRenderer />
+      
+      {/* LiveKit component that only renders if the browser blocks AudioContext autoplay */}
+      <StartAudio label="Click to allow audio & play stream" className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm text-white font-bold text-xl uppercase tracking-widest cursor-pointer hover:bg-black/95 transition-all text-f1-red border-4 border-f1-red" />
     </LiveKitRoom>
   );
 }
