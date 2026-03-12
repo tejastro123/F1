@@ -28,6 +28,10 @@ passport.use(
         user = await User.findOne({ email });
 
         if (user) {
+          // If user is an admin, they must use the dedicated login form.
+          if (user.role === 'admin') {
+            return done(new Error('Admin users cannot use social login.'), null);
+          }
           // Link Google to existing account
           user.googleId = profile.id;
           if (!user.displayName) user.displayName = profile.displayName;

@@ -10,7 +10,7 @@ export default function AdminPredictions() {
   useEffect(() => {
     const fetch = async () => {
       try {
-        const { data } = await api.get('/predictions');
+        const { data } = await api.get('/admin/predictions');
         setPredictions(data);
       } catch { /* */ } finally { setLoading(false); }
     };

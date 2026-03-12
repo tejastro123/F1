@@ -3,7 +3,7 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
-import authMiddleware from '../middleware/authMiddleware.js';
+import adminAuthMiddleware from '../middleware/adminAuthMiddleware.js';
 import { seedFromXlsx } from '../scripts/seedFromXlsx.js';
 import Driver from '../models/Driver.js';
 import Race from '../models/Race.js';
@@ -15,8 +15,8 @@ const __dirname = path.dirname(__filename);
 
 const router = Router();
 
-// All admin routes require JWT
-router.use(authMiddleware);
+// All admin routes require admin privileges
+router.use(adminAuthMiddleware);
 
 // Configure multer for xlsx upload
 const storage = multer.diskStorage({
@@ -91,6 +91,16 @@ router.patch('/drivers/:id', async (req, res, next) => {
 
     broadcast('driver-updated', driver);
     res.json(driver);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// GET /api/v1/admin/predictions — Get ALL user predictions
+router.get('/predictions', async (req, res, next) => {
+  try {
+    const predictions = await Prediction.find({}).sort({ round: 1, grandPrixName: 1 });
+    res.json(predictions);
   } catch (error) {
     next(error);
   }

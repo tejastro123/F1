@@ -30,8 +30,8 @@ router.post('/login', authRateLimiter, async (req, res, next) => {
     }
 
     const user = await User.findOne({ email: email.toLowerCase() });
-    if (!user) {
-      return res.status(401).json({ error: 'Invalid credentials.' });
+    if (!user || user.role !== 'admin') {
+      return res.status(401).json({ error: 'Invalid credentials or not an admin.' });
     }
 
     const isValid = await bcrypt.compare(password, user.passwordHash);
