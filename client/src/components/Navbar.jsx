@@ -45,38 +45,44 @@ export default function Navbar() {
   return (
     <>
       <nav
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          scrolled ? 'bg-f1-dark/95 backdrop-blur-md shadow-lg shadow-black/20' : 'bg-transparent'
+        className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-500 ${
+          scrolled ? 'py-3 bg-f1-dark/80 backdrop-blur-2xl border-b border-white/5 shadow-2xl shadow-black/40' : 'py-6 bg-transparent'
         }`}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="flex items-center justify-between h-16">
-            {/* Logo */}
-            <Link to="/" className="flex items-center gap-2">
-              <span className="text-f1-red font-black text-xl tracking-tighter">F1</span>
-              <span className="text-white font-bold text-sm hidden sm:inline">2026 TRACKER</span>
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="flex items-center justify-between h-14">
+            {/* Logo - Elite Styling */}
+            <Link to="/" className="flex items-center gap-3 active:scale-95 transition-transform group">
+              <div className="relative">
+                <span className="text-f1-red font-black text-3xl tracking-tighter italic">F1</span>
+                <div className="absolute -inset-1 bg-f1-red/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-white font-black text-[10px] tracking-[0.3em] uppercase leading-none">Command</span>
+                <span className="text-gray-500 font-black text-[8px] tracking-[0.3em] uppercase leading-none mt-1">Center 2026</span>
+              </div>
             </Link>
 
-            {/* Desktop Nav */}
-            <div className="hidden md:flex items-center gap-1">
+            {/* Desktop Nav - Refined */}
+            <div className="hidden xl:flex items-center gap-2">
               {links.map((link) => (
                 <NavLink
                   key={link.to}
                   to={link.to}
                   className={({ isActive }) =>
-                    `relative px-3 py-2 text-sm font-medium transition-colors ${
-                      isActive ? 'text-white' : 'text-gray-400 hover:text-white'
+                    `relative px-4 py-2 text-[10px] font-black uppercase tracking-[0.15em] transition-all duration-300 ${
+                      isActive ? 'text-white' : 'text-gray-500 hover:text-white'
                     }`
                   }
                 >
                   {({ isActive }) => (
                     <>
-                      {link.label}
+                      <span className="relative z-10">{link.label}</span>
                       {isActive && (
                         <motion.div
-                          layoutId="nav-indicator"
-                          className="absolute bottom-0 left-0 right-0 h-0.5 bg-f1-red"
-                          transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                          layoutId="nav-pill"
+                          className="absolute inset-0 bg-white/5 border border-white/5 rounded-full"
+                          transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                         />
                       )}
                     </>
@@ -84,98 +90,68 @@ export default function Navbar() {
                 </NavLink>
               ))}
 
-              {/* Live button */}
+              {/* Live button - Distinctive */}
               <NavLink
                 to="/live"
                 className={({ isActive }) =>
-                  `relative px-3 py-2 text-sm font-medium flex items-center gap-1.5 ${
-                    isActive ? 'text-white' : 'text-gray-400 hover:text-white'
+                  `ml-4 relative px-5 py-2 rounded-full border transition-all flex items-center gap-2 ${
+                    isActive 
+                      ? 'bg-f1-red/10 border-f1-red text-white' 
+                      : 'bg-white/5 border-white/10 text-gray-400 hover:text-white hover:bg-white/10'
                   }`
                 }
               >
-                <span className={`w-2 h-2 rounded-full ${
-                  lastBroadcast ? 'bg-f1-red animate-live-pulse' : isConnected ? 'bg-green-500' : 'bg-gray-500'
-                }`} />
-                Live
+                <div className="relative">
+                  <span className={`block w-2 h-2 rounded-full ${
+                    lastBroadcast ? 'bg-f1-red animate-live-pulse' : isConnected ? 'bg-green-500' : 'bg-white/20'
+                  }`} />
+                  {lastBroadcast && <div className="absolute inset-0 bg-f1-red/50 rounded-full animate-ping" />}
+                </div>
+                <span className="text-[10px] font-black uppercase tracking-widest">Live Grid</span>
               </NavLink>
             </div>
 
-            {/* Controls */}
-            <div className="flex items-center gap-3">
-              {/* Theme toggle */}
-              <button
-                onClick={toggleTheme}
-                className="text-gray-400 hover:text-white transition-colors p-2"
-                aria-label="Toggle theme"
-              >
-                {theme === 'dark' ? '☀️' : '🌙'}
-              </button>
-
-              {/* User Avatar / Login */}
-              {isAuthenticated && user && user.role !== 'admin' ? (
-                <div className="flex items-center gap-2 mr-2">
-                  <span className="hidden lg:inline text-xs text-gray-400 font-medium">{user.displayName}</span>
+            {/* Controls & User */}
+            <div className="flex items-center gap-4">
+              {/* User - Premium Fit */}
+              {isAuthenticated && user ? (
+                <Link to="/profile" className="flex items-center gap-3 bg-white/5 border border-white/5 rounded-full pl-1.5 pr-4 py-1.5 hover:bg-white/10 transition-all active:scale-95 group">
                   {user.avatarUrl ? (
-                    <img src={user.avatarUrl} alt="avatar" className="w-8 h-8 rounded-full border border-white/20" />
+                    <img src={user.avatarUrl} alt="" className="w-8 h-8 rounded-full border-2 border-white/10 group-hover:border-f1-red/50 transition-colors" />
                   ) : (
-                    <div className="w-8 h-8 rounded-full bg-f1-red text-white flex items-center justify-center font-bold text-xs">
-                      {(user.displayName || user.email || 'U')[0].toUpperCase()}
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-f1-red to-f1-red/50 text-white flex items-center justify-center font-black text-xs">
+                      {(user.displayName || 'U')[0].toUpperCase()}
                     </div>
                   )}
-                  <button 
-                    onClick={logout}
-                    className="ml-2 text-xs text-gray-400 hover:text-white transition"
-                  >
-                    Logout
-                  </button>
-                </div>
-              ) : !isAuthenticated && (
-                <button 
-                  onClick={handleGoogleLogin} 
-                  className="bg-white/10 hover:bg-white/20 text-white text-sm px-4 py-1.5 rounded-full transition font-medium mr-2 border border-white/10 flex items-center gap-2"
+                  <span className="hidden lg:block text-[10px] font-black text-white uppercase tracking-widest">{user.displayName?.split(' ')[0]}</span>
+                </Link>
+              ) : (
+                <motion.button 
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleGoogleLogin}
+                  className="bg-white text-black px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-f1-red hover:text-white transition-all shadow-xl shadow-white/5"
                 >
-                  <svg viewBox="0 0 24 24" width="16" height="16" xmlns="http://www.w3.org/2000/svg">
-                    <g transform="matrix(1, 0, 0, 1, 27.009001, -39.238998)">
-                      <path fill="#4285F4" d="M -3.264 51.509 C -3.264 50.719 -3.334 49.969 -3.454 49.239 L -14.754 49.239 L -14.754 53.749 L -8.284 53.749 C -8.574 55.229 -9.424 56.479 -10.684 57.329 L -10.684 60.329 L -6.824 60.329 C -4.564 58.239 -3.264 55.159 -3.264 51.509 Z"/>
-                      <path fill="#34A853" d="M -14.754 63.239 C -11.514 63.239 -8.804 62.159 -6.824 60.329 L -10.684 57.329 C -11.764 58.049 -13.134 58.489 -14.754 58.489 C -17.884 58.489 -20.534 56.379 -21.484 53.529 L -25.464 53.529 L -25.464 56.619 C -23.494 60.539 -19.444 63.239 -14.754 63.239 Z"/>
-                      <path fill="#FBBC05" d="M -21.484 53.529 C -21.734 52.809 -21.864 52.039 -21.864 51.239 C -21.864 50.439 -21.724 49.669 -21.484 48.949 L -21.484 45.859 L -25.464 45.859 C -26.284 47.479 -26.754 49.299 -26.754 51.239 C -26.754 53.179 -26.284 54.999 -25.464 56.619 L -21.484 53.529 Z"/>
-                      <path fill="#EA4335" d="M -14.754 43.989 C -12.984 43.989 -11.404 44.599 -10.154 45.789 L -6.734 42.369 C -8.804 40.429 -11.514 39.239 -14.754 39.239 C -19.444 39.239 -23.494 41.939 -25.464 45.859 L -21.484 48.949 C -20.534 46.099 -17.884 43.989 -14.754 43.989 Z"/>
-                    </g>
-                  </svg>
-                  <span className="hidden sm:inline">Sign In</span>
-                </button>
+                  Join the Grid
+                </motion.button>
               )}
 
-              {!isAuthenticated && (
-                <button 
-                  onClick={handleDiscordLogin} 
-                  className="bg-[#5865F2]/10 hover:bg-[#5865F2]/20 text-white text-sm px-4 py-1.5 rounded-full transition font-medium mr-2 border border-[#5865F2]/10 flex items-center gap-2"
-                >
-                  <svg viewBox="0 0 127.14 96.36" width="16" height="16" xmlns="http://www.w3.org/2000/svg">
-                    <path fill="#5865F2" d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.71,32.65-1.82,56.6.48,80.1a105.73,105.73,0,0,0,32.22,16.26,73,73,0,0,0,7.3-11.72A67.39,67.39,0,0,1,28.27,77.73a50,50,0,0,0,4,3.14,78.72,78.72,0,0,0,62.88,0c1.32-1,2.65-2.05,4-3.14a67.46,67.46,0,0,1-11.75,6.91,73.11,73.11,0,0,0,7.3,11.72,105.33,105.33,0,0,0,32.25-16.27c2.81-27.18-4.71-50.7-19.46-72ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z"/>
-                  </svg>
-                  <span className="hidden sm:inline">Discord</span>
-                </button>
-              )}
-
-              {/* Mobile menu toggle */}
+              {/* Menu Toggle - Mobile Only */}
               <button
                 onClick={() => setMobileOpen(!mobileOpen)}
-                className="md:hidden text-white p-2"
-                aria-label="Toggle menu"
+                className="xl:hidden w-12 h-12 flex items-center justify-center rounded-2xl bg-white/5 border border-white/10 text-white transition-all active:scale-90"
               >
-                <div className="w-5 flex flex-col gap-1">
+                <div className="w-6 flex flex-col gap-1.5 items-end">
                   <motion.span
-                    animate={mobileOpen ? { rotate: 45, y: 6 } : { rotate: 0, y: 0 }}
-                    className="w-full h-0.5 bg-white block"
+                    animate={mobileOpen ? { rotate: 45, y: 7, width: 24 } : { rotate: 0, y: 0, width: 24 }}
+                    className="h-0.5 bg-white block rounded-full"
                   />
                   <motion.span
-                    animate={mobileOpen ? { opacity: 0 } : { opacity: 1 }}
-                    className="w-full h-0.5 bg-white block"
+                    animate={mobileOpen ? { opacity: 0 } : { opacity: 1, width: 16 }}
+                    className="h-0.5 bg-white block rounded-full"
                   />
                   <motion.span
-                    animate={mobileOpen ? { rotate: -45, y: -6 } : { rotate: 0, y: 0 }}
-                    className="w-full h-0.5 bg-white block"
+                    animate={mobileOpen ? { rotate: -45, y: -7, width: 24 } : { rotate: 0, y: 0, width: 24 }}
+                    className="h-0.5 bg-white block rounded-full"
                   />
                 </div>
               </button>
@@ -184,34 +160,46 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* Mobile overlay */}
+      {/* Mobile Elite Menu Overlay */}
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-40 bg-f1-dark/98 backdrop-blur-xl md:hidden"
+            initial={{ opacity: 0, backdropFilter: 'blur(0px)' }}
+            animate={{ opacity: 1, backdropFilter: 'blur(32px)' }}
+            exit={{ opacity: 0, backdropFilter: 'blur(0px)' }}
+            className="fixed inset-0 z-[90] bg-f1-dark/95 xl:hidden flex flex-col"
           >
-            <div className="flex flex-col items-center justify-center h-full gap-6">
-              {[...links, { to: '/live', label: 'Live' }].map((link, i) => (
+            <div className="flex-1 flex flex-col items-center justify-center gap-2">
+              {[...links, { to: '/live', label: 'Live Grid' }].map((link, i) => (
                 <motion.div
                   key={link.to}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.07 }}
+                  initial={{ opacity: 0, y: 40, scale: 0.8 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ delay: i * 0.05, type: 'spring', damping: 20 }}
+                  className="w-full text-center"
                 >
                   <NavLink
                     to={link.to}
                     onClick={() => setMobileOpen(false)}
                     className={({ isActive }) =>
-                      `text-3xl font-bold ${isActive ? 'text-f1-red' : 'text-white hover:text-f1-red'} transition-colors`
+                      `block text-5xl md:text-7xl font-black uppercase italic tracking-tighter py-2 transition-all ${
+                        isActive ? 'text-f1-red' : 'text-white hover:text-f1-red/50'
+                      }`
                     }
                   >
                     {link.label}
                   </NavLink>
                 </motion.div>
               ))}
+            </div>
+            
+            <div className="p-12 text-center border-t border-white/5 bg-white/[0.02]">
+               <div className="text-[10px] font-black text-gray-600 uppercase tracking-[0.4em] mb-4">Official 2026 Partner</div>
+               <div className="flex justify-center gap-8 opacity-40">
+                  <span className="font-black italic text-lg text-white">ORACLE</span>
+                  <span className="font-black italic text-lg text-white">ROLEX</span>
+                  <span className="font-black italic text-lg text-white">AWS</span>
+               </div>
             </div>
           </motion.div>
         )}

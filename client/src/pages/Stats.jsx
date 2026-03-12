@@ -66,55 +66,50 @@ export default function Stats() {
         <meta name="description" content="Deep analytics and statistics for the 2026 Formula 1 season" />
       </Helmet>
 
-      <div className="pt-24 pb-16 px-4 max-w-7xl mx-auto">
-        <SectionHeader title="Stats & Analytics" subtitle="Deep dive into the 2026 championship data" />
+      <div className="pt-24 pb-16 px-6 max-w-7xl mx-auto overflow-x-hidden">
+        <SectionHeader title="ANALYTICS" subtitle="Deep-space telemetry and championship trajectories" />
 
         {loading ? (
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)}
           </div>
         ) : (
           <>
-            {/* Quick stats */}
+            {/* Quick Stats - Command Center */}
             {stats && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10"
-              >
-                <Card className="text-center">
-                  <div className="text-2xl font-black text-f1-gold"><AnimatedCounter value={stats.totalPointsDistributed} /></div>
-                  <div className="text-xs text-gray-400 mt-1">Total Points</div>
-                </Card>
-                <Card className="text-center">
-                  <div className="text-2xl font-black text-white"><AnimatedCounter value={stats.totalDrivers} /></div>
-                  <div className="text-xs text-gray-400 mt-1">Drivers</div>
-                </Card>
-                <Card className="text-center">
-                  <div className="text-2xl font-black text-green-400"><AnimatedCounter value={stats.racesDone} /></div>
-                  <div className="text-xs text-gray-400 mt-1">Races Done</div>
-                </Card>
-                <Card className="text-center">
-                  <div className="text-2xl font-black text-f1-red">{stats.leaderName?.split(' ').pop()}</div>
-                  <div className="text-xs text-gray-400 mt-1">Leader</div>
-                </Card>
-              </motion.div>
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+                {[
+                  { label: 'Total Points', value: stats.totalPointsDistributed, icon: '⚡' },
+                  { label: 'The Grid', value: stats.totalDrivers, icon: '👤' },
+                  { label: 'Races Done', value: stats.racesDone, icon: '🚦' },
+                  { label: 'Leader', value: stats.leaderName?.split(' ').pop(), icon: '🏆', isText: true }
+                ].map((s, i) => (
+                  <motion.div key={s.label} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}>
+                    <Card glass className="p-6 text-center border-white/5 rounded-[2rem] shadow-xl">
+                      <div className="text-[8px] font-black text-gray-500 uppercase tracking-[0.3em] mb-3">{s.label}</div>
+                      <div className="text-3xl font-black text-white italic tracking-tighter">
+                        {s.isText ? s.value : <AnimatedCounter value={s.value} />}
+                      </div>
+                      <div className="mt-3 text-lg opacity-20">{s.icon}</div>
+                    </Card>
+                  </motion.div>
+                ))}
+              </div>
             )}
 
-            <div className="grid md:grid-cols-2 gap-6">
-              {/* Points gap chart */}
-              <Card>
-                <h3 className="font-bold text-lg mb-4">Points Gap to Leader</h3>
-                <div className="h-72">
+            <div className="grid md:grid-cols-2 gap-10">
+              {/* Points gap chart - Refined */}
+              <Card glass className="rounded-[2.5rem] p-8 border-white/5 bg-white/[0.01]">
+                <h3 className="text-[10px] font-black text-white uppercase tracking-[0.2em] mb-10">Leader Gap (Points)</h3>
+                <div className="h-80">
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={gapData} layout="vertical">
-                      <CartesianGrid strokeDasharray="3 3" stroke="#2a2a3a" />
-                      <XAxis type="number" stroke="#666" />
-                      <YAxis type="category" dataKey="name" stroke="#666" width={80} tick={{ fontSize: 12 }} />
-                      <Tooltip content={<CustomTooltip />} />
-                      <Bar dataKey="points" name="Points" radius={[0, 4, 4, 0]}>
+                    <BarChart data={gapData} layout="vertical" margin={{ left: -20 }}>
+                      <XAxis type="number" hide />
+                      <YAxis type="category" dataKey="name" stroke="rgba(255,255,255,0.3)" width={100} tick={{ fontSize: 10, fontWeight: 900, textTransform: 'uppercase' }} axisLine={false} tickLine={false} />
+                      <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.03)' }} />
+                      <Bar dataKey="points" name="Points" radius={[0, 15, 15, 0]} barSize={20}>
                         {gapData.map((entry, idx) => (
-                          <Cell key={idx} fill={entry.color} />
+                          <Cell key={idx} fill={entry.color} className="filter drop-shadow-[0_0_8px_rgba(255,255,255,0.1)]" />
                         ))}
                       </Bar>
                     </BarChart>
@@ -122,10 +117,10 @@ export default function Stats() {
                 </div>
               </Card>
 
-              {/* Wins distribution */}
-              <Card>
-                <h3 className="font-bold text-lg mb-4">Wins Distribution</h3>
-                <div className="h-72">
+              {/* Wins distribution - Refined */}
+              <Card glass className="rounded-[2.5rem] p-8 border-white/5 bg-white/[0.01]">
+                <h3 className="text-[10px] font-black text-white uppercase tracking-[0.2em] mb-10">Win Share %</h3>
+                <div className="h-80">
                   {winsData.length > 0 ? (
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
@@ -133,10 +128,11 @@ export default function Stats() {
                           data={winsData}
                           cx="50%"
                           cy="50%"
+                          innerRadius={70}
                           outerRadius={100}
+                          paddingAngle={4}
                           dataKey="value"
-                          label={({ name, value }) => `${name.split(' ').pop()} (${value})`}
-                          labelLine={{ stroke: '#666' }}
+                          stroke="none"
                         >
                           {winsData.map((entry, idx) => (
                             <Cell key={idx} fill={entry.color} />
@@ -146,25 +142,26 @@ export default function Stats() {
                       </PieChart>
                     </ResponsiveContainer>
                   ) : (
-                    <div className="h-full flex items-center justify-center text-gray-500">
-                      No wins data yet
+                    <div className="h-full flex flex-col items-center justify-center opacity-30 italic text-sm">
+                      <span className="text-4xl mb-4">🏁</span>
+                      Season records pending...
                     </div>
                   )}
                 </div>
               </Card>
 
-              {/* Team radar chart */}
-              <Card className="md:col-span-2">
-                <h3 className="font-bold text-lg mb-4">Team Performance Comparison</h3>
-                <div className="h-80">
+              {/* Team radar chart - Immersion */}
+              <Card glass className="md:col-span-2 rounded-[3.5rem] p-12 border-white/5 bg-white/[0.01]">
+                <h3 className="text-[10px] font-black text-white uppercase tracking-[0.2em] mb-12 text-center">Constructor Performance Profile</h3>
+                <div className="h-[450px]">
                   <ResponsiveContainer width="100%" height="100%">
                     <RadarChart data={radarData}>
-                      <PolarGrid stroke="#2a2a3a" />
-                      <PolarAngleAxis dataKey="team" stroke="#666" tick={{ fontSize: 11 }} />
-                      <PolarRadiusAxis stroke="#666" />
+                      <PolarGrid stroke="rgba(255,255,255,0.05)" />
+                      <PolarAngleAxis dataKey="team" stroke="rgba(255,255,255,0.4)" tick={{ fontSize: 9, fontWeight: 900, textTransform: 'uppercase' }} />
+                      <PolarRadiusAxis hide />
                       <Tooltip content={<CustomTooltip />} />
-                      <Radar name="Points" dataKey="points" stroke="#E10600" fill="#E10600" fillOpacity={0.2} />
-                      <Radar name="Wins" dataKey="wins" stroke="#F5C518" fill="#F5C518" fillOpacity={0.1} />
+                      <Radar name="Points" dataKey="points" stroke="#E10600" fill="#E10600" fillOpacity={0.2} strokeWidth={3} />
+                      <Radar name="Wins" dataKey="wins" stroke="#F5C518" fill="#F5C518" fillOpacity={0.1} strokeWidth={2} />
                     </RadarChart>
                   </ResponsiveContainer>
                 </div>

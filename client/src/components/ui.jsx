@@ -26,27 +26,28 @@ export function AnimatedCounter({ value, duration = 1.2, className = '' }) {
 }
 
 export function Button({ children, onClick, variant = 'primary', size = 'md', className = '', disabled = false, ...props }) {
-  const base = 'font-semibold rounded-lg transition-all duration-200 inline-flex items-center justify-center gap-2';
+  const base = 'font-bold rounded-2xl transition-all duration-300 inline-flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed';
   const variants = {
-    primary: 'bg-f1-red hover:bg-red-700 text-white shadow-lg shadow-f1-red/20 hover:shadow-f1-red/40',
-    secondary: 'bg-f1-card hover:bg-f1-panel text-white border border-white/10',
-    gold: 'bg-f1-gold hover:bg-yellow-500 text-black',
-    ghost: 'bg-transparent hover:bg-white/5 text-white',
-    admin: 'bg-f1-admin hover:bg-orange-600 text-white',
+    primary: 'bg-f1-red hover:bg-red-600 text-white shadow-[0_10px_20px_-10px_rgba(225,6,0,0.4)] hover:shadow-[0_15px_30px_-10px_rgba(225,6,0,0.6)]',
+    secondary: 'bg-white/5 hover:bg-white/10 text-white border border-white/10 backdrop-blur-md',
+    gold: 'bg-f1-gold hover:bg-[#FFD700] text-black shadow-[0_10px_20px_-10px_rgba(255,215,0,0.3)]',
+    ghost: 'bg-transparent hover:bg-white/10 text-white',
+    admin: 'bg-orange-600 hover:bg-orange-500 text-white shadow-lg shadow-orange-900/40',
+    outline: 'bg-transparent border-2 border-white/20 hover:border-white/40 text-white',
   };
   const sizes = {
-    sm: 'px-3 py-1.5 text-sm',
-    md: 'px-5 py-2.5 text-sm',
-    lg: 'px-7 py-3 text-base',
+    sm: 'px-4 py-2 text-xs',
+    md: 'px-6 py-3 text-sm',
+    lg: 'px-8 py-4 text-base md:text-lg',
   };
 
   return (
     <motion.button
-      whileHover={{ scale: disabled ? 1 : 1.02 }}
-      whileTap={{ scale: disabled ? 1 : 0.98 }}
+      whileHover={{ scale: disabled ? 1 : 1.01 }}
+      whileTap={{ scale: disabled ? 1 : 0.96 }}
       onClick={onClick}
       disabled={disabled}
-      className={`${base} ${variants[variant]} ${sizes[size]} ${disabled ? 'opacity-50 cursor-not-allowed' : ''} ${className}`}
+      className={`${base} ${variants[variant]} ${sizes[size]} ${className}`}
       {...props}
     >
       {children}
@@ -54,15 +55,17 @@ export function Button({ children, onClick, variant = 'primary', size = 'md', cl
   );
 }
 
-export function Card({ children, className = '', hover = true, ...props }) {
+export function Card({ children, className = '', hover = true, glass = true, ...props }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 15 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      transition={{ duration: 0.4 }}
-      whileHover={hover ? { y: -2, transition: { duration: 0.2 } } : {}}
-      className={`bg-f1-card rounded-xl border border-white/5 p-6 ${className}`}
+      transition={{ duration: 0.5, ease: 'easeOut' }}
+      whileHover={hover ? { y: -4, shadow: '0 20px 40px rgba(0,0,0,0.4)', transition: { duration: 0.3 } } : {}}
+      className={`rounded-[2rem] border border-white/5 p-5 md:p-8 transition-all ${
+        glass ? 'bg-f1-card/40 backdrop-blur-2xl shadow-2xl' : 'bg-f1-card'
+      } ${className}`}
       {...props}
     >
       {children}
@@ -72,16 +75,16 @@ export function Card({ children, className = '', hover = true, ...props }) {
 
 export function Badge({ children, color = 'red', className = '' }) {
   const colors = {
-    red: 'bg-f1-red/20 text-f1-red border-f1-red/30',
-    gold: 'bg-f1-gold/20 text-f1-gold border-f1-gold/30',
-    silver: 'bg-f1-silver/20 text-f1-silver border-f1-silver/30',
-    bronze: 'bg-f1-bronze/20 text-f1-bronze border-f1-bronze/30',
-    green: 'bg-green-500/20 text-green-400 border-green-500/30',
-    gray: 'bg-gray-500/20 text-gray-400 border-gray-500/30',
-    orange: 'bg-orange-500/20 text-orange-400 border-orange-500/30',
+    red: 'bg-f1-red/10 text-f1-red border-f1-red/20',
+    gold: 'bg-f1-gold/10 text-f1-gold border-f1-gold/20',
+    silver: 'bg-f1-silver/10 text-f1-silver border-f1-silver/20',
+    bronze: 'bg-f1-bronze/10 text-f1-bronze border-f1-bronze/20',
+    green: 'bg-green-500/10 text-green-400 border-green-500/20',
+    gray: 'bg-gray-500/10 text-gray-400 border-gray-500/20',
+    orange: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
   };
   return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${colors[color]} ${className}`}>
+    <span className={`inline-flex items-center px-3 py-1 rounded-full text-[10px] uppercase font-black tracking-widest border ${colors[color]} ${className}`}>
       {children}
     </span>
   );
@@ -89,11 +92,11 @@ export function Badge({ children, color = 'red', className = '' }) {
 
 export function StatPill({ label, value, icon, className = '' }) {
   return (
-    <div className={`flex items-center gap-3 bg-f1-panel rounded-xl px-4 py-3 border border-white/5 ${className}`}>
-      {icon && <span className="text-xl">{icon}</span>}
+    <div className={`flex items-center gap-4 bg-white/5 backdrop-blur-xl rounded-2xl px-5 py-4 border border-white/5 hover:border-white/10 transition-colors ${className}`}>
+      {icon && <span className="text-2xl drop-shadow-lg">{icon}</span>}
       <div>
-        <p className="text-xs text-gray-400 uppercase tracking-wider">{label}</p>
-        <p className="text-lg font-bold text-white">
+        <p className="text-[10px] text-gray-500 font-black uppercase tracking-[0.2em] mb-0.5">{label}</p>
+        <p className="text-xl font-black text-white leading-tight">
           {typeof value === 'number' ? <AnimatedCounter value={value} /> : value}
         </p>
       </div>
@@ -101,19 +104,19 @@ export function StatPill({ label, value, icon, className = '' }) {
   );
 }
 
-export function SectionHeader({ title, subtitle, className = '' }) {
+export function SectionHeader({ title, subtitle, className = '', align = 'left' }) {
   return (
     <motion.div
-      initial={{ opacity: 0, x: -20 }}
-      whileInView={{ opacity: 1, x: 0 }}
+      initial={{ opacity: 0, x: align === 'left' ? -20 : 0, y: align === 'center' ? 20 : 0 }}
+      whileInView={{ opacity: 1, x: 0, y: 0 }}
       viewport={{ once: true }}
-      className={`mb-8 ${className}`}
+      className={`mb-10 ${align === 'center' ? 'text-center' : ''} ${className}`}
     >
-      <h2 className="text-2xl md:text-3xl font-bold text-white">
+      <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-white tracking-tighter uppercase italic leading-none mb-4">
         {title}
       </h2>
-      {subtitle && <p className="text-gray-400 mt-1">{subtitle}</p>}
-      <div className="w-16 h-1 bg-f1-red rounded-full mt-3" />
+      {subtitle && <p className="text-gray-400 text-sm md:text-base font-medium max-w-2xl mx-auto lg:mx-0">{subtitle}</p>}
+      <div className={`w-20 h-1.5 bg-f1-red rounded-full mt-4 ${align === 'center' ? 'mx-auto' : ''}`} />
     </motion.div>
   );
 }
@@ -151,25 +154,25 @@ export function RaceStatusBadge({ status }) {
 
 export function SkeletonLoader({ lines = 3, className = '' }) {
   return (
-    <div className={`space-y-3 ${className}`}>
+    <div className={`space-y-4 ${className}`}>
       {Array.from({ length: lines }).map((_, i) => (
         <div
           key={i}
-          className="skeleton h-4 rounded"
-          style={{ width: `${100 - i * 15}%` }}
+          className="h-4 bg-white/5 rounded-full animate-pulse"
+          style={{ width: `${Math.max(40, 100 - i * 15)}%` }}
         />
       ))}
     </div>
   );
 }
 
-export function SkeletonCard() {
+export function SkeletonCard({ className = '' }) {
   return (
-    <div className="bg-f1-card rounded-xl border border-white/5 p-6">
-      <div className="skeleton h-6 w-3/4 rounded mb-4" />
-      <div className="skeleton h-4 w-1/2 rounded mb-2" />
-      <div className="skeleton h-4 w-2/3 rounded mb-2" />
-      <div className="skeleton h-10 w-full rounded mt-4" />
+    <div className={`bg-white/5 backdrop-blur-3xl rounded-[2.5rem] border border-white/5 p-8 animate-pulse ${className}`}>
+      <div className="h-4 w-1/4 bg-white/10 rounded-full mb-8" />
+      <div className="h-12 w-3/4 bg-white/5 rounded-2xl mb-4" />
+      <div className="h-4 w-1/2 bg-white/5 rounded-full mb-10" />
+      <div className="h-16 w-full bg-white/5 rounded-3xl" />
     </div>
   );
 }

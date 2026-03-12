@@ -20,27 +20,35 @@ export default function LiveBanner() {
     <AnimatePresence>
       {visible && (
         <motion.div
-          initial={{ y: -100 }}
-          animate={{ y: 0 }}
-          exit={{ y: -100 }}
-          className="fixed top-[64px] left-0 right-0 z-[49] px-4 py-2 bg-f1-red text-white shadow-xl flex items-center justify-between"
+          initial={{ y: -100, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: -100, opacity: 0 }}
+          className="fixed top-[74px] left-6 right-6 z-[95] overflow-hidden"
         >
-          <div className="flex items-center gap-3 overflow-hidden">
-            <span className="flex h-2 w-2 relative">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
-            </span>
-            <span className="text-xs font-black uppercase tracking-tighter shrink-0">Live Update</span>
-            <span className="text-sm font-bold truncate">{lastBroadcast.message || lastBroadcast}</span>
+          <div className="bg-f1-red/90 backdrop-blur-xl border border-white/20 rounded-2xl p-4 shadow-2xl flex items-center justify-between">
+            <div className="flex items-center gap-4 overflow-hidden">
+               <div className="flex h-3 w-3 relative">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-white"></span>
+               </div>
+               <div className="h-6 w-[1px] bg-white/20" />
+               <div className="flex flex-col">
+                  <span className="text-[8px] font-black uppercase tracking-[0.4em] text-white/60 leading-none mb-1">Grid Priority Alert</span>
+                  <span className="text-xs font-black text-white uppercase italic tracking-widest leading-none truncate">
+                     {lastBroadcast.message || lastBroadcast}
+                  </span>
+               </div>
+            </div>
+            
+            <button 
+              onClick={() => setVisible(false)}
+              className="ml-6 p-2 rounded-xl bg-white/10 hover:bg-white/20 transition-all active:scale-90"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4">
+                <path d="M18 6L6 18M6 6l12 12" />
+              </svg>
+            </button>
           </div>
-          <button 
-            onClick={() => setVisible(false)}
-            className="ml-4 hover:bg-white/20 p-1 rounded-full transition"
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-              <path d="M18 6L6 18M6 6l12 12" />
-            </svg>
-          </button>
         </motion.div>
       )}
     </AnimatePresence>
