@@ -10,17 +10,16 @@ const xmsPath = path.resolve(__dirname, '../../data/F1_2026_PRO.xlsx');
 function debugXlsx() {
   try {
     const workbook = XLSX.readFile(xmsPath);
-    const sheet = workbook.Sheets['🏎 Drivers'];
-    if (!sheet) {
-      console.log('Sheet not found');
-      return;
-    }
-    const raw = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-    console.log('HEADERS (Row 3):', JSON.stringify(raw[3]));
-    const maxRow = raw.find(r => r && r[2] === 'Max Verstappen');
-    console.log('MAX ROW:', JSON.stringify(maxRow));
-    const oconRow = raw.find(r => r && r[2] === 'Esteban Ocon');
-    console.log('OCON ROW:', JSON.stringify(oconRow));
+    console.log('SHEETS:', workbook.SheetNames);
+    workbook.SheetNames.forEach(name => {
+      const s = workbook.Sheets[name];
+      const r = XLSX.utils.sheet_to_json(s, { header: 1 });
+      r.forEach((row, i) => {
+        if (row && row.includes(44)) {
+          console.log(`FOUND 44 in sheet "${name}" at row ${i}:`, JSON.stringify(row));
+        }
+      });
+    });
   } catch (e) {
     console.error(e);
   }

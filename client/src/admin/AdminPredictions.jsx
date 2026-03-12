@@ -35,8 +35,11 @@ export default function AdminPredictions() {
     'GOOD_SURPRISE': '🌟 GOOD SURPRISE',
     'BIG_FLOP': '💥 BIG FLOP',
     'P_WHAT': '❓ PWHAT?',
-    'CRAZY_CALL': '🤯 CRAZY'
+    'CRAZY': '🤯 CRAZY'
   };
+
+  const correct = predictions.filter(p => p.isCorrect === true).length;
+  const total = predictions.length;
 
   return (
     <>

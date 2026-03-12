@@ -17,6 +17,34 @@ import Prediction from '../models/Prediction.js';
 
 const DEFAULT_XLSX_PATH = path.resolve(__dirname, '../../data/F1_2026_PRO.xlsx');
 
+const OFFICIAL_NUMBERS = {
+  'Max Verstappen': 1,
+  'Lewis Hamilton': 44,
+  'George Russell': 63,
+  'Charles Leclerc': 16,
+  'Carlos Sainz Jr.': 55,
+  'Lando Norris': 4,
+  'Oscar Piastri': 81,
+  'Fernando Alonso': 14,
+  'Lance Stroll': 18,
+  'Pierre Gasly': 10,
+  'Esteban Ocon': 31,
+  'Alexander Albon': 23,
+  'Franco Colapinto': 43,
+  'Liam Lawson': 30,
+  'Yuki Tsunoda': 22,
+  'Nico Hülkenberg': 27,
+  'Sergio Pérez': 11,
+  'Kevin Magnussen': 20,
+  'Valtteri Bottas': 77,
+  'Guanyu Zhou': 24,
+  'Oliver Bearman': 38,
+  'Kimi Antonelli': 12,
+  'Isack Hadjar': 20,
+  'Gabriel Bortoleto': 5,
+  'Arvid Lindblad': 19
+};
+
 /**
  * Parse drivers from the '🏎 Drivers' sheet
  * Headers at row 4 (0-indexed: 3), data starts row 5 (0-indexed: 4)
@@ -43,7 +71,7 @@ function parseDrivers(workbook) {
       wins: row[6] || 0,
       podiums: row[7] || 0,
       gridPosition: row[8] || 0,
-      driverNumber: row[9] || null,
+      driverNumber: row[9] || OFFICIAL_NUMBERS[row[2]] || null,
       photoUrl: null,
     });
   }

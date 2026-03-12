@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from './ui.jsx';
 import { useDrivers } from '../hooks/useData.js';
@@ -25,7 +25,7 @@ export default function PredictionModal({ isOpen, onClose, race, onPredicted, in
     { id: 'GOOD_SURPRISE', label: '🌟 GOOD SURPRISE', emoji: '🌟' },
     { id: 'BIG_FLOP', label: '💥 BIG FLOP', emoji: '💥' },
     { id: 'P_WHAT', label: '❓ PWHAT?', emoji: '❓' },
-    { id: 'CRAZY_CALL', label: '🤯 CRAZY', emoji: '🤯' },
+    { id: 'CRAZY', label: '🤯 CRAZY', emoji: '🤯' },
   ];
 
   // Effect to handle initial category when opening from different places

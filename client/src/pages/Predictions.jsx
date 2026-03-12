@@ -47,7 +47,7 @@ export default function Predictions() {
     'GOOD_SURPRISE': '🌟 GOOD SURPRISE',
     'BIG_FLOP': '💥 BIG FLOP',
     'P_WHAT': '❓ PWHAT?',
-    'CRAZY_CALL': '🤯 CRAZY'
+    'CRAZY': '🤯 CRAZY'
   };
 
   const statusColor = (isCorrect) => {
