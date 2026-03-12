@@ -16,6 +16,13 @@ import api from '../services/api.js';
 import { useSocket } from '../context/SocketContext.jsx';
 import { Card, Badge, SectionHeader, Button } from '../components/ui.jsx';
 
+// Live Center Components
+import ReactionStream from '../components/Live/ReactionStream.jsx';
+import PollWidget from '../components/Live/PollWidget.jsx';
+import TrackStatusPanel from '../components/Live/TrackStatusPanel.jsx';
+import SectorFeed from '../components/Live/SectorFeed.jsx';
+import PredictionHeatmap from '../components/Live/PredictionHeatmap.jsx';
+
 export default function Live() {
   const [token, setToken] = useState(null);
   const [error, setError] = useState(null);
@@ -206,183 +213,111 @@ function LiveViewerContent({ viewerName }) {
 
   return (
     <>
-      <Helmet>
-        <title>Live — F1 2026</title>
-        <meta name="description" content="Live F1 race updates and broadcasts" />
-      </Helmet>
+      <ReactionStream />
+      <div className="pt-24 pb-16 px-4 max-w-[1600px] mx-auto">
+        <div className="flex items-center justify-between mb-8">
+          <SectionHeader title="Live Command Center" subtitle="Zero-latency sub-second global streaming & interactive telemetry" className="!mb-0" />
+          <div className="hidden sm:flex gap-2">
+            <Badge color={isLiveStreamActive ? 'red' : 'gray'} className="animate-live-pulse">
+              {isLiveStreamActive ? 'Race Session Active' : 'Waiting for Broadcast'}
+            </Badge>
+          </div>
+        </div>
 
-      <div className="pt-24 pb-16 px-4 max-w-7xl mx-auto">
-        <SectionHeader title="Live Edge Feed" subtitle="Zero-latency sub-second global streaming" />
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Left: Telemetry & Commentary */}
+          <div className="lg:col-span-1 space-y-6">
+            <TrackStatusPanel />
+            <SectorFeed />
+          </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column: Video & Announcements */}
+          {/* Middle: Live Stream & Interaction */}
           <div className="lg:col-span-2 space-y-6">
-
-            {/* Connection Status */}
-            <Card className="mb-6 flex justify-between items-center bg-black/40 border-white/5 p-4 rounded-xl">
+             {/* Connection Status */}
+             <Card className="flex justify-between items-center bg-black/40 border-white/5 p-4 rounded-xl">
               <div className="flex items-center gap-3">
                 <span className="w-3 h-3 rounded-full bg-green-500 animate-live-pulse" />
-                <span className="font-medium text-gray-300">Edge Server: Connected</span>
+                <span className="font-medium text-[10px] uppercase tracking-widest text-gray-400">Edge Connectivity: Optimized</span>
               </div>
-              <div className="flex items-center gap-3">
-                <span className="font-medium text-gray-300">LiveKit Stream:</span>
-                <Badge color={isLiveStreamActive ? 'red' : 'gray'}>{isLiveStreamActive ? 'LIVE' : 'OFFLINE'}</Badge>
-              </div>
-            </Card>
-
-            {/* Viewer Stream Controls */}
-            {isLiveStreamActive && (
-              <div className="flex items-center justify-between bg-black/30 border border-white/5 p-3 rounded-lg mb-4">
+              {isLiveStreamActive && (
                 <div className="flex items-center gap-3">
-                  <span className="text-sm text-gray-400">Stream Quality:</span>
                   <select 
                     value={quality}
                     onChange={handleQualityChange}
-                    className="bg-black/80 border border-white/20 rounded px-2 py-1 text-white text-sm outline-none cursor-pointer focus:border-red-500 transition-colors"
+                    className="bg-black/80 border border-white/10 rounded px-2 py-1 text-[10px] font-bold text-white outline-none cursor-pointer focus:border-red-500 transition-colors"
                   >
-                    <option value="high">1080p (Source)</option>
-                    <option value="medium">720p (Data Saver)</option>
-                    <option value="low">480p (Low Bandwidth)</option>
+                    <option value="high">1080p</option>
+                    <option value="medium">720p</option>
+                    <option value="low">480p</option>
                   </select>
                 </div>
-                
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  className={`border-white/20 ${isRecording ? 'text-white bg-red-600 border-red-500 animate-pulse' : 'text-gray-300 hover:bg-white/10'}`} 
-                  onClick={toggleRecording}
-                >
-                  {isRecording ? '⏸ Stop Recording' : '⏺ Record VOD'}
-                </Button>
-              </div>
-            )}
+              )}
+            </Card>
 
             {/* Live Video Player */}
-            <Card className={`mb-8 p-0 overflow-hidden transition-all duration-500 ${isLiveStreamActive ? 'ring-2 ring-red-500/50' : 'opacity-80'}`}>
+            <Card className={`relative p-0 overflow-hidden transition-all duration-500 rounded-3xl ${isLiveStreamActive ? 'ring-2 ring-red-500/50 shadow-[0_0_40px_rgba(255,0,0,0.1)]' : 'opacity-80'}`}>
               <div 
                 ref={playerContainerRef}
-                className="bg-black aspect-video relative flex items-center justify-center rounded-lg border border-white/10 group"
+                className="bg-black aspect-video relative flex items-center justify-center group"
               >
                 {!isLiveStreamActive && (
                   <div className="absolute flex flex-col items-center justify-center text-gray-500 z-10 w-full h-full bg-black/80">
                     <span className="text-5xl mb-4 opacity-50">📡</span>
                     <p className="text-xl font-bold font-f1 tracking-wider uppercase">Live Stream Offline</p>
-                    <p className="text-sm mt-2 opacity-70 mb-4">Waiting for admin to start broadcasting...</p>
+                    <p className="text-sm mt-2 opacity-70 mb-4 text-center px-4">The command center is powered up. Waiting for the session to go green.</p>
                   </div>
                 )}
 
-                {/* LiveKit automatically handles Track rendering and attaching streams to <video> tags */}
                 {screenTrack && (
-                   <VideoTrack trackRef={screenTrack} className="w-full h-full object-cover rounded-lg" />
+                   <VideoTrack trackRef={screenTrack} className="w-full h-full object-contain" />
                 )}
 
-                {/* Viewer PiP Overlay */}
                 {camTrack && (
-                  <div className="absolute bottom-4 right-4 w-1/4 max-w-[200px] aspect-video bg-black rounded-lg border-2 border-white/20 overflow-hidden shadow-2xl z-20">
+                  <div className="absolute bottom-4 right-4 w-1/4 max-w-[200px] aspect-video bg-black rounded-xl border-2 border-white/20 overflow-hidden shadow-2xl z-20">
                     <VideoTrack trackRef={camTrack} className="w-full h-full object-cover" />
                   </div>
                 )}
                 
                 {isLiveStreamActive && (
                   <div className="absolute top-4 left-4 z-10">
-                    <Badge color="red" className="animate-live-pulse bg-red-600/80 backdrop-blur border-red-400">
-                      <span className="w-2 h-2 rounded-full bg-white mr-2 inline-block animate-pulse"></span>
-                      LIVE
-                    </Badge>
+                    <button onClick={toggleFullScreen} className="bg-black/40 hover:bg-black/60 p-2 rounded-lg backdrop-blur opacity-0 group-hover:opacity-100 transition-opacity">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2"><path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 00 2-2v-3M3 16v3a2 2 0 00 2 2h3" /></svg>
+                    </button>
                   </div>
-                )}
-
-                {isLiveStreamActive && (
-                  <button 
-                    onClick={toggleFullScreen}
-                    className="absolute bottom-4 left-4 z-30 bg-black/60 hover:bg-black/80 text-white p-2.5 rounded-lg backdrop-blur-sm transition-all duration-300 opacity-0 group-hover:opacity-100 focus:opacity-100"
-                    title="Toggle Fullscreen"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
-                    </svg>
-                  </button>
                 )}
               </div>
             </Card>
 
-            {/* Latest Broadcast */}
-            {lastBroadcast && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="bg-gradient-to-r from-f1-red/20 to-f1-card rounded-xl border border-f1-red/30 p-6 mb-8"
-              >
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="w-2 h-2 bg-f1-red rounded-full animate-live-pulse" />
-                  <span className="text-f1-red text-sm font-bold uppercase">Latest Announcement</span>
-                </div>
-                <p className="text-xl font-bold text-white">{lastBroadcast.message}</p>
-                <p className="text-xs text-gray-400 mt-2">
-                  {new Date(lastBroadcast.timestamp).toLocaleString()}
-                </p>
-              </motion.div>
-            )}
-
-            {/* Broadcast History */}
-            <h3 className="text-lg font-bold mb-4 text-gray-300">Announcement History</h3>
-            {broadcasts.length === 0 ? (
-              <Card className="text-center py-12">
-                <div className="text-4xl mb-3 opacity-50">📰</div>
-                <p className="text-gray-400">No announcements yet</p>
-              </Card>
-            ) : (
-              <div className="space-y-3">
-                <AnimatePresence>
-                  {broadcasts.map((b, idx) => (
-                    <motion.div
-                      key={b.timestamp + idx}
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0 }}
-                      className="bg-f1-card rounded-xl border border-white/5 p-4 flex items-start gap-3"
-                    >
-                      <div className="w-2 h-2 bg-f1-red rounded-full mt-2 shrink-0" />
-                      <div>
-                        <p className="text-white font-medium">{b.message}</p>
-                        <p className="text-xs text-gray-500 mt-1">
-                          {new Date(b.timestamp).toLocaleString()}
-                        </p>
-                      </div>
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
-              </div>
-            )}
+            <div className="grid sm:grid-cols-2 gap-6">
+              <PollWidget />
+              <PredictionHeatmap round={20} />
+            </div>
           </div>
 
-          {/* Right Column: Live Chat */}
+          {/* Right: Global Chat */}
           <div className="lg:col-span-1">
-            <Card className="flex flex-col h-[600px] lg:h-[calc(100vh-8rem)] sticky top-24 p-0 overflow-hidden border-white/10">
-              <div className="bg-f1-dark border-b border-white/5 p-4 flex items-center justify-between">
-                <h3 className="font-bold text-white flex items-center gap-2">
-                  <span className="text-xl">💬</span> LiveKit Chat
+            <Card className="flex flex-col h-[600px] lg:h-[calc(100vh-14rem)] sticky top-24 p-0 overflow-hidden border-white/5 bg-white/5 backdrop-blur-md">
+              <div className="p-4 border-b border-white/5 flex items-center justify-between">
+                <h3 className="text-xs font-black text-white uppercase tracking-widest flex items-center gap-2">
+                  <span className="w-2 h-2 bg-green-500 rounded-full" /> Live Comms
                 </h3>
-                <Badge color="gray">{chatMessages.length} Messages</Badge>
               </div>
               
-              <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar bg-black/20">
+              <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
                 {chatMessages.length === 0 ? (
-                  <div className="text-center text-gray-500 py-8 text-sm italic">
-                    Welcome to the global edge network chat!
+                  <div className="text-center text-gray-500 py-20 text-xs italic">
+                    Encrypted channel established.
                   </div>
                 ) : (
                   chatMessages.map((msg, idx) => (
-                    <div key={msg.id || idx} className={`flex flex-col `}>
-                      <div className="flex items-baseline gap-2 mb-1">
-                        <span className={`text-xs font-bold ${msg.isAdmin ? 'text-f1-red' : 'text-gray-400'}`}>
+                    <div key={msg.id || idx} className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className={`text-[10px] font-black uppercase tracking-wider ${msg.isAdmin ? 'text-f1-red' : 'text-f1-gold'}`}>
                           {msg.senderName}
                         </span>
-                        <span className="text-[10px] text-gray-600">
-                          {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </span>
+                        <div className="h-px flex-1 bg-white/5" />
                       </div>
-                      <div className={`px-3 py-2 rounded-lg text-sm inline-block max-w-[90%] ${msg.isAdmin ? 'bg-f1-red/20 text-white border border-f1-red/30' : 'bg-white/5 text-gray-200'}`}>
+                      <div className={`px-3 py-2 rounded-xl text-sm ${msg.isAdmin ? 'bg-f1-red/10 text-white border border-f1-red/20' : 'bg-white/5 text-gray-200'}`}>
                         {msg.message}
                       </div>
                     </div>
@@ -391,19 +326,19 @@ function LiveViewerContent({ viewerName }) {
                 <div ref={chatEndRef} />
               </div>
 
-              <div className="p-4 bg-f1-dark border-t border-white/5">
+              <div className="p-4 border-t border-white/5">
                 <form onSubmit={sendChatMessage} className="flex gap-2">
                   <input
                     type="text"
                     value={chatInput}
                     onChange={(e) => setChatInput(e.target.value)}
-                    placeholder="Send a message..."
-                    className="flex-1 bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none"
+                    placeholder="Broadcast message..."
+                    className="flex-1 bg-f1-dark border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-white/20"
                     maxLength={200}
                   />
-                  <Button type="submit" variant="admin" className="px-4" disabled={!chatInput.trim()}>
-                    Send
-                  </Button>
+                  <button type="submit" className="p-2 bg-f1-red text-white rounded-xl hover:bg-red-600 transition-colors" disabled={!chatInput.trim()}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" /></svg>
+                  </button>
                 </form>
               </div>
             </Card>

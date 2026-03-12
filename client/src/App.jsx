@@ -30,6 +30,7 @@ const AdminRaces = lazy(() => import('./admin/AdminRaces.jsx'));
 const AdminDrivers = lazy(() => import('./admin/AdminDrivers.jsx'));
 const AdminPredictions = lazy(() => import('./admin/AdminPredictions.jsx'));
 const AdminBroadcast = lazy(() => import('./admin/AdminBroadcast.jsx'));
+const AdminLiveControl = lazy(() => import('./admin/AdminLiveControl.jsx'));
 
 function ProtectedRoute({ children }) {
   const { isAuthenticated, loading } = useAuth();
@@ -78,6 +79,7 @@ function AnimatedRoutes() {
           <Route path="/admin/drivers" element={<ProtectedRoute><PageTransition><AdminDrivers /></PageTransition></ProtectedRoute>} />
           <Route path="/admin/predictions" element={<ProtectedRoute><PageTransition><AdminPredictions /></PageTransition></ProtectedRoute>} />
           <Route path="/admin/broadcast" element={<ProtectedRoute><PageTransition><AdminBroadcast /></PageTransition></ProtectedRoute>} />
+          <Route path="/admin/live" element={<ProtectedRoute><PageTransition><AdminLiveControl /></PageTransition></ProtectedRoute>} />
 
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />

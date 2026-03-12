@@ -9,6 +9,12 @@ const initSocket = (socketIo) => {
   io.on('connection', (socket) => {
     console.log(`Client connected for global alerts: ${socket.id}`);
 
+    // --- Live Interactions ---
+    socket.on('reaction-pulse', (emoji) => {
+      // Echo the reaction to everyone
+      io.emit('reaction-echo', emoji);
+    });
+
     // --- Disconnect Handling ---
     socket.on('disconnect', () => {
        // Legacy code removed: specific broadcaster/viewer map logic
