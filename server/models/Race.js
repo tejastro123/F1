@@ -13,7 +13,6 @@ const raceSchema = new mongoose.Schema({
   status: { type: String, enum: ['completed', 'upcoming'], default: 'upcoming' },
 }, { timestamps: true });
 
-raceSchema.index({ round: 1 });
 raceSchema.index({ status: 1 });
 
 export default mongoose.model('Race', raceSchema);
