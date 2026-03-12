@@ -11,6 +11,17 @@ const raceSchema = new mongoose.Schema({
   p3: { type: String, default: null },
   sprintWinner: { type: String, default: null },
   status: { type: String, enum: ['completed', 'upcoming'], default: 'upcoming' },
+  circuitDetails: {
+    history: { type: String, default: '' },
+    description: { type: String, default: '' },
+    length: { type: String, default: '' },
+    turns: { type: Number, default: 0 },
+    lapRecord: {
+      time: { type: String, default: '' },
+      driver: { type: String, default: '' },
+      year: { type: String, default: '' }
+    }
+  }
 }, { timestamps: true });
 
 raceSchema.index({ status: 1 });

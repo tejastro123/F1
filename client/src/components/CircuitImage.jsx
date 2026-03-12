@@ -66,7 +66,7 @@ export default function CircuitImage({ trackData }) {
   const outlineUrl = getTrackImageUrl(trackData);
 
   return (
-    <div className="w-full h-full min-h-[300px] bg-gradient-to-br from-f1-panel to-f1-dark/80 flex flex-col relative group">
+    <div className="w-full h-full min-h-[500px] bg-gradient-to-br from-f1-panel to-f1-dark/80 flex flex-col relative group">
       <div className="absolute top-4 left-4 z-10 pointer-events-none">
         <h4 className="text-white font-black text-xl flex items-center gap-2">
           <span>{trackData.flag}</span> {trackData.grandPrixName}
@@ -74,14 +74,14 @@ export default function CircuitImage({ trackData }) {
         <p className="text-gray-400 text-sm">2D Circuit Outline</p>
       </div>
       
-      <div className="flex-1 flex items-center justify-center p-8 mt-6">
+      <div className="flex-1 flex items-center justify-center p-4 mt-12">
         {!imgError ? (
           <img 
             src={outlineUrl} 
             alt={`${trackData.grandPrixName} layout`}
             onError={() => setImgError(true)}
             // Brighten up the image so it pops nicely on a dark background since standard lines are dark grey
-            className="w-full max-h-[250px] object-contain filter brightness-[2] drop-shadow-2xl transition-transform duration-[2000ms] group-hover:scale-[1.03]"
+            className="w-full max-h-[600px] object-contain filter brightness-[2] drop-shadow-2xl transition-transform duration-[2000ms] group-hover:scale-[1.03]"
             draggable={false}
           />
         ) : (

@@ -95,12 +95,22 @@ export default function Drivers() {
                         </div>
                       </td>
                       <td className="py-4 px-4">
-                        <span className="font-semibold text-white group-hover:text-f1-red transition-colors">
-                          {driver.fullName}
-                        </span>
+                        <div className="flex items-center gap-3">
+                          <TeamColorStripe team={driver.team} className="h-10" />
+                          {driver.photoUrl && (
+                            <img 
+                              src={driver.photoUrl} 
+                              alt="" 
+                              className="w-10 h-10 object-cover rounded-full border border-white/10 bg-f1-dark"
+                            />
+                          )}
+                          <span className="font-semibold text-white group-hover:text-f1-red transition-colors">
+                            {driver.fullName}
+                          </span>
+                        </div>
                       </td>
                       <td className="py-4 px-4">
-                        <span className="text-sm" style={{ color: getTeamColor(driver.team) }}>
+                        <span className="text-sm font-medium" style={{ color: getTeamColor(driver.team) }}>
                           {driver.team}
                         </span>
                       </td>

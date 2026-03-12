@@ -6,6 +6,7 @@ import useCountdown from '../hooks/useCountdown.js';
 import { Card, Badge, RaceStatusBadge, SectionHeader, SkeletonCard, Button } from '../components/ui.jsx';
 import PredictionModal from '../components/PredictionModal.jsx';
 import CircuitImage from '../components/CircuitImage.jsx';
+import CircuitDetailModal from '../components/CircuitDetailModal.jsx';
 import { formatDate } from '../utils/formatDate.js';
 
 function RaceCountdown({ dateStr }) {
@@ -27,6 +28,7 @@ export default function Calendar() {
   const { races, loading } = useRaces();
   const [selectedRace, setSelectedRace] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isCircuitModalOpen, setIsCircuitModalOpen] = useState(false);
 
   const completed = races.filter(r => r.status === 'completed');
   const upcoming = races.filter(r => r.status === 'upcoming');
@@ -55,7 +57,7 @@ export default function Calendar() {
               <motion.div 
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
-                className="mb-8 w-full aspect-video md:aspect-[21/9] rounded-2xl overflow-hidden shadow-2xl border border-white/20"
+                className="mb-8 w-full aspect-video rounded-2xl overflow-hidden shadow-2xl border border-white/20"
               >
                 <CircuitImage trackData={selectedRace} />
               </motion.div>
@@ -65,7 +67,10 @@ export default function Calendar() {
             {races.map((race, idx) => (
               <motion.div
                 key={race._id}
-                onClick={() => setSelectedRace(race)}
+                onClick={() => {
+                  setSelectedRace(race);
+                  setIsCircuitModalOpen(true);
+                }}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -142,6 +147,11 @@ export default function Calendar() {
         onPredicted={() => {
           // Could show a toast or trigger a refresh in the future
         }}
+      />
+      <CircuitDetailModal 
+        isOpen={isCircuitModalOpen}
+        onClose={() => setIsCircuitModalOpen(false)}
+        race={selectedRace}
       />
     </>
   );
