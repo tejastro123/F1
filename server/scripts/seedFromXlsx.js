@@ -18,32 +18,29 @@ import Prediction from '../models/Prediction.js';
 const DEFAULT_XLSX_PATH = path.resolve(__dirname, '../../data/F1_2026_PRO.xlsx');
 
 const OFFICIAL_NUMBERS = {
-  'Max Verstappen': 1,
-  'Lewis Hamilton': 44,
-  'George Russell': 63,
-  'Charles Leclerc': 16,
-  'Carlos Sainz Jr.': 55,
-  'Lando Norris': 4,
-  'Oscar Piastri': 81,
-  'Fernando Alonso': 14,
-  'Lance Stroll': 18,
-  'Pierre Gasly': 10,
-  'Esteban Ocon': 31,
-  'Alexander Albon': 23,
-  'Franco Colapinto': 43,
-  'Liam Lawson': 30,
-  'Yuki Tsunoda': 22,
-  'Nico Hülkenberg': 27,
-  'Sergio Pérez': 11,
-  'Kevin Magnussen': 20,
-  'Valtteri Bottas': 77,
-  'Guanyu Zhou': 24,
-  'Oliver Bearman': 38,
-  'Kimi Antonelli': 12,
-  'Isack Hadjar': 20,
-  'Gabriel Bortoleto': 5,
-  'Arvid Lindblad': 19
-};
+  "George Russell": 63,
+  "Kimi Antonelli": 12,
+  "Charles Leclerc": 16,
+  "Lewis Hamilton": 44,
+  "Lando Norris": 1,
+  "Max Verstappen": 3,
+  "Oliver Bearman": 87,
+  "Arvid Lindblad": 41,
+  "Gabriel Bortoleto": 5,
+  "Pierre Gasly": 10,
+  "Esteban Ocon": 31,
+  "Alexander Albon": 23,
+  "Liam Lawson": 30,
+  "Franco Colapinto": 43,
+  "Carlos Sainz Jr.": 55,
+  "Sergio Pérez": 11,
+  "Isack Hadjar": 6,
+  "Oscar Piastri": 81,
+  "Nico Hülkenberg": 27,
+  "Fernando Alonso": 14,
+  "Valtteri Bottas": 77,
+  "Lance Stroll": 18
+}
 
 /**
  * Parse drivers from the '🏎 Drivers' sheet

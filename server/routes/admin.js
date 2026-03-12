@@ -96,33 +96,6 @@ router.patch('/drivers/:id', async (req, res, next) => {
   }
 });
 
-// GET /api/v1/admin/predictions — Get ALL user predictions
-router.get('/predictions', async (req, res, next) => {
-  try {
-    const predictions = await Prediction.find({}).sort({ round: 1, grandPrixName: 1 });
-    res.json(predictions);
-  } catch (error) {
-    next(error);
-  }
-});
-
-// PATCH /api/v1/admin/predictions/:id — Mark prediction correct/incorrect
-router.patch('/predictions/:id', async (req, res, next) => {
-  try {
-    const { isCorrect, actualResult } = req.body;
-    const update = {};
-    if (isCorrect !== undefined) update.isCorrect = isCorrect;
-    if (actualResult !== undefined) update.actualResult = actualResult;
-
-    const prediction = await Prediction.findByIdAndUpdate(req.params.id, update, { new: true, runValidators: true }).populate('user', 'displayName email avatarUrl');
-    if (!prediction) return res.status(404).json({ error: 'Prediction not found' });
-
-    res.json(prediction);
-  } catch (error) {
-    next(error);
-  }
-});
-
 // GET /api/v1/admin/predictions — Fetch all predictions across all users
 router.get('/predictions', async (req, res, next) => {
   try {

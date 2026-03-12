@@ -1,0 +1,24 @@
+﻿--- Driver Report ---
+George Russell | Number: 63 | Team: Mercedes
+Kimi Antonelli | Number: 12 | Team: Mercedes
+Charles Leclerc | Number: 16 | Team: Ferrari
+Lewis Hamilton | Number: 44 | Team: Ferrari
+Lando Norris | Number: 1 | Team: McLaren
+Max Verstappen | Number: 3 | Team: Red Bull
+Oliver Bearman | Number: 87 | Team: Haas
+Arvid Lindblad | Number: 41 | Team: RB
+Gabriel Bortoleto | Number: 5 | Team: Audi
+Pierre Gasly | Number: 10 | Team: Alpine
+Esteban Ocon | Number: 31 | Team: Haas
+Alexander Albon | Number: 23 | Team: Williams
+Liam Lawson | Number: 30 | Team: RB
+Franco Colapinto | Number: 43 | Team: Alpine
+Carlos Sainz Jr. | Number: 55 | Team: Williams
+Sergio P├⌐rez | Number: 11 | Team: Cadillac
+Isack Hadjar | Number: 6 | Team: Red Bull
+Oscar Piastri | Number: 81 | Team: McLaren
+Nico H├╝lkenberg | Number: 27 | Team: Audi
+Fernando Alonso | Number: 14 | Team: Aston Martin
+Valtteri Bottas | Number: 77 | Team: Cadillac
+Lance Stroll | Number: 18 | Team: Aston Martin
+---------------------
