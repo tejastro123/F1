@@ -312,12 +312,28 @@ function LiveViewerContent({ viewerName }) {
 
             {/* Quality Controls for Desktop */}
             <div className="hidden lg:block">
-              <Card glass className="flex justify-between items-center py-4 px-6 rounded-2xl">
-                <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Edge Node: FRA-01</span>
+              <Card glass className="flex justify-between items-center py-4 px-6 rounded-2xl border-white/10">
                 <div className="flex items-center gap-4">
-                  <span className="text-[10px] font-black text-white uppercase tracking-widest text-center">
-                    {isTheaterMode ? 'THEATER MODE ACTIVE (T to exit)' : 'STANDARD GRID VIEW'}
-                  </span>
+                   <div className="flex flex-col">
+                      <span className="text-[8px] font-black text-gray-600 uppercase tracking-widest leading-none mb-1">Grid Status</span>
+                      <span className="text-[10px] font-black text-white uppercase tracking-widest">
+                        {isTheaterMode ? 'IMMERSIVE THEATER ACTIVE' : 'COMMAND CENTER GRID'}
+                      </span>
+                   </div>
+                </div>
+                
+                <div className="flex items-center gap-3">
+                  {tracks.length > 1 && (
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="border-f1-red/30 text-f1-red text-[8px] tracking-[0.2em]"
+                    >
+                      <span className="w-1.5 h-1.5 bg-f1-red rounded-full animate-pulse mr-1" /> 
+                      {tracks.length} SIGNALS FOUND
+                    </Button>
+                  )}
+                  <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-4">Edge Node: FRA-01</span>
                 </div>
               </Card>
             </div>

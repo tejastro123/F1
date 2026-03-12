@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import api from '../services/api.js';
-import { Card, SectionHeader, SkeletonLoader, Badge, AnimatedCounter, TeamColorStripe } from '../components/ui.jsx';
+import { Card, SectionHeader, SkeletonLoader, Badge, AnimatedCounter, TeamColorStripe, SkeletonCard } from '../components/ui.jsx';
 
 export default function Leaderboard() {
   const [leaderboard, setLeaderboard] = useState([]);

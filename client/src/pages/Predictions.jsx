@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
 import { usePredictions } from '../hooks/useData.js';
 import { useAuth } from '../context/AuthContext.jsx';
-import { Card, Badge, SectionHeader, AnimatedCounter, SkeletonLoader } from '../components/ui.jsx';
+import { Card, Badge, SectionHeader, AnimatedCounter, SkeletonLoader, SkeletonCard, Button } from '../components/ui.jsx';
 
 export default function Predictions() {
   const { isAuthenticated, loading: authLoading } = useAuth();

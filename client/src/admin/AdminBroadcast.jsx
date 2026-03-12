@@ -59,6 +59,20 @@ function AdminBroadcastContent() {
   const room = useRoomContext();
   const { localParticipant } = useLocalParticipant();
   
+  const [message, setMessage] = useState('');
+  const [history, setHistory] = useState([]);
+  const [sending, setSending] = useState(false);
+  
+  const [chatMessages, setChatMessages] = useState([]);
+  const [chatInput, setChatInput] = useState('');
+  const [isRecording, setIsRecording] = useState(false);
+  
+  const chatEndRef = useRef(null);
+  const mediaRecorderRef = useRef(null);
+  const recordedChunks = useRef([]);
+  const videoRef = useRef(null);
+  const pipVideoRef = useRef(null);
+
   // Multi-Viewpoint State
   const [viewpoints, setViewpoints] = useState([
     { id: 'main', label: 'Main Feed', active: false, source: 'screen_share' },

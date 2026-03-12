@@ -168,7 +168,8 @@ export function SkeletonLoader({ lines = 3, className = '' }) {
 
 export function SkeletonCard({ className = '' }) {
   return (
-    <div className={`bg-white/5 backdrop-blur-3xl rounded-[2.5rem] border border-white/5 p-8 animate-pulse ${className}`}>
+    <div className={`bg-white/5 backdrop-blur-3xl rounded-[2.5rem] border border-white/5 p-8 animate-pulse relative overflow-hidden ${className}`}>
+      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full animate-shimmer" />
       <div className="h-4 w-1/4 bg-white/10 rounded-full mb-8" />
       <div className="h-12 w-3/4 bg-white/5 rounded-2xl mb-4" />
       <div className="h-4 w-1/2 bg-white/5 rounded-full mb-10" />
