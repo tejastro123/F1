@@ -3,7 +3,7 @@ import cron from 'node-cron';
 import Race from '../models/Race.js';
 import Driver from '../models/Driver.js';
 import Prediction from '../models/Prediction.js';
-import { getIo } from '../socket/socketManager.js';
+import { getIO } from '../socket/socketManager.js';
 import { logger } from '../middleware/errorHandler.js';
 
 // Ergast API Base URL (or OpenF1 if preferred)
@@ -81,7 +81,7 @@ export async function syncLatestRaceResults() {
       await syncDriverStandings();
       
       // Notify all connected clients via Socket.io that data has refreshed!
-      const io = getIo();
+      const io = getIO();
       if (io) {
         io.emit('data_refreshed', { message: 'Live data synced from F1 API' });
       }
