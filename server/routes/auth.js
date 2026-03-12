@@ -2,7 +2,7 @@ import { Router } from 'express';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import passport from 'passport';
-import User from '../models/user.js';
+import User from '../models/User.js';
 import { authRateLimiter } from '../middleware/rateLimiter.js';
 
 const router = Router();
