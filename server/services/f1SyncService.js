@@ -10,32 +10,164 @@ import { logger } from '../middleware/errorHandler.js';
 const ERGAST_API = 'http://ergast.com/api/f1/current';
 
 /**
- * Score pending predictions for a completed race
+ * Score pending predictions for a completed session (Quali, Sprint, or Race)
  */
-async function scorePredictions(raceRound, results) {
+async function scorePredictions(raceRound, results, sessionType = 'race') {
   try {
     const predictions = await Prediction.find({ round: raceRound, isCorrect: null });
-    
-    // Extrack P1-P3 from the results array (results is sorted by finishing position 1, 2, 3...)
-    const p1FullName = `${results[0].Driver.givenName} ${results[0].Driver.familyName}`;
-    // We strictly score the 'P1 (Winner)' category from the PredictionModal here
-    
+    if (predictions.length === 0) return;
+
+    // Helper to get full name
+    const getName = (driver) => `${driver.givenName} ${driver.familyName}`;
+
     let scoredCount = 0;
     for (const pred of predictions) {
-      if (pred.category === 'P1 (Winner)') {
-        // Did they guess the P1 winner correctly?
-        const isCorrect = pred.prediction.toLowerCase() === p1FullName.toLowerCase();
-        
-        pred.actualResult = p1FullName;
+      const { category, prediction } = pred;
+      let actual = 'TBD';
+      let isCorrect = false;
+      let shouldScore = false;
+
+      switch (category) {
+        case 'GP_WINNER':
+        case 'PODIUM_P1':
+          if (sessionType === 'race') {
+            actual = getName(results[0].Driver);
+            isCorrect = prediction.toLowerCase() === actual.toLowerCase();
+            shouldScore = true;
+          }
+          break;
+        case 'PODIUM_P2':
+          if (sessionType === 'race' && results.length >= 2) {
+            actual = getName(results[1].Driver);
+            isCorrect = prediction.toLowerCase() === actual.toLowerCase();
+            shouldScore = true;
+          }
+          break;
+        case 'PODIUM_P3':
+          if (sessionType === 'race' && results.length >= 3) {
+            actual = getName(results[2].Driver);
+            isCorrect = prediction.toLowerCase() === actual.toLowerCase();
+            shouldScore = true;
+          }
+          break;
+        case 'GP_POLE':
+          if (sessionType === 'qualifying') {
+            actual = getName(results[0].Driver);
+            isCorrect = prediction.toLowerCase() === actual.toLowerCase();
+            shouldScore = true;
+          }
+          break;
+        case 'SPRINT_WIN':
+          if (sessionType === 'sprint') {
+            actual = getName(results[0].Driver);
+            isCorrect = prediction.toLowerCase() === actual.toLowerCase();
+            shouldScore = true;
+          }
+          break;
+        case 'SPRINT_POLE':
+          if (sessionType === 'sprint_qualifying') {
+            actual = getName(results[0].Driver);
+            isCorrect = prediction.toLowerCase() === actual.toLowerCase();
+            shouldScore = true;
+          }
+          break;
+        case 'GOOD_SURPRISE':
+          if (sessionType === 'race') {
+            // Find driver who gained most positions
+            const gainer = results.reduce((prev, curr) => {
+              const prevGain = parseInt(prev.grid) - parseInt(prev.position);
+              const currGain = parseInt(curr.grid) - parseInt(curr.position);
+              return currGain > prevGain ? curr : prev;
+            });
+            actual = getName(gainer.Driver);
+            isCorrect = prediction.toLowerCase() === actual.toLowerCase();
+            shouldScore = true;
+          }
+          break;
+        case 'BIG_FLOP':
+          if (sessionType === 'race') {
+            // Find driver who lost most positions
+            const loser = results.reduce((prev, curr) => {
+              const prevLoss = parseInt(prev.position) - parseInt(prev.grid);
+              const currLoss = parseInt(curr.position) - parseInt(curr.grid);
+              return currLoss > prevLoss ? curr : prev;
+            });
+            actual = getName(loser.Driver);
+            isCorrect = prediction.toLowerCase() === actual.toLowerCase();
+            shouldScore = true;
+          }
+          break;
+        case 'P_WHAT':
+          if (sessionType === 'race') {
+            // Check if predicted driver finished P11-P20
+            const driverResult = results.find(r => getName(r.Driver).toLowerCase() === prediction.toLowerCase());
+            if (driverResult) {
+              const pos = parseInt(driverResult.position);
+              actual = `P${pos}`;
+              isCorrect = pos >= 11 && pos <= 20;
+              shouldScore = true;
+            }
+          }
+          break;
+        case 'CRAZY_CALL':
+          if (sessionType === 'race') {
+            // Logic: Predicted driver wins but started P10+
+            const winner = results[0];
+            actual = getName(winner.Driver);
+            const startedP10Plus = parseInt(winner.grid) >= 10;
+            isCorrect = (prediction.toLowerCase() === actual.toLowerCase()) && startedP10Plus;
+            shouldScore = true;
+          }
+          break;
+      }
+
+      if (shouldScore) {
+        pred.actualResult = actual;
         pred.isCorrect = isCorrect;
         await pred.save();
         scoredCount++;
       }
     }
     
-    logger.info(`Scored ${scoredCount} predictions for Round ${raceRound}`);
+    if (scoredCount > 0) {
+      logger.info(`Scored ${scoredCount} predictions for Round ${raceRound} (${sessionType})`);
+    }
   } catch (error) {
     logger.error(`Error scoring predictions for Round ${raceRound}: ${error.message}`);
+  }
+}
+
+/**
+ * Fetch Qualifying results
+ */
+export async function syncQualifyingResults() {
+  try {
+    const { data } = await axios.get(`${ERGAST_API}/qualifying.json?limit=1000`);
+    const races = data.MRData.RaceTable.Races;
+    for (const race of races) {
+      if (race.QualifyingResults) {
+        await scorePredictions(parseInt(race.round), race.QualifyingResults, 'qualifying');
+      }
+    }
+  } catch (error) {
+    logger.error(`Qualifying Sync Failed: ${error.message}`);
+  }
+}
+
+/**
+ * Fetch Sprint results
+ */
+export async function syncSprintResults() {
+  try {
+    const { data } = await axios.get(`${ERGAST_API}/sprint.json?limit=1000`);
+    const races = data.MRData.RaceTable.Races;
+    for (const race of races) {
+      if (race.SprintResults) {
+        await scorePredictions(parseInt(race.round), race.SprintResults, 'sprint');
+      }
+    }
+  } catch (error) {
+    logger.error(`Sprint Sync Failed: ${error.message}`);
   }
 }
 
@@ -45,6 +177,11 @@ async function scorePredictions(raceRound, results) {
 export async function syncLatestRaceResults() {
   try {
     logger.info('Starting F1 API sync...');
+    
+    // Sync Quali and Sprint first
+    await syncQualifyingResults();
+    await syncSprintResults();
+
     const { data } = await axios.get(`${ERGAST_API}/results.json?limit=1000`);
     
     const racesData = data.MRData.RaceTable.Races;
@@ -70,8 +207,8 @@ export async function syncLatestRaceResults() {
         raceDoc.p3 = `${results[2].Driver.givenName} ${results[2].Driver.familyName}`;
         await raceDoc.save();
         
-        // Score the predictions now that the race is officially over
-        await scorePredictions(round, results);
+        // Score the predictions
+        await scorePredictions(round, results, 'race');
         updatedCount++;
       }
     }
@@ -80,7 +217,6 @@ export async function syncLatestRaceResults() {
     if (updatedCount > 0) {
       await syncDriverStandings();
       
-      // Notify all connected clients via Socket.io that data has refreshed!
       const io = getIO();
       if (io) {
         io.emit('data_refreshed', { message: 'Live data synced from F1 API' });

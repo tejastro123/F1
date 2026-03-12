@@ -1,5 +1,6 @@
 import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
+import { Strategy as DiscordStrategy } from 'passport-discord';
 import User from '../models/User.js';
 import dotenv from 'dotenv';
 dotenv.config();
@@ -41,6 +42,57 @@ passport.use(
           displayName: profile.displayName,
           avatarUrl: profile.photos[0]?.value,
           role: 'user', // Public permission level
+        });
+
+        return done(null, newUser);
+      } catch (error) {
+        return done(error, null);
+      }
+    }
+  )
+);
+
+passport.use(
+  new DiscordStrategy(
+    {
+      clientID: process.env.DISCORD_CLIENT_ID || 'placeholder_id',
+      clientSecret: process.env.DISCORD_CLIENT_SECRET || 'placeholder_secret',
+      callbackURL: '/api/v1/auth/discord/callback',
+      scope: ['identify', 'email'],
+    },
+    async (accessToken, refreshToken, profile, done) => {
+      try {
+        let user = await User.findOne({ discordId: profile.id });
+
+        if (user) {
+          return done(null, user);
+        }
+
+        const email = profile.email;
+        if (!email) {
+          return done(new Error('Email is required from Discord account.'), null);
+        }
+
+        user = await User.findOne({ email });
+
+        if (user) {
+          // Link Discord to existing account
+          user.discordId = profile.id;
+          if (!user.displayName) user.displayName = profile.username;
+          if (!user.avatarUrl) {
+            user.avatarUrl = `https://cdn.discordapp.com/avatars/${profile.id}/${profile.avatar}.png`;
+          }
+          await user.save();
+          return done(null, user);
+        }
+
+        // New user
+        const newUser = await User.create({
+          email,
+          discordId: profile.id,
+          displayName: profile.username,
+          avatarUrl: `https://cdn.discordapp.com/avatars/${profile.id}/${profile.avatar}.png`,
+          role: 'user',
         });
 
         return done(null, newUser);

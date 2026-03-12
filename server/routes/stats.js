@@ -49,10 +49,29 @@ router.get('/leaderboard', async (req, res, next) => {
           },
           pending: {
             $sum: { $cond: [{ $eq: ['$isCorrect', null] }, 1, 0] }
+          },
+          // Weighted scoring
+          totalPoints: {
+            $sum: {
+              $cond: [
+                { $eq: ['$isCorrect', true] },
+                {
+                  $switch: {
+                    branches: [
+                      { case: { $in: ['$category', ['CRAZY_CALL', 'P_WHAT', 'GOOD_SURPRISE', 'BIG_FLOP']] }, then: 10 },
+                      { case: { $in: ['$category', ['GP_POLE', 'SPRINT_WIN', 'SPRINT_POLE']] }, then: 5 },
+                      { case: { $in: ['$category', ['GP_WINNER', 'PODIUM_P1', 'PODIUM_P2', 'PODIUM_P3']] }, then: 3 }
+                    ],
+                    default: 1
+                  }
+                },
+                0
+              ]
+            }
           }
         }
       },
-      // 2. Calculate percentage
+      // 2. Calculate accuracy percentage
       {
         $addFields: {
           accuracyScore: {
@@ -88,12 +107,13 @@ router.get('/leaderboard', async (req, res, next) => {
           correct: 1,
           wrong: 1,
           pending: 1,
-          accuracyScore: 1
+          accuracyScore: 1,
+          totalPoints: 1
         }
       },
-      // 6. Sort by most correct predictions, then by fewest total predictions (efficiency)
+      // 6. Sort by Points, then by Accuracy
       {
-        $sort: { correct: -1, totalPredictions: 1 }
+        $sort: { totalPoints: -1, accuracyScore: -1 }
       }
     ]);
 

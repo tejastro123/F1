@@ -3,7 +3,8 @@ import mongoose from 'mongoose';
 const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true, lowercase: true, trim: true },
   passwordHash: { type: String, required: false }, // Optional for OAuth users
-  googleId: { type: String, unique: true, sparse: true }, // Optional but unique
+  googleId: { type: String, unique: true, sparse: true },
+  discordId: { type: String, unique: true, sparse: true },
   displayName: { type: String },
   avatarUrl: { type: String },
   role: { type: String, enum: ['admin', 'viewer', 'user'], default: 'user' },

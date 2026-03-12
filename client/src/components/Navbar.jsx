@@ -18,6 +18,10 @@ export default function Navbar() {
     window.location.href = `${import.meta.env.VITE_API_URL}/api/v1/auth/google`;
   };
 
+  const handleDiscordLogin = () => {
+    window.location.href = `${import.meta.env.VITE_API_URL}/api/v1/auth/discord`;
+  };
+
   useEffect(() => {
     setMobileOpen(false);
   }, [location]);
@@ -139,6 +143,18 @@ export default function Navbar() {
                     </g>
                   </svg>
                   <span className="hidden sm:inline">Sign In</span>
+                </button>
+              )}
+
+              {!isAuthenticated && (
+                <button 
+                  onClick={handleDiscordLogin} 
+                  className="bg-[#5865F2]/10 hover:bg-[#5865F2]/20 text-white text-sm px-4 py-1.5 rounded-full transition font-medium mr-2 border border-[#5865F2]/10 flex items-center gap-2"
+                >
+                  <svg viewBox="0 0 127.14 96.36" width="16" height="16" xmlns="http://www.w3.org/2000/svg">
+                    <path fill="#5865F2" d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.71,32.65-1.82,56.6.48,80.1a105.73,105.73,0,0,0,32.22,16.26,73,73,0,0,0,7.3-11.72A67.39,67.39,0,0,1,28.27,77.73a50,50,0,0,0,4,3.14,78.72,78.72,0,0,0,62.88,0c1.32-1,2.65-2.05,4-3.14a67.46,67.46,0,0,1-11.75,6.91,73.11,73.11,0,0,0,7.3,11.72,105.33,105.33,0,0,0,32.25-16.27c2.81-27.18-4.71-50.7-19.46-72ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z"/>
+                  </svg>
+                  <span className="hidden sm:inline">Discord</span>
                 </button>
               )}
 

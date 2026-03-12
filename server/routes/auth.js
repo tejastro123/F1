@@ -132,6 +132,33 @@ router.get(
   }
 );
 
+// --- DISCORD OAUTH ROUTES ---
+
+// GET /api/v1/auth/discord
+router.get(
+  '/discord',
+  passport.authenticate('discord')
+);
+
+// GET /api/v1/auth/discord/callback
+router.get(
+  '/discord/callback',
+  passport.authenticate('discord', { failureRedirect: '/login', session: false }),
+  (req, res) => {
+    const { accessToken, refreshToken } = generateTokens(req.user);
+
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    const frontendUrl = process.env.CLIENT_ORIGIN || 'http://localhost:5173';
+    res.redirect(`${frontendUrl}/auth-success`);
+  }
+);
+
 // GET /api/v1/auth/me
 // Fetch the current user profile (using logic similar to /refresh but returns user data)
 router.get('/me', async (req, res, next) => {

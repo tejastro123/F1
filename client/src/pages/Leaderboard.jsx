@@ -40,10 +40,10 @@ export default function Leaderboard() {
                   <tr className="bg-white/5 text-gray-400 text-xs uppercase tracking-wider border-b border-white/10">
                     <th className="py-4 px-6 w-16 text-center">Rank</th>
                     <th className="py-4 px-6">User</th>
+                    <th className="py-4 px-6 text-right">Points</th>
                     <th className="py-4 px-6 text-right">Accuracy</th>
                     <th className="py-4 px-6 text-right w-24">Correct</th>
                     <th className="py-4 px-6 text-right w-24">Wrong</th>
-                    <th className="py-4 px-6 text-right w-24">Pending</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5">
@@ -90,10 +90,15 @@ export default function Leaderboard() {
                           </div>
                         </td>
 
+                        {/* Points */}
+                        <td className="py-4 px-6 text-right font-black text-xl text-f1-red">
+                          <AnimatedCounter value={player.totalPoints || 0} />
+                        </td>
+                        
                         {/* Accuracy metric */}
                         <td className="py-4 px-6 text-right">
                           <div className="flex justify-end items-center gap-2">
-                            <span className={`text-lg font-black ${
+                            <span className={`text-md font-bold ${
                               player.accuracyScore >= 80 ? 'text-f1-gold' : 
                               player.accuracyScore >= 50 ? 'text-green-400' : 
                               player.accuracyScore > 0 ? 'text-orange-400' : 'text-gray-500'
@@ -106,7 +111,6 @@ export default function Leaderboard() {
                         {/* Raw Stats */}
                         <td className="py-4 px-6 text-right font-medium text-green-400">{player.correct}</td>
                         <td className="py-4 px-6 text-right font-medium text-f1-red">{player.wrong}</td>
-                        <td className="py-4 px-6 text-right font-medium text-gray-500">{player.pending}</td>
                       </motion.tr>
                     );
                   })}
