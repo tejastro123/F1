@@ -1,7 +1,8 @@
 import { Router } from 'express';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
-import User from '../models/User.js';
+import passport from 'passport';
+import User from '../models/user.js';
 import { authRateLimiter } from '../middleware/rateLimiter.js';
 
 const router = Router();
@@ -96,6 +97,57 @@ router.post('/logout', (_req, res) => {
     sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
   });
   res.json({ message: 'Logged out successfully.' });
+});
+
+// --- GOOGLE OAUTH ROUTES ---
+
+// GET /api/v1/auth/google
+// Triggers the Google consent screen
+router.get(
+  '/google',
+  passport.authenticate('google', { scope: ['profile', 'email'] })
+);
+
+// GET /api/v1/auth/google/callback
+// Google redirects here after user consents
+router.get(
+  '/google/callback',
+  passport.authenticate('google', { failureRedirect: '/login', session: false }),
+  (req, res) => {
+    // If successful, `req.user` contains the authenticated user from Passport
+    const { accessToken, refreshToken } = generateTokens(req.user);
+
+    // Set HttpOnly refresh token
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    // Redirect to frontend, sending accessToken in URL hash (or simply rely on /me endpoint)
+    // We will rely on an immediate frontend call to /refresh or /me to get the accessToken
+    const frontendUrl = process.env.CLIENT_ORIGIN || 'http://localhost:5173';
+    res.redirect(`${frontendUrl}/auth-success`);
+  }
+);
+
+// GET /api/v1/auth/me
+// Fetch the current user profile (using logic similar to /refresh but returns user data)
+router.get('/me', async (req, res, next) => {
+  try {
+    const token = req.cookies?.refreshToken;
+    if (!token) return res.status(401).json({ error: 'Not authenticated' });
+
+    const decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET);
+    const user = await User.findById(decoded.id).select('-passwordHash');
+    
+    if (!user) return res.status(401).json({ error: 'User not found' });
+
+    res.json({ user });
+  } catch (error) {
+    res.status(401).json({ error: 'Invalid session' });
+  }
 });
 
 export default router;

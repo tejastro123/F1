@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 
 const predictionSchema = new mongoose.Schema({
+  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   round: { type: Number, required: true },
   category: { type: String, required: true },
   prediction: { type: String, required: true },
@@ -9,6 +10,7 @@ const predictionSchema = new mongoose.Schema({
   grandPrixName: { type: String, required: true },
 }, { timestamps: true });
 
-predictionSchema.index({ round: 1 });
+// Optimize for looking up a specific user's predictions for a specific race
+predictionSchema.index({ user: 1, round: 1 });
 
 export default mongoose.model('Prediction', predictionSchema);

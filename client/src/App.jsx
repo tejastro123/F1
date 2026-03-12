@@ -15,8 +15,10 @@ const DriverDetail = lazy(() => import('./pages/DriverDetail.jsx'));
 const Constructors = lazy(() => import('./pages/Constructors.jsx'));
 const Calendar = lazy(() => import('./pages/Calendar.jsx'));
 const Predictions = lazy(() => import('./pages/Predictions.jsx'));
+const Leaderboard = lazy(() => import('./pages/Leaderboard.jsx'));
 const Stats = lazy(() => import('./pages/Stats.jsx'));
 const Live = lazy(() => import('./pages/Live.jsx'));
+const AuthSuccess = lazy(() => import('./pages/AuthSuccess.jsx'));
 
 // Admin pages
 const AdminLogin = lazy(() => import('./admin/AdminLogin.jsx'));
@@ -60,8 +62,10 @@ function AnimatedRoutes() {
           <Route path="/constructors" element={<PageTransition><Constructors /></PageTransition>} />
           <Route path="/calendar" element={<PageTransition><Calendar /></PageTransition>} />
           <Route path="/predictions" element={<PageTransition><Predictions /></PageTransition>} />
+          <Route path="/leaderboard" element={<PageTransition><Leaderboard /></PageTransition>} />
           <Route path="/stats" element={<PageTransition><Stats /></PageTransition>} />
           <Route path="/live" element={<PageTransition><Live /></PageTransition>} />
+          <Route path="/auth-success" element={<AuthSuccess />} />
 
           {/* Admin Routes */}
           <Route path="/admin/login" element={<PageTransition><AdminLogin /></PageTransition>} />

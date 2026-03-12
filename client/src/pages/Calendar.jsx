@@ -1,8 +1,11 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
 import { useRaces } from '../hooks/useData.js';
 import useCountdown from '../hooks/useCountdown.js';
-import { Card, Badge, RaceStatusBadge, SectionHeader, SkeletonCard } from '../components/ui.jsx';
+import { Card, Badge, RaceStatusBadge, SectionHeader, SkeletonCard, Button } from '../components/ui.jsx';
+import PredictionModal from '../components/PredictionModal.jsx';
+import CircuitViewer from '../components/CircuitViewer.jsx';
 import { formatDate } from '../utils/formatDate.js';
 
 function RaceCountdown({ dateStr }) {
@@ -22,6 +25,8 @@ function RaceCountdown({ dateStr }) {
 
 export default function Calendar() {
   const { races, loading } = useRaces();
+  const [selectedRace, setSelectedRace] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const completed = races.filter(r => r.status === 'completed');
   const upcoming = races.filter(r => r.status === 'upcoming');
@@ -44,17 +49,30 @@ export default function Calendar() {
             {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
           </div>
         ) : (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <>
+            {/* 3D Track Viewer Area */}
+            {selectedRace && (
+              <motion.div 
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                className="mb-8 w-full aspect-video md:aspect-[21/9] rounded-2xl overflow-hidden shadow-2xl border border-white/20"
+              >
+                <CircuitViewer trackData={selectedRace} />
+              </motion.div>
+            )}
+
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {races.map((race, idx) => (
               <motion.div
                 key={race._id}
+                onClick={() => setSelectedRace(race)}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: idx * 0.03 }}
-                className={`bg-f1-card rounded-xl border overflow-hidden ${
+                className={`bg-f1-card cursor-pointer hover:bg-white/5 active:scale-[0.98] transition-all rounded-xl border overflow-hidden ${
                   race.status === 'completed' ? 'border-white/5' : 'border-white/10'
-                }`}
+                } ${selectedRace?._id === race._id ? 'ring-2 ring-f1-red/50 shadow-[0_0_20px_rgba(225,6,0,0.15)] bg-white/5' : ''}`}
               >
                 <div className="p-5">
                   <div className="flex items-start justify-between mb-3">
@@ -92,13 +110,39 @@ export default function Calendar() {
                   )}
 
                   {/* Countdown for upcoming races */}
-                  {race.status === 'upcoming' && <RaceCountdown dateStr={race.date} />}
+                  {race.status === 'upcoming' && (
+                    <div className="mt-4">
+                      <RaceCountdown dateStr={race.date} />
+                      <Button 
+                        variant="gold" 
+                        size="sm" 
+                        className="w-full mt-4"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedRace(race);
+                          setIsModalOpen(true);
+                        }}
+                      >
+                        Predict Winner
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </motion.div>
             ))}
           </div>
+          </>
         )}
       </div>
+
+      <PredictionModal 
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        race={selectedRace}
+        onPredicted={() => {
+          // Could show a toast or trigger a refresh in the future
+        }}
+      />
     </>
   );
 }

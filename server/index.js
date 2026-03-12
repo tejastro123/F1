@@ -14,9 +14,12 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
+import session from 'express-session';
+import passport from './config/passport.js';
 import { rateLimiter } from './middleware/rateLimiter.js';
 import errorHandler, { logger } from './middleware/errorHandler.js';
 import { initSocket } from './socket/socketManager.js';
+import { initCronJobs } from './services/f1SyncService.js';
 
 // Route imports
 import driversRouter from './routes/drivers.js';
@@ -49,7 +52,20 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(cookieParser());
-// Auth routes mounted BEFORE global rate limiter (refresh/logout need to be exempt)
+
+// Sessions are required by passport-google-oauth20
+app.use(
+  session({
+    secret: process.env.JWT_SECRET || 'f1backupsecret',
+    resave: false,
+    saveUninitialized: false,
+  })
+);
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Auth routes mounted BEFORE global rate limiter (refresh/logout/google need to be exempt)
 app.use('/api/v1/auth', authRouter);
 
 // Global rate limiter (applies to all routes below)
@@ -78,6 +94,10 @@ const PORT = process.env.PORT || 5000;
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => {
     logger.info('🏎  Connected to MongoDB');
+    
+    // Start background F1 Data workers
+    initCronJobs();
+    
     httpServer.listen(PORT, () => {
       logger.info(`🏁 F1 2026 API running on port ${PORT}`);
     });

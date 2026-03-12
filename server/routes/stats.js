@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import Driver from '../models/Driver.js';
 import Race from '../models/Race.js';
+import Prediction from '../models/Prediction.js';
+import User from '../models/User.js';
 
 const router = Router();
 
@@ -25,6 +27,77 @@ router.get('/overview', async (req, res, next) => {
       totalPointsDistributed,
       totalDrivers: drivers.length,
     });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// GET /api/v1/stats/leaderboard — Public Prediction Leaderboard
+router.get('/leaderboard', async (req, res, next) => {
+  try {
+    const leaderboard = await Prediction.aggregate([
+      // 1. Group by User ID and calculate stats
+      {
+        $group: {
+          _id: '$user',
+          totalPredictions: { $sum: 1 },
+          correct: {
+            $sum: { $cond: [{ $eq: ['$isCorrect', true] }, 1, 0] }
+          },
+          wrong: {
+            $sum: { $cond: [{ $eq: ['$isCorrect', false] }, 1, 0] }
+          },
+          pending: {
+            $sum: { $cond: [{ $eq: ['$isCorrect', null] }, 1, 0] }
+          }
+        }
+      },
+      // 2. Calculate percentage
+      {
+        $addFields: {
+          accuracyScore: {
+            $cond: [
+              { $gt: ['$totalPredictions', 0] },
+              { $round: [{ $multiply: [{ $divide: ['$correct', '$totalPredictions'] }, 100] }, 0] },
+              0
+            ]
+          }
+        }
+      },
+      // 3. Join with Users collection to get profile info
+      {
+        $lookup: {
+          from: 'users',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'userInfo'
+        }
+      },
+      // 4. Flatten the array created by $lookup
+      {
+        $unwind: '$userInfo'
+      },
+      // 5. Structure the final output
+      {
+        $project: {
+          _id: 0,
+          userId: '$_id',
+          displayName: '$userInfo.displayName',
+          avatarUrl: '$userInfo.avatarUrl',
+          totalPredictions: 1,
+          correct: 1,
+          wrong: 1,
+          pending: 1,
+          accuracyScore: 1
+        }
+      },
+      // 6. Sort by most correct predictions, then by fewest total predictions (efficiency)
+      {
+        $sort: { correct: -1, totalPredictions: 1 }
+      }
+    ]);
+
+    res.json(leaderboard);
   } catch (error) {
     next(error);
   }

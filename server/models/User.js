@@ -2,8 +2,11 @@ import mongoose from 'mongoose';
 
 const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true, lowercase: true, trim: true },
-  passwordHash: { type: String, required: true },
-  role: { type: String, enum: ['admin', 'viewer'], default: 'viewer' },
+  passwordHash: { type: String, required: false }, // Optional for OAuth users
+  googleId: { type: String, unique: true, sparse: true }, // Optional but unique
+  displayName: { type: String },
+  avatarUrl: { type: String },
+  role: { type: String, enum: ['admin', 'viewer', 'user'], default: 'user' },
   createdAt: { type: Date, default: Date.now },
 });
 

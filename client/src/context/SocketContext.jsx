@@ -41,6 +41,10 @@ export const SocketProvider = ({ children }) => {
       window.dispatchEvent(new CustomEvent('f1-data-updated'));
     });
 
+    socket.on('data_refreshed', () => {
+      window.dispatchEvent(new CustomEvent('f1-data-updated'));
+    });
+
     return () => {
       socket.disconnect();
     };

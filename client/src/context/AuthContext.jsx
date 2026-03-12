@@ -14,11 +14,14 @@ export const AuthProvider = ({ children }) => {
       try {
         const { data } = await api.post('/auth/refresh');
         setAccessToken(data.accessToken);
+        
+        // Fetch full profile (display name, avatar, etc. from DB)
+        const meRes = await api.get('/auth/me');
+        setUser(meRes.data.user);
+        
         setIsAuthenticated(true);
-        // Decode user from token payload
-        const payload = JSON.parse(atob(data.accessToken.split('.')[1]));
-        setUser({ id: payload.id, email: payload.email, role: payload.role });
-      } catch {
+      } catch (err) {
+        console.error('Session refresh failed:', err);
         clearAccessToken();
         setIsAuthenticated(false);
       } finally {
@@ -31,7 +34,10 @@ export const AuthProvider = ({ children }) => {
   const login = useCallback(async (email, password) => {
     const { data } = await api.post('/auth/login', { email, password });
     setAccessToken(data.accessToken);
-    setUser(data.user);
+    
+    const meRes = await api.get('/auth/me');
+    setUser(meRes.data.user);
+    
     setIsAuthenticated(true);
     return data;
   }, []);

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useAuth } from '../context/AuthContext.jsx';
 import api from '../services/api.js';
 
 export function useDrivers() {
@@ -89,8 +90,16 @@ export function usePredictions(round) {
   const [predictions, setPredictions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { isAuthenticated, loading: authLoading } = useAuth();
 
   const fetchPredictions = useCallback(async () => {
+    if (authLoading) return;
+    if (!isAuthenticated) {
+      setPredictions([]);
+      setLoading(false);
+      return;
+    }
+    
     try {
       setLoading(true);
       const params = round ? `?round=${round}` : '';
@@ -99,10 +108,11 @@ export function usePredictions(round) {
       setError(null);
     } catch (err) {
       setError(err.message);
+      setPredictions([]);
     } finally {
       setLoading(false);
     }
-  }, [round]);
+  }, [round, isAuthenticated, authLoading]);
 
   useEffect(() => {
     fetchPredictions();
@@ -137,4 +147,29 @@ export function useStats() {
   }, [fetchStats]);
 
   return { stats, loading, error, refetch: fetchStats };
+}
+
+export function useLeaderboard() {
+  const [leaderboard, setLeaderboard] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const fetchLeaderboard = useCallback(async () => {
+    try {
+      setLoading(true);
+      const { data } = await api.get('/stats/leaderboard');
+      setLeaderboard(data);
+      setError(null);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchLeaderboard();
+  }, [fetchLeaderboard]);
+
+  return { leaderboard, loading, error, refetch: fetchLeaderboard };
 }
