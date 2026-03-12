@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useSocket } from '../context/SocketContext.jsx';
+import { useSocket } from '../../context/SocketContext.jsx';
 
 const EMOJIS = ['🔥', '🏎️', '😱', '👏', '🏁', '💜', '⚡', '🚧'];
 
