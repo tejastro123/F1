@@ -12,7 +12,7 @@ A production-grade, full-stack Formula 1 2026 Season Tracker built on the **MERN
 - **Race Calendar** — 24-race grid with podium results and countdown timers
 - **Prediction Tracker** — Track your pre-race predictions with accuracy scoring
 - **Stats & Analytics** — Points gap charts, wins distribution, team radar comparisons
-- **Live Feed** — Real-time Socket.io broadcast updates from the admin panel
+- **Live Streaming Engine** — True sub-second global WebRTC live streaming powered by **LiveKit SFU** (Screen Share, Webcam PiP, Live Chat, and VOD Recording).
 - **Admin Panel** — JWT-protected dashboard for managing all data
 - **Excel Upload** — Drag-and-drop `.xlsx` import with full database re-seeding
 - **Dark/Light Theme** — Toggle between F1 dark mode and light mode
@@ -24,6 +24,7 @@ A production-grade, full-stack Formula 1 2026 Season Tracker built on the **MERN
 | -------- | ------------------------------------------------------- |
 | Frontend | React 18, Vite, TailwindCSS v3, Framer Motion, Recharts |
 | Backend  | Node.js 20+, Express.js, Mongoose, Socket.io            |
+| Streaming| **LiveKit SFU** (`livekit-server-sdk`, `livekit-client`)|
 | Database | MongoDB (Atlas or local)                                |
 | Auth     | JWT (access + refresh tokens), bcryptjs                 |
 | Data     | xlsx package for Excel parsing                          |
@@ -85,8 +86,13 @@ cp .env.example .env
 # JWT_SECRET=your_secret_here
 # JWT_REFRESH_SECRET=your_refresh_secret_here
 # PORT=5000
-# CLIENT_ORIGIN=http://localhost:5173
-# ADMIN_SEED_KEY=your_admin_key_here
+# ...
+# VITE_API_URL=http://localhost:5000
+#
+# # LiveKit SFU (Cloud or Local)
+# LIVEKIT_API_KEY=your_livekit_api_key
+# LIVEKIT_API_SECRET=your_livekit_api_secret
+# VITE_LIVEKIT_URL=wss://your-project.livekit.cloud
 ```
 
 ### 3. Seed the Database
