@@ -107,12 +107,27 @@ export default function AdminBroadcast() {
 
   const startStream = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      const stream = await navigator.mediaDevices.getDisplayMedia({ 
+        video: { cursor: 'always' }, 
+        audio: {
+          echoCancellation: false,
+          noiseSuppression: false,
+          sampleRate: 44100
+        } 
+      });
+
+      // Stop the stream if the user clicks "Stop Sharing" on the browser's native banner
+      stream.getVideoTracks()[0].onended = () => {
+        stopStream();
+      };
+
       videoRef.current.srcObject = stream;
       setStreaming(true);
     } catch (error) {
-      console.error('Error accessing media devices.', error);
-      alert('Could not access camera/microphone. Please check permissions.');
+      console.error('Error accessing screen sharing.', error);
+      if (error.name !== 'NotAllowedError') { // Don't alert if they just clicked cancel
+        alert('Could not access screen sharing. Ensure you grant permission to share your screen and system audio.');
+      }
     }
   };
 
@@ -158,9 +173,10 @@ export default function AdminBroadcast() {
             
             <div className="bg-black/50 aspect-video rounded-lg overflow-hidden border border-white/5 mb-4 relative flex items-center justify-center">
               {!streaming && (
-                <div className="absolute inset-0 flex flex-col justify-center items-center text-gray-500">
-                  <span className="text-4xl mb-2">📹</span>
-                  <p>Camera is currently off</p>
+                <div className="absolute inset-0 flex flex-col justify-center items-center text-gray-500 p-4 text-center">
+                  <span className="text-4xl mb-2">💻</span>
+                  <p>Screen sharing is currently off</p>
+                  <p className="text-xs mt-2 text-gray-600">Tip: Check "Share system audio" when prompted to include sound</p>
                 </div>
               )}
               <video 
@@ -183,11 +199,11 @@ export default function AdminBroadcast() {
               
               {streaming ? (
                 <Button variant="outline" className="text-red-400 border-red-500/30 hover:bg-red-500/10" onClick={stopStream}>
-                  ⏹ Stop Stream
+                  ⏹ Stop Screen Share
                 </Button>
               ) : (
                 <Button variant="admin" onClick={startStream}>
-                  ▶ Start Camera
+                  ▶ Share Screen
                 </Button>
               )}
             </div>
