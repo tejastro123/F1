@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import api from '../services/api.js';
-import { AnimatedCounter, Card, Button, StatPill, SectionHeader, SkeletonCard } from '../components/ui.jsx';
+import { AnimatedCounter, Card, Button, StatPill, SectionHeader, SkeletonCard, Badge } from '../components/ui.jsx';
 import { getTeamColor, getTeamGradient } from '../utils/teamColors.js';
 import { ShareCard, useShareCard } from '../components/ShareCard.jsx';
 
