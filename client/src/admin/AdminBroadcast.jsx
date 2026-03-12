@@ -39,7 +39,18 @@ export default function AdminBroadcast() {
 
       peerConnection.onicecandidate = (event) => {
         if (event.candidate) {
+          console.log(`Sending ICE candidate to ${id}`);
           socket.emit('candidate', id, event.candidate);
+        }
+      };
+
+      peerConnection.oniceconnectionstatechange = () => {
+        console.log(`[Broadcaster] ICE State for ${id}:`, peerConnection.iceConnectionState);
+        if (peerConnection.iceConnectionState === 'disconnected' || peerConnection.iceConnectionState === 'failed') {
+          console.warn(`Peer ${id} disconnected unexpectedly. Closing connection.`);
+          peerConnection.close();
+          delete peerConnections.current[id];
+          setViewers(Object.keys(peerConnections.current).length);
         }
       };
 
@@ -54,11 +65,13 @@ export default function AdminBroadcast() {
     });
 
     socket.on('answer', (id, description) => {
-      peerConnections.current[id].setRemoteDescription(description);
+      console.log(`Received answer from ${id}`);
+      peerConnections.current[id]?.setRemoteDescription(description).catch(e => console.error('Error setting remote description:', e));
     });
 
     socket.on('candidate', (id, candidate) => {
-      peerConnections.current[id].addIceCandidate(new RTCIceCandidate(candidate));
+      console.log(`Received candidate from ${id}`);
+      peerConnections.current[id]?.addIceCandidate(new RTCIceCandidate(candidate)).catch(e => console.error('Error adding candidate:', e));
     });
 
     socket.on('disconnectPeer', (id) => {

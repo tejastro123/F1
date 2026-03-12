@@ -38,26 +38,39 @@ export default function Live() {
         });
 
       peerConnection.current.ontrack = (event) => {
-        console.log('Received remote track!', event.streams);
+        console.log('[Viewer] Track received:', event.track.kind, event.streams);
         setIsLiveStreamActive(true);
         if (videoRef.current) {
-          videoRef.current.srcObject = event.streams[0];
-          // Autoplay policy might block this if user hasn't interacted
+          if (videoRef.current.srcObject !== event.streams[0]) {
+            videoRef.current.srcObject = event.streams[0];
+          }
           videoRef.current.play().catch(e => console.warn('Autoplay prevented:', e));
+        }
+      };
+
+      peerConnection.current.oniceconnectionstatechange = () => {
+        console.log('[Viewer] ICE State:', peerConnection.current.iceConnectionState);
+        if (peerConnection.current.iceConnectionState === 'disconnected' || peerConnection.current.iceConnectionState === 'failed') {
+             console.warn('[Viewer] Connection lost. Attempting to restart.');
+             setIsLiveStreamActive(false);
+             if (videoRef.current) videoRef.current.srcObject = null;
         }
       };
 
       peerConnection.current.onicecandidate = (event) => {
         if (event.candidate) {
+          console.log('[Viewer] Sending ICE candidate back to broadcaster');
           socket.emit('candidate', id, event.candidate);
         }
       };
     });
 
     socket.on('candidate', (id, candidate) => {
-      peerConnection.current
-        .addIceCandidate(new RTCIceCandidate(candidate))
-        .catch(e => console.error(e));
+      console.log('[Viewer] Received ICE candidate from broadcaster');
+      if (peerConnection.current) {
+        peerConnection.current.addIceCandidate(new RTCIceCandidate(candidate))
+          .catch(e => console.error('[Viewer] Error adding candidate:', e));
+      }
     });
 
     socket.on('disconnectPeer', () => {
@@ -141,6 +154,7 @@ export default function Live() {
               ref={videoRef}
               autoPlay
               playsInline
+              webkit-playsinline="true"
               muted // Start muted to bypass initial autoplay restrictions
               className={`w-full h-full object-cover rounded-lg ${!isLiveStreamActive ? 'hidden' : ''}`}
             />
