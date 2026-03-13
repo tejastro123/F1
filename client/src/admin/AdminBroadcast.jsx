@@ -69,6 +69,7 @@ function AdminBroadcastContent() {
   const [chatMessages, setChatMessages] = useState([]);
   const [chatInput, setChatInput] = useState('');
   const [isRecording, setIsRecording] = useState(false);
+  const [isMicEnabled, setIsMicEnabled] = useState(false);
   
   const chatEndRef = useRef(null);
   const mediaRecorderRef = useRef(null);
@@ -83,6 +84,16 @@ function AdminBroadcastContent() {
     { id: 'pitlane', label: 'Pit Lane', active: false, source: 'camera' },
     { id: 'data', label: 'Telemetry', active: false, source: 'screen_share' }
   ]);
+
+  const toggleMicrophone = async () => {
+    try {
+      const nextState = !isMicEnabled;
+      await localParticipant.setMicrophoneEnabled(nextState);
+      setIsMicEnabled(nextState);
+    } catch (err) {
+      console.error('Failed to toggle microphone', err);
+    }
+  };
 
   const toggleViewpoint = async (viewId) => {
     const vp = viewpoints.find(v => v.id === viewId);
@@ -101,7 +112,7 @@ function AdminBroadcastContent() {
         // Start specific track
         if (vp.source === 'screen_share') {
            await localParticipant.setScreenShareEnabled(true, { 
-             audio: false,
+             audio: true, // ENABLE SYSTEM AUDIO
              name: vp.label // Label the track for users
            });
         } else {
@@ -165,6 +176,7 @@ function AdminBroadcastContent() {
     await localParticipant.setScreenShareEnabled(false);
     await localParticipant.setCameraEnabled(false);
     await localParticipant.setMicrophoneEnabled(false);
+    setIsMicEnabled(false);
     setViewpoints(prev => prev.map(v => ({ ...v, active: false })));
   };
 
@@ -264,7 +276,7 @@ function AdminBroadcastContent() {
                 </div>
               )}
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {viewpoints.map(vp => (
                   <button
                     key={vp.id}
@@ -280,6 +292,20 @@ function AdminBroadcastContent() {
                     <Badge color={vp.active ? 'red' : 'gray'}>{vp.active ? 'BROADCASTING' : 'OFFLINE'}</Badge>
                   </button>
                 ))}
+
+                {/* Microphone Control */}
+                <button
+                  onClick={toggleMicrophone}
+                  className={`p-6 rounded-2xl border-2 transition-all flex flex-col items-center gap-3 ${
+                    isMicEnabled
+                      ? 'bg-f1-gold/10 border-f1-gold text-white shadow-[0_0_20px_rgba(245,197,24,0.1)]'
+                      : 'bg-white/5 border-white/5 text-gray-500 hover:border-white/20'
+                  }`}
+                >
+                  <span className="text-3xl">{isMicEnabled ? '🎙️' : '🔇'}</span>
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em]">Microphone</span>
+                  <Badge color={isMicEnabled ? 'gold' : 'gray'}>{isMicEnabled ? 'LIVE COMMS' : 'MUTED'}</Badge>
+                </button>
               </div>
 
               <div className="flex items-center justify-between pt-4 border-t border-white/5">
