@@ -36,9 +36,27 @@ export default function Home() {
       </Helmet>      {/* Hero Section */}
       <section className="relative min-h-[90vh] md:min-h-screen flex items-center justify-center overflow-hidden">
         {/* Background effects */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-1/4 left-1/4 w-[150%] h-[150%] bg-f1-red/10 rounded-full blur-[120px] -translate-x-1/2 -translate-y-1/2" />
-          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-f1-red/5 rounded-full blur-[100px]" />
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <div className="absolute top-1/4 left-1/4 w-[150%] h-[150%] bg-f1-red/10 rounded-full blur-[150px] -translate-x-1/2 -translate-y-1/2 animate-pulse" />
+          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-f1-red/10 rounded-full blur-[120px]" />
+          
+          {/* Cinematic Light Streaks */}
+          <motion.div 
+            animate={{ 
+              x: [-500, 1500],
+              opacity: [0, 0.3, 0]
+            }}
+            transition={{ duration: 7, repeat: Infinity, ease: "linear" }}
+            className="absolute top-[20%] left-0 w-[600px] h-[2px] bg-gradient-to-r from-transparent via-f1-red to-transparent -rotate-12 blur-sm"
+          />
+          <motion.div 
+            animate={{ 
+              x: [1500, -500],
+              opacity: [0, 0.2, 0]
+            }}
+            transition={{ duration: 10, repeat: Infinity, ease: "linear", delay: 2 }}
+            className="absolute top-[60%] left-0 w-[800px] h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent rotate-12 blur-sm"
+          />
         </div>
 
         <div className="relative z-10 text-center px-6 max-w-6xl mx-auto">
@@ -46,45 +64,53 @@ export default function Home() {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8 }}
+            className="flex justify-center"
           >
             <div
-              className="inline-flex items-center gap-2 bg-white/5 border border-white/10 backdrop-blur-xl rounded-full px-5 py-2 mb-8 cursor-pointer select-none hover:bg-white/10 transition-all active:scale-95"
+              className="inline-flex items-center gap-2 bg-white/5 border border-white/10 backdrop-blur-2xl rounded-full px-6 py-2.5 mb-10 cursor-pointer select-none hover:bg-white/10 hover:border-f1-red/30 transition-all active:scale-95 group shadow-2xl"
               onClick={handleBadgeClick}
             >
-              <span className="w-2 h-2 bg-f1-red rounded-full animate-live-pulse" />
-              <span className="text-white text-[10px] font-black tracking-[0.3em] uppercase">Season 2026</span>
+              <div className="relative">
+                <span className="block w-2.5 h-2.5 bg-f1-red rounded-full animate-live-pulse" />
+                <span className="absolute inset-0 bg-f1-red rounded-full animate-ping opacity-50" />
+              </div>
+              <span className="text-white text-[11px] font-black tracking-[0.4em] uppercase">Season 2026 Archive</span>
             </div>
           </motion.div>
 
           <motion.h1
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.1 }}
-            className="text-6xl md:text-9xl font-black text-white mb-6 tracking-tighter uppercase italic leading-[0.85]"
+            initial={{ opacity: 0, y: 60, rotateX: 45 }}
+            animate={{ opacity: 1, y: 0, rotateX: 0 }}
+            transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+            className="text-7xl md:text-[12rem] font-black text-white mb-8 tracking-tighter uppercase italic leading-[0.75] perspective-1000"
           >
-            FORMULA <span className="text-f1-red">1</span>
+            FORMULA <span className="text-f1-red drop-shadow-[0_0_50px_rgba(225,6,0,0.4)]">1</span>
           </motion.h1>
           
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-lg md:text-2xl text-gray-400 font-medium mb-12 max-w-2xl mx-auto leading-tight"
+            transition={{ duration: 0.8, delay: 0.3 }}
+            className="text-lg md:text-3xl text-gray-400 font-medium mb-16 max-w-3xl mx-auto leading-tight italic tracking-tight"
           >
-            The ultimate "Second-Screen" experience for the 2026 Grand Prix season.
+            The premium "Second-Screen" cockpit for the <span className="text-white">2026 Grand Prix</span> era.
           </motion.p>
 
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.3 }}
-            className="flex flex-col sm:flex-row justify-center gap-4 px-4"
+            transition={{ duration: 1, delay: 0.5, ease: "easeOut" }}
+            className="flex flex-col sm:flex-row justify-center gap-6 px-4"
           >
             <Link to="/drivers" className="w-full sm:w-auto">
-              <Button variant="primary" size="lg" className="w-full">Live Standings</Button>
+              <Button variant="primary" size="lg" className="w-full h-16 !px-12 text-lg shadow-[0_20px_50px_rgba(225,6,0,0.3)]">
+                Live Standings
+              </Button>
             </Link>
             <Link to="/live" className="w-full sm:w-auto">
-              <Button variant="outline" size="lg" className="w-full">Command Center</Button>
+              <Button variant="outline" size="lg" className="w-full h-16 !px-12 text-lg backdrop-blur-3xl hover:bg-white/5">
+                Command Center
+              </Button>
             </Link>
           </motion.div>
         </div>

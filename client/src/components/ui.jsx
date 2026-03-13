@@ -1,4 +1,4 @@
-import { motion, useMotionValue, useSpring, useInView } from 'framer-motion';
+import { motion, useMotionValue, useSpring, useInView, useMotionTemplate } from 'framer-motion';
 import { useEffect, useRef } from 'react';
 
 export function AnimatedCounter({ value, duration = 1.2, className = '' }) {
@@ -56,19 +56,46 @@ export function Button({ children, onClick, variant = 'primary', size = 'md', cl
 }
 
 export function Card({ children, className = '', hover = true, glass = true, ...props }) {
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+
+  function handleMouseMove({ currentTarget, clientX, clientY }) {
+    let { left, top } = currentTarget.getBoundingClientRect();
+    mouseX.set(clientX - left);
+    mouseY.set(clientY - top);
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 15 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.5, ease: 'easeOut' }}
-      whileHover={hover ? { y: -4, shadow: '0 20px 40px rgba(0,0,0,0.4)', transition: { duration: 0.3 } } : {}}
-      className={`rounded-[2rem] border border-white/5 p-5 md:p-8 transition-all ${
-        glass ? 'bg-f1-card/40 backdrop-blur-2xl shadow-2xl' : 'bg-f1-card'
+      whileHover={hover ? { y: -4, transition: { duration: 0.3 } } : {}}
+      onMouseMove={handleMouseMove}
+      className={`relative group rounded-[2.5rem] border border-white/10 p-5 md:p-8 transition-all overflow-hidden ${
+        glass ? 'bg-white/[0.03] backdrop-blur-3xl shadow-2xl' : 'bg-f1-card'
       } ${className}`}
       {...props}
     >
-      {children}
+      {/* Spotlight Effect */}
+      <motion.div
+        className="pointer-events-none absolute -inset-px rounded-[2.5rem] opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+        style={{
+          background: useMotionTemplate`
+            radial-gradient(
+              650px circle at ${mouseX}px ${mouseY}px,
+              rgba(225, 6, 0, 0.1),
+              transparent 80%
+            )
+          `,
+        }}
+      />
+      
+      {/* Internal Content */}
+      <div className="relative z-10">
+        {children}
+      </div>
     </motion.div>
   );
 }

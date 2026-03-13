@@ -42,10 +42,15 @@ function ProtectedRoute({ children }) {
 function PageTransition({ children }) {
   return (
     <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.25 }}
+      initial={{ opacity: 0, y: 20, scale: 0.98 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: -20, scale: 0.98 }}
+      transition={{ 
+        type: 'spring',
+        stiffness: 260,
+        damping: 20,
+        opacity: { duration: 0.2 }
+      }}
     >
       {children}
     </motion.div>
