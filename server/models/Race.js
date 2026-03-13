@@ -21,6 +21,15 @@ const raceSchema = new mongoose.Schema({
       driver: { type: String, default: '' },
       year: { type: String, default: '' }
     }
+  },
+  sessions: {
+    fp1: { type: String, default: null },
+    fp2: { type: String, default: null },
+    fp3: { type: String, default: null },
+    qualifying: { type: String, default: null },
+    sprintQualifying: { type: String, default: null },
+    sprintRace: { type: String, default: null },
+    race: { type: String, default: null } // Standardized race start time
   }
 }, { timestamps: true });
 

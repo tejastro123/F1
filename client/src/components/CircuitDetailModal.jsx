@@ -75,6 +75,50 @@ export default function CircuitDetailModal({ isOpen, onClose, race }) {
                   </section>
 
                   <section className="bg-white/5 p-6 rounded-xl border border-white/5">
+                    <SectionHeader title="Weekend Schedule" subtitle="Session Timings (Local Time)" />
+                    <div className="space-y-3">
+                      {race.sessions ? (
+                        Object.entries(race.sessions)
+                          .filter(([_, time]) => time) // Only show sessions with times
+                          .map(([key, time]) => {
+                            const labels = {
+                              fp1: 'Practice 1',
+                              fp2: 'Practice 2',
+                              fp3: 'Practice 3',
+                              qualifying: 'Qualifying',
+                              sprintQualifying: 'Sprint Shootout',
+                              sprintRace: 'Sprint Race',
+                              race: 'Grand Prix'
+                            };
+                            const isMainRace = key === 'race';
+                            const isQualy = key.includes('Qualifying');
+                            
+                            return (
+                              <div key={key} className={`flex items-center justify-between p-3 rounded-xl border transition-all ${
+                                isMainRace ? 'bg-f1-red/10 border-f1-red/30' : 'bg-white/5 border-white/5'
+                              }`}>
+                                <div className="flex items-center gap-3">
+                                  <div className={`w-2 h-2 rounded-full ${
+                                    isMainRace ? 'bg-f1-red animate-pulse' : 
+                                    isQualy ? 'bg-f1-gold' : 'bg-gray-500'
+                                  }`} />
+                                  <span className="text-[10px] font-black text-white uppercase tracking-widest">{labels[key] || key}</span>
+                                </div>
+                                <span className={`text-[10px] font-black tabular-nums transition-colors ${isMainRace ? 'text-f1-red' : 'text-gray-400'}`}>
+                                  {time}
+                                </span>
+                              </div>
+                            );
+                          })
+                      ) : (
+                        <div className="text-center py-4 opacity-30 italic text-[10px] font-black uppercase tracking-widest">
+                          Schedule pending FIA confirmation
+                        </div>
+                      )}
+                    </div>
+                  </section>
+
+                  <section className="bg-white/5 p-6 rounded-xl border border-white/5">
                     <SectionHeader title="Rich History" subtitle="Moments & Milestones" />
                     <div className="prose prose-invert max-w-none">
                       <p className="text-gray-400 leading-relaxed italic border-l-2 border-f1-red pl-4">
