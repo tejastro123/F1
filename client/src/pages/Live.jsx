@@ -17,7 +17,7 @@ import { useSocket } from '../context/SocketContext.jsx';
 import { Card, Badge, SectionHeader, Button } from '../components/ui.jsx';
 
 // Live Center Components
-import ReactionStream from '../components/Live/ReactionStream.jsx';
+import { ReactionCanvas, ReactionBar } from '../components/Live/ReactionStream.jsx';
 import PollWidget from '../components/Live/PollWidget.jsx';
 import TrackStatusPanel from '../components/Live/TrackStatusPanel.jsx';
 import SectorFeed from '../components/Live/SectorFeed.jsx';
@@ -231,7 +231,7 @@ function LiveViewerContent({ viewerName }) {
 
   return (
     <>
-      <ReactionStream />
+      <ReactionCanvas />
       <div className="pt-20 md:pt-28 pb-16 px-4 max-w-[1600px] mx-auto overflow-x-hidden">
         {/* Header - Hidden on small mobile to save space when scrolling */}
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4 px-2">
@@ -297,6 +297,9 @@ function LiveViewerContent({ viewerName }) {
                   )}
                 </div>
               </Card>
+              
+              {/* Live Signal Feedback - Reaction Bar */}
+              <ReactionBar className="w-full" />
              </div>
 
             {/* Mobile-Only Spacer for fixed video */}

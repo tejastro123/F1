@@ -71,28 +71,25 @@ export function Card({ children, className = '', hover = true, glass = true, ...
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.5, ease: 'easeOut' }}
-      whileHover={hover ? { y: -4, transition: { duration: 0.3 } } : {}}
+      whileHover={hover ? { y: -2, transition: { duration: 0.2 } } : {}}
       onMouseMove={handleMouseMove}
-      className={`relative group rounded-[2.5rem] border border-white/10 p-5 md:p-8 transition-all overflow-hidden ${
-        glass ? 'bg-white/[0.03] backdrop-blur-3xl shadow-2xl' : 'bg-f1-card'
-      } ${className}`}
+      className={`relative group bento-card p-6 md:p-8 overflow-hidden ${className}`}
       {...props}
     >
-      {/* Spotlight Effect */}
+      {/* Precision Rim Lighting */}
       <motion.div
-        className="pointer-events-none absolute -inset-px rounded-[2.5rem] opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+        className="pointer-events-none absolute -inset-px rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
         style={{
           background: useMotionTemplate`
             radial-gradient(
-              650px circle at ${mouseX}px ${mouseY}px,
-              rgba(225, 6, 0, 0.1),
+              400px circle at ${mouseX}px ${mouseY}px,
+              rgba(225, 6, 0, 0.05),
               transparent 80%
             )
           `,
         }}
       />
       
-      {/* Internal Content */}
       <div className="relative z-10">
         {children}
       </div>
@@ -119,11 +116,11 @@ export function Badge({ children, color = 'red', className = '' }) {
 
 export function StatPill({ label, value, icon, className = '' }) {
   return (
-    <div className={`flex items-center gap-4 bg-white/5 backdrop-blur-xl rounded-2xl px-5 py-4 border border-white/5 hover:border-white/10 transition-colors ${className}`}>
-      {icon && <span className="text-2xl drop-shadow-lg">{icon}</span>}
+    <div className={`flex items-center gap-4 bg-white/[0.03] rounded-2xl px-5 py-4 border border-white/5 hover:border-white/10 transition-colors ${className}`}>
+      {icon && <span className="text-xl drop-shadow-md">{icon}</span>}
       <div>
-        <p className="text-[10px] text-gray-500 font-black uppercase tracking-[0.2em] mb-0.5">{label}</p>
-        <p className="text-xl font-black text-white leading-tight">
+        <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-0.5">{label}</p>
+        <p className="text-xl font-bold text-white leading-tight tabular-nums">
           {typeof value === 'number' ? <AnimatedCounter value={value} /> : value}
         </p>
       </div>
@@ -134,16 +131,19 @@ export function StatPill({ label, value, icon, className = '' }) {
 export function SectionHeader({ title, subtitle, className = '', align = 'left' }) {
   return (
     <motion.div
-      initial={{ opacity: 0, x: align === 'left' ? -20 : 0, y: align === 'center' ? 20 : 0 }}
-      whileInView={{ opacity: 1, x: 0, y: 0 }}
+      initial={{ opacity: 0, y: 10 }}
+      whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      className={`mb-10 ${align === 'center' ? 'text-center' : ''} ${className}`}
+      className={`mb-12 ${align === 'center' ? 'text-center' : ''} ${className}`}
     >
-      <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-white tracking-tighter uppercase italic leading-none mb-4">
+      <div className={`flex items-center gap-3 mb-2 ${align === 'center' ? 'justify-center' : ''}`}>
+        <div className="w-8 h-[2px] bg-f1-red rounded-full" />
+        <span className="text-[10px] font-bold text-f1-red uppercase tracking-[0.3em]">Telemetry Signal</span>
+      </div>
+      <h2 className="text-3xl md:text-5xl font-bold text-white tracking-tight uppercase leading-none mb-4">
         {title}
       </h2>
-      {subtitle && <p className="text-gray-400 text-sm md:text-base font-medium max-w-2xl mx-auto lg:mx-0">{subtitle}</p>}
-      <div className={`w-20 h-1.5 bg-f1-red rounded-full mt-4 ${align === 'center' ? 'mx-auto' : ''}`} />
+      {subtitle && <p className="text-gray-400 text-sm md:text-base font-medium max-w-2xl mx-auto lg:mx-0 leading-relaxed uppercase tracking-wider">{subtitle}</p>}
     </motion.div>
   );
 }

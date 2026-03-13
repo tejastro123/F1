@@ -8,8 +8,11 @@ import {
   useRoomContext,
   useLocalParticipant,
   useDataChannel,
+  useTracks,
+  VideoTrack,
   TrackToggle,
 } from '@livekit/components-react';
+import { Track } from 'livekit-client';
 import '@livekit/components-styles';
 
 // Container component that fetches the LiveKit Token
@@ -113,7 +116,15 @@ function AdminBroadcastContent() {
     }
   };
 
+  // Broadcast Monitor State
+  const localTracks = useTracks([
+    { source: Track.Source.Camera, withPlaceholder: false },
+    { source: Track.Source.ScreenShare, withPlaceholder: false }
+  ]).filter(t => t.participant.identity === localParticipant.identity);
+
   const isStreaming = viewpoints.some(v => v.active);
+
+  // ... previous chat and recording logic ...
 
   // Listen to incoming chat messages from DataChannel
   useDataChannel('chat', (msg) => {
@@ -231,6 +242,28 @@ function AdminBroadcastContent() {
             </h3>
             
             <div className="space-y-6">
+              {/* Broadcast Monitor - NEW PREVIEW SECTION */}
+              {isStreaming && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                  <AnimatePresence>
+                    {localTracks.map(track => (
+                      <motion.div 
+                        key={track.publication.trackSid}
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        className="relative rounded-2xl overflow-hidden aspect-video bg-black ring-1 ring-white/10 group"
+                      >
+                        <VideoTrack trackRef={track} className="w-full h-full object-cover" />
+                        <div className="absolute top-2 left-2 px-2 py-1 bg-f1-red text-[8px] font-black italic tracking-widest text-white uppercase rounded-sm shadow-lg">
+                          LIVE: {track.publication.trackName || 'UNLABELED FEED'}
+                        </div>
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+                </div>
+              )}
+
               <div className="grid grid-cols-2 gap-4">
                 {viewpoints.map(vp => (
                   <button
