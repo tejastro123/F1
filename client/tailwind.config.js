@@ -25,6 +25,7 @@ export default {
         'team-haas': '#B6BABD',
         'team-audi': '#FF0000',
         'team-cadillac': '#DAA520',
+        'glass-border': 'rgba(255, 255, 255, 0.05)',
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
