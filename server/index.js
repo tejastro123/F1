@@ -105,8 +105,12 @@ const WS_PORT = process.env.WS_PORT || 5001;
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => {
     logger.info('🏎  Connected to MongoDB');
+    // Start background F1 Data workers
     initCronJobs();
     
+    // Attach Socket.io to main API server for production connectivity (resolvers 404)
+    io.attach(apiServer);
+
     // API Server on Port 5000
     apiServer.listen(PORT, () => {
       logger.info(`🏁 F1 2026 API running on port ${PORT}`);
