@@ -32,12 +32,18 @@ import adminRouter from './routes/admin.js';
 import streamRouter from './routes/stream.js';
 import liveRouter from './routes/live.js';
 
-const app = express();
-app.set('trust proxy', 1); // Enable proxy support for Render/Vercel
-const httpServer = createServer(app);
+import MongoStore from 'connect-mongo';
 
-// Socket.io
-const io = new Server(httpServer, {
+const app = express();
+app.set('trust proxy', 1);
+
+// We need two separate server instances if they listen on different ports
+const apiServer = createServer(app);
+const wsApp = express(); // Minimal express app for WS if needed, or just a raw server
+const wsServer = createServer(wsApp);
+
+// Socket.io - Bound to the dedicated WS server (Port 5001)
+const io = new Server(wsServer, {
   cors: {
     origin: process.env.CLIENT_ORIGIN || 'http://localhost:5173',
     methods: ['GET', 'POST'],
@@ -55,25 +61,29 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 
-// Sessions are required by passport-google-oauth20
+// Production-ready session storage with connect-mongo
 app.use(
   session({
     secret: process.env.JWT_SECRET || 'f1backupsecret',
     resave: false,
     saveUninitialized: false,
+    store: MongoStore.create({
+      mongoUrl: process.env.MONGODB_URI,
+      ttl: 14 * 24 * 60 * 60 // 14 days
+    }),
+    cookie: {
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
+    }
   })
 );
 
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Auth routes mounted BEFORE global rate limiter (refresh/logout/google need to be exempt)
+// ... (routes remain the same)
 app.use('/api/v1/auth', authRouter);
-
-// Global rate limiter (applies to all routes below)
 app.use(rateLimiter);
-
-// API Routes
 app.use('/api/v1/drivers', driversRouter);
 app.use('/api/v1/constructors', constructorsRouter);
 app.use('/api/v1/races', racesRouter);
@@ -83,36 +93,32 @@ app.use('/api/v1/admin', adminRouter);
 app.use('/api/v1/stream', streamRouter);
 app.use('/api/v1/live', liveRouter);
 
-// Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// Error handler (must be last)
 app.use(errorHandler);
 
-// Connect to MongoDB & start server
 const PORT = process.env.PORT || 5000;
+const WS_PORT = process.env.WS_PORT || 5001;
 
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => {
     logger.info('🏎  Connected to MongoDB');
-    
-    // Start background F1 Data workers
     initCronJobs();
     
-    httpServer.listen(PORT, () => {
+    // API Server on Port 5000
+    apiServer.listen(PORT, () => {
       logger.info(`🏁 F1 2026 API running on port ${PORT}`);
     });
 
-    // Dedicated WebSocket Hub port as per Section 3.1
-    const WS_PORT = process.env.WS_PORT || 5001;
-    httpServer.listen(WS_PORT, () => {
-        logger.info(`📡 WebSocket Hub running on port ${WS_PORT}`);
+    // WebSocket Hub on Port 5001 (Section 3.1 compliance)
+    wsServer.listen(WS_PORT, () => {
+      logger.info(`📡 WebSocket Hub running on port ${WS_PORT}`);
     });
   })
   .catch((err) => {
-    logger.error('MongoDB connection failed:', err.message);
+    logger.error('Server initialization failed:', err.message);
     process.exit(1);
   });
 
