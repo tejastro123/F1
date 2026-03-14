@@ -104,6 +104,12 @@ mongoose.connect(process.env.MONGODB_URI)
     httpServer.listen(PORT, () => {
       logger.info(`🏁 F1 2026 API running on port ${PORT}`);
     });
+
+    // Dedicated WebSocket Hub port as per Section 3.1
+    const WS_PORT = process.env.WS_PORT || 5001;
+    httpServer.listen(WS_PORT, () => {
+        logger.info(`📡 WebSocket Hub running on port ${WS_PORT}`);
+    });
   })
   .catch((err) => {
     logger.error('MongoDB connection failed:', err.message);

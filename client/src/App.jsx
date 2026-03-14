@@ -20,7 +20,12 @@ const Predictions = lazy(() => import('./pages/Predictions.jsx'));
 const Leaderboard = lazy(() => import('./pages/Leaderboard.jsx'));
 const Stats = lazy(() => import('./pages/Stats.jsx'));
 const Live = lazy(() => import('./pages/Live.jsx'));
+const PredictionEngine = lazy(() => import('./ai/PredictionEngine.jsx'));
+const RAGChatWidget = lazy(() => import('./ai/RAGChatWidget.jsx'));
+const StatisticsPanel = lazy(() => import('./ds/StatisticsPanel.jsx'));
+const TelemetryDashboard = lazy(() => import('./ds/TelemetryDashboard.jsx'));
 const AuthSuccess = lazy(() => import('./pages/AuthSuccess.jsx'));
+
 
 // Admin pages
 const AdminLogin = lazy(() => import('./admin/AdminLogin.jsx'));
@@ -74,6 +79,10 @@ function AnimatedRoutes() {
           <Route path="/leaderboard" element={<PageTransition><Leaderboard /></PageTransition>} />
           <Route path="/stats" element={<PageTransition><Stats /></PageTransition>} />
           <Route path="/live" element={<PageTransition><Live /></PageTransition>} />
+          <Route path="/predictions/ai" element={<PageTransition><PredictionEngine /></PageTransition>} />
+          <Route path="/chat" element={<PageTransition><RAGChatWidget /></PageTransition>} />
+          <Route path="/analytics/stats" element={<PageTransition><StatisticsPanel /></PageTransition>} />
+          <Route path="/analytics/telemetry" element={<PageTransition><TelemetryDashboard /></PageTransition>} />
           <Route path="/auth-success" element={<AuthSuccess />} />
 
           {/* Admin Routes */}

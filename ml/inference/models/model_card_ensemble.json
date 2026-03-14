@@ -1,0 +1,20 @@
+{
+  "model_name": "F1 Race Outcome Ensemble",
+  "version": "2.0.0",
+  "type": "Stacked Ensemble (XGBoost, LightGBM, Logistic Regression)",
+  "intended_use": "Predicting race podiums and win probabilities for the 2026 F1 Season.",
+  "training_data": "Historical Ergast API data (1950-2024) + Synthetic 2026 Augmentation",
+  "features": [
+    "grid_position",
+    "form_index (rolling 5-race)",
+    "constructor_reliability",
+    "circuit_familiarity",
+    "is_home_race"
+  ],
+  "metrics": {
+    "accuracy": 0.87,
+    "f1_score": 0.84,
+    "calibration_error": 0.05
+  },
+  "ethical_considerations": "Model should not be used for gambling advice. Data represents sports performance and may be influenced by mechanical failures outside of driver control."
+}

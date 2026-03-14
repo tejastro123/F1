@@ -151,4 +151,39 @@ router.post('/broadcast', (req, res) => {
   res.json({ message: 'Broadcast sent', broadcastMessage: message });
 });
 
+// ML Proxy Routes
+const ML_API_URL = process.env.ML_API_URL || 'http://localhost:8001';
+const NLP_API_URL = process.env.NLP_API_URL || 'http://localhost:8003';
+const VISION_API_URL = process.env.VISION_API_URL || 'http://localhost:8004';
+const ANALYTICS_API_URL = process.env.ANALYTICS_API_URL || 'http://localhost:8005';
+
+router.post('/ml/predict', async (req, res, next) => {
+  try {
+    const response = await fetch(`${ML_API_URL}/predict/race-winner`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(req.body)
+    });
+    const data = await response.json();
+    res.json(data);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post('/ml/retrain-trigger', async (req, res, next) => {
+  // Mock retrain trigger
+  res.json({ message: 'Retraining initiated', status: 'processing' });
+});
+
+router.get('/ml/model-health', async (req, res, next) => {
+  try {
+    const response = await fetch(`${ML_API_URL}/model/health`);
+    const data = await response.json();
+    res.json(data);
+  } catch (error) {
+    next(error);
+  }
+});
+
 export default router;
