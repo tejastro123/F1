@@ -20,7 +20,11 @@ export default function SankeyDiagram() {
     };
 
     // Simple D3 visualization placeholder
-    svg.append("text").attr("x", 10).attr("y", 20).text("D3 Sankey Visualization (Positions Transitions)").fill("white");
+    svg.append("text")
+      .attr("x", 10)
+      .attr("y", 20)
+      .text("D3 Sankey Visualization (Positions Transitions)")
+      .attr("fill", "white");
     
     data.links.forEach((link, i) => {
         svg.append("rect")
