@@ -2,6 +2,7 @@ import axios from 'axios';
 import cron from 'node-cron';
 import Race from '../models/Race.js';
 import Driver from '../models/Driver.js';
+import Constructor from '../models/Constructor.js';
 import Prediction from '../models/Prediction.js';
 import { getIO } from '../socket/socketManager.js';
 import { logger } from '../middleware/errorHandler.js';
@@ -176,7 +177,7 @@ export async function syncSprintResults() {
  */
 export async function syncLatestRaceResults() {
   try {
-    logger.info('Starting F1 API sync...');
+    logger.info('Starting F1 results sync...');
     
     // Sync Quali and Sprint first
     await syncQualifyingResults();
@@ -213,21 +214,19 @@ export async function syncLatestRaceResults() {
       }
     }
 
-    // Sync Driver Standings if any races were updated
+    // Sync Standings if any races were updated
     if (updatedCount > 0) {
       await syncDriverStandings();
+      await syncConstructorStandings();
       
-      const io = getIO();
-      if (io) {
-        io.emit('data_refreshed', { message: 'Live data synced from F1 API' });
-      }
-      logger.info(`F1 Sync complete. ${updatedCount} new races ingested.`);
+      notifyClients('Live results synced from F1 API');
+      logger.info(`F1 Results sync complete. ${updatedCount} races updated.`);
     } else {
-      logger.info('F1 Sync complete. No new race data to process.');
+      logger.info('F1 Results sync complete. No new data.');
     }
 
   } catch (error) {
-    logger.error(`F1 API Sync Failed: ${error.message}`);
+    logger.error(`F1 Results Sync Failed: ${error.message}`);
   }
 }
 
@@ -248,13 +247,95 @@ export async function syncDriverStandings() {
       const rank = parseInt(st.position);
 
       await Driver.findOneAndUpdate(
-        { fullName },     // Assuming name matches exactly. A robust system uses driverIds.
+        { fullName },
         { points, wins, rank },
         { new: true }
       );
     }
+    logger.info('Driver standings synced.');
   } catch (error) {
-    logger.error(`Standings Sync Failed: ${error.message}`);
+    logger.error(`Driver Standings Sync Failed: ${error.message}`);
+  }
+}
+
+/**
+ * Fetch constructor standings and update in DB
+ */
+export async function syncConstructorStandings() {
+  try {
+    const { data } = await axios.get(`${ERGAST_API}/constructorStandings.json`);
+    const standingsList = data.MRData.StandingsTable.StandingsLists[0];
+    
+    if (!standingsList || !standingsList.ConstructorStandings) return;
+
+    for (const st of standingsList.ConstructorStandings) {
+      const teamName = st.Constructor.name;
+      const points = parseFloat(st.points);
+      const wins = parseInt(st.wins);
+      const rank = parseInt(st.position);
+
+      await Constructor.findOneAndUpdate(
+        { teamName },
+        { points, wins, rank },
+        { new: true }
+      );
+    }
+    logger.info('Constructor standings synced.');
+  } catch (error) {
+    logger.error(`Constructor Standings Sync Failed: ${error.message}`);
+  }
+}
+
+/**
+ * Fetch the full season schedule and update Race documents
+ */
+export async function syncRaceSchedule() {
+  try {
+    logger.info('Syncing F1 season schedule...');
+    const { data } = await axios.get(`${ERGAST_API}.json`);
+    const races = data.MRData.RaceTable.Races;
+
+    if (!races) return;
+
+    for (const raceData of races) {
+      const round = parseInt(raceData.round);
+      const updateData = {
+        grandPrixName: raceData.raceName,
+        venue: raceData.Circuit.circuitName,
+        date: raceData.date,
+        sessions: {
+          race: raceData.time ? `${raceData.date}T${raceData.time}` : `${raceData.date}T15:00:00Z`
+        }
+      };
+
+      // Add other session times if available (Ergast sometimes provides them)
+      if (raceData.FirstPractice) updateData.sessions.fp1 = `${raceData.FirstPractice.date}T${raceData.FirstPractice.time}`;
+      if (raceData.SecondPractice) updateData.sessions.fp2 = `${raceData.SecondPractice.date}T${raceData.SecondPractice.time}`;
+      if (raceData.ThirdPractice) updateData.sessions.fp3 = `${raceData.ThirdPractice.date}T${raceData.ThirdPractice.time}`;
+      if (raceData.Qualifying) updateData.sessions.qualifying = `${raceData.Qualifying.date}T${raceData.Qualifying.time}`;
+      if (raceData.Sprint) updateData.sessions.sprintRace = `${raceData.Sprint.date}T${raceData.Sprint.time}`;
+
+      await Race.findOneAndUpdate(
+        { round },
+        updateData,
+        { upsert: true, new: true }
+      );
+    }
+    
+    notifyClients('Race schedule updated');
+    logger.info('F1 Schedule sync complete.');
+  } catch (error) {
+    logger.error(`F1 Schedule Sync Failed: ${error.message}`);
+  }
+}
+
+/**
+ * Utility to emit socket event
+ */
+function notifyClients(message) {
+  const io = getIO();
+  if (io) {
+    io.emit('data_refreshed', { message });
   }
 }
 
@@ -262,12 +343,32 @@ export async function syncDriverStandings() {
  * Initialize the cron jobs
  */
 export function initCronJobs() {
-  // Run every hour on weekends (Saturday & Sunday) during the F1 season
-  // Minute 0, Hour *, Day of Month *, Month *, Day of Week 0,6
+  // 1. Daily Sync (Standings & Schedule) - Runs at midnight
+  cron.schedule('0 0 * * *', () => {
+    logger.info('Starting daily F1 metadata sync...');
+    syncRaceSchedule();
+    syncDriverStandings();
+    syncConstructorStandings();
+  });
+
+  // 2. Weekend Results Sync - Every hour on Saturday & Sunday
   cron.schedule('0 * * * 0,6', () => {
-    logger.info('Running scheduled F1 data sync (Weekend Webhook)...');
+    logger.info('Running weekend results sync...');
+    syncLatestRaceResults();
+  });
+
+  // 3. Post-Race Intensive Sync - Every 10 mins on Sunday afternoons (13:00 to 18:00)
+  // This helps catch live result updates quickly after a GP ends.
+  cron.schedule('*/10 13-18 * * 0', () => {
+    logger.info('Running intensive post-race results check...');
     syncLatestRaceResults();
   });
   
+  // Initial sync on startup to ensure data is fresh
+  syncRaceSchedule();
+  syncDriverStandings();
+  syncConstructorStandings();
+  syncLatestRaceResults();
+
   logger.info('⏰ F1 Sync Webhook cron jobs initialized.');
 }
