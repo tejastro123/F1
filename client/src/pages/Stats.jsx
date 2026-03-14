@@ -1,19 +1,13 @@
 import { useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
 } from 'recharts';
 import { useDrivers, useConstructors, useStats } from '../hooks/useData.js';
-import { Card, SectionHeader, AnimatedCounter, SkeletonCard, Button } from '../components/ui.jsx';
+import { Card, SectionHeader, AnimatedCounter, SkeletonCard } from '../components/ui.jsx';
 import { getTeamColor } from '../utils/teamColors.js';
-import StatisticsPanel from '../ds/StatisticsPanel.jsx';
-import TelemetryDashboard from '../ds/TelemetryDashboard.jsx';
-import SankeyDiagram from '../ds/SankeyDiagram.jsx';
-import ThreeDScatterPlot from '../ds/ThreeDScatterPlot.jsx';
-import NetworkGraph from '../ds/NetworkGraph.jsx';
-import { useState } from 'react';
 
 export default function Stats() {
   const { drivers, loading: driversLoading } = useDrivers();
@@ -21,7 +15,6 @@ export default function Stats() {
   const { stats, loading: statsLoading } = useStats();
 
   const loading = driversLoading || constructorsLoading || statsLoading;
-  const [activeTab, setActiveTab] = useState('standard'); // standard | ai
 
   // Points gap bar chart data
   const gapData = useMemo(() => {
@@ -157,45 +150,23 @@ export default function Stats() {
                 </div>
               </Card>
 
-
+              {/* Team radar chart - Immersion */}
+              <Card glass className="md:col-span-2 rounded-[3.5rem] p-12 border-white/5 bg-white/[0.01]">
+                <h3 className="text-[10px] font-black text-white uppercase tracking-[0.2em] mb-12 text-center">Constructor Performance Profile</h3>
+                <div className="h-[450px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <RadarChart data={radarData}>
+                      <PolarGrid stroke="rgba(255,255,255,0.05)" />
+                      <PolarAngleAxis dataKey="team" stroke="rgba(255,255,255,0.4)" tick={{ fontSize: 9, fontWeight: 900, textTransform: 'uppercase' }} />
+                      <PolarRadiusAxis hide />
+                      <Tooltip content={<CustomTooltip />} />
+                      <Radar name="Points" dataKey="points" stroke="#E10600" fill="#E10600" fillOpacity={0.2} strokeWidth={3} />
+                      <Radar name="Wins" dataKey="wins" stroke="#F5C518" fill="#F5C518" fillOpacity={0.1} strokeWidth={2} />
+                    </RadarChart>
+                  </ResponsiveContainer>
+                </div>
+              </Card>
             </div>
-
-            {/* AI Insights & Advanced Analytics Section */}
-            <div className="mt-12 flex justify-center gap-4">
-                <Button 
-                    variant={activeTab === 'standard' ? 'primary' : 'outline'}
-                    onClick={() => setActiveTab('standard')}
-                    className="rounded-full px-8"
-                >
-                    Standard Stats
-                </Button>
-                <Button 
-                    variant={activeTab === 'ai' ? 'primary' : 'outline'}
-                    onClick={() => setActiveTab('ai')}
-                    className="rounded-full px-8 flex items-center gap-2"
-                >
-                    <span>🤖</span> AI Insights
-                </Button>
-            </div>
-
-            <AnimatePresence mode="wait">
-                {activeTab === 'ai' && (
-                    <motion.div 
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        className="mt-12 space-y-10"
-                    >
-                        <StatisticsPanel />
-                        <TelemetryDashboard />
-                        <div className="grid md:grid-cols-2 gap-10">
-                            <SankeyDiagram />
-                            <ThreeDScatterPlot />
-                        </div>
-                        <NetworkGraph />
-                    </motion.div>
-                )}
-            </AnimatePresence>
           </>
         )}
       </div>
