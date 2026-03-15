@@ -101,9 +101,10 @@ export default function TrackMap3D({ predictions }) {
         <pointLight position={[10, 20, 10]} intensity={1.5} color="#e10600" />
         <spotLight position={[-20, 50, 10]} angle={0.15} penumbra={1} intensity={2} color="#fff" />
         
-        <Float speed={1.5} rotationIntensity={0.2} floatIntensity={0.5}>
-          <TrackSpline predictions={predictions} />
-        </Float>
+        <mesh>
+          <boxGeometry args={[10, 10, 10]} />
+          <meshStandardMaterial color="red" />
+        </mesh>
 
         <OrbitControls 
           enableDamping 
