@@ -173,3 +173,31 @@ export function useLeaderboard() {
 
   return { leaderboard, loading, error, refetch: fetchLeaderboard };
 }
+
+export function useNews() {
+  const [news, setNews] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const fetchNews = useCallback(async () => {
+    try {
+      setLoading(true);
+      const { data } = await api.get('/news');
+      setNews(data);
+      setError(null);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchNews();
+    const handler = () => fetchNews();
+    window.addEventListener('f1-data-updated', handler);
+    return () => window.removeEventListener('f1-data-updated', handler);
+  }, [fetchNews]);
+
+  return { news, loading, error, refetch: fetchNews };
+}

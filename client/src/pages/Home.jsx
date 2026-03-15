@@ -2,13 +2,14 @@ import { useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { useStats, useRaces } from '../hooks/useData.js';
+import { useStats, useRaces, useNews } from '../hooks/useData.js';
 import useCountdown from '../hooks/useCountdown.js';
 import { AnimatedCounter, Card, Button, StatPill, SectionHeader, SkeletonCard } from '../components/ui.jsx';
 
 export default function Home() {
   const { stats, loading: statsLoading } = useStats();
   const { races, loading: racesLoading } = useRaces();
+  const { news, loading: newsLoading } = useNews();
   const navigate = useNavigate();
   const clickCountRef = useRef(0);
   const clickTimerRef = useRef(null);
@@ -216,6 +217,64 @@ export default function Home() {
           </div>
         </section>
       )}
+
+      {/* Latest Intelligence - News Feed */}
+      <section className="py-32 px-6 bg-white/[0.01]">
+        <div className="max-w-7xl mx-auto">
+          <SectionHeader title="Latest Intelligence" subtitle="Real-time F1 operations and updates" align="center" />
+          
+          {newsLoading ? (
+            <div className="grid md:grid-cols-2 gap-8 mt-16">
+              {Array.from({ length: 2 }).map((_, i) => <SkeletonCard key={i} />)}
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-2 gap-8 mt-16">
+              {news.map((item, idx) => (
+                <motion.a
+                  key={item._id}
+                  href={item.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ delay: idx * 0.1 }}
+                  className="group"
+                >
+                  <Card className="h-full border-white/5 transition-colors group-hover:border-f1-red/30 overflow-hidden !p-0">
+                    <div className="relative h-48 overflow-hidden">
+                      <img 
+                        src={item.imageUrl || 'https://images.unsplash.com/photo-1533130061792-64b345e4a833?auto=format&fit=crop&q=80&w=1000'} 
+                        alt={item.title}
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      />
+                      <div className="absolute top-4 left-4">
+                        <span className="px-3 py-1 bg-f1-red text-[10px] font-bold text-white uppercase tracking-widest rounded-full">
+                          {item.category}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="p-8">
+                      <div className="flex items-center gap-2 mb-4">
+                        <span className="text-[10px] font-bold text-f1-red uppercase tracking-widest">{item.source}</span>
+                        <span className="w-1 h-1 bg-white/10 rounded-full" />
+                        <span className="text-[10px] font-medium text-gray-500 uppercase tracking-widest">
+                          {new Date(item.publishedAt).toLocaleDateString()}
+                        </span>
+                      </div>
+                      <h4 className="text-xl font-bold text-white mb-4 group-hover:text-f1-red transition-colors italic uppercase leading-tight">
+                        {item.title}
+                      </h4>
+                      <p className="text-sm text-gray-400 font-medium leading-relaxed line-clamp-2">
+                        {item.summary}
+                      </p>
+                    </div>
+                  </Card>
+                </motion.a>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
 
       {/* Playbook - Engineering Specs */}
       <section className="py-32 px-6 mb-20">
