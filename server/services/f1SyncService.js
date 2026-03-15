@@ -234,7 +234,7 @@ export async function syncLatestRaceResults() {
     }
 
     if (updatedCount > 0) {
-      await recalculateRanks();
+      await recalculateAllStandings();
       notifyClients('F1 Results updated and standings recalculated');
       logger.info(`F1 Results sync complete. ${updatedCount} races updated.`);
     } else {
@@ -246,30 +246,61 @@ export async function syncLatestRaceResults() {
   }
 }
 
-async function updateStandingsFromResults(result) {
-  // Points mapping: 25, 18, 15...
-  const points = [25, 18, 15];
-  const winners = [result.p1Winner, result.p2, result.p3];
+/**
+ * Deterministically recalculates all driver and constructor points/ranks 
+ * by sweeping all completed races in the database.
+ */
+export async function recalculateAllStandings() {
+  try {
+    logger.info('Recalculating all standings from race archive...');
 
-  for (let i = 0; i < winners.length; i++) {
-    const name = winners[i];
-    const driver = await Driver.findOne({ fullName: name });
-    if (driver) {
-      driver.points += points[i];
-      if (i === 0) driver.wins += 1;
-      driver.podiums += 1;
-      await driver.save();
+    // 1. Reset all points to 0
+    await Driver.updateMany({}, { points: 0, wins: 0, podiums: 0 });
+    await Constructor.updateMany({}, { points: 0, wins: 0, podiums: 0 });
+
+    // 2. Sweep all completed races
+    const completedRaces = await Race.find({ status: 'completed' }).sort({ round: 1 });
+    const pointSystem = [25, 18, 15]; // P1, P2, P3
+
+    for (const race of completedRaces) {
+      const winners = [race.p1Winner, race.p2, race.p3];
       
-      // Also update constructor points
-      const team = await Constructor.findOne({ teamName: driver.team });
-      if (team) {
-        team.points += points[i];
-        if (i === 0) team.wins += 1;
-        team.podiums += 1;
-        await team.save();
+      for (let i = 0; i < winners.length; i++) {
+        const name = winners[i];
+        if (!name) continue;
+
+        const points = pointSystem[i];
+        const driver = await Driver.findOne({ fullName: name });
+        
+        if (driver) {
+          driver.points += points;
+          if (i === 0) driver.wins += 1;
+          driver.podiums += 1;
+          await driver.save();
+
+          // Update Constructor
+          const team = await Constructor.findOne({ teamName: driver.team });
+          if (team) {
+            team.points += points;
+            if (i === 0) team.wins += 1;
+            team.podiums += 1;
+            await team.save();
+          }
+        }
       }
     }
+
+    // 3. Finalize Ranks with tie-breaking
+    await recalculateRanks();
+    logger.info('Global standings recalculation complete.');
+  } catch (error) {
+    logger.error(`Standings recalculation failed: ${error.message}`);
   }
+}
+
+async function updateStandingsFromResults(result) {
+  // Legacy function - now handled by recalculateAllStandings for idempotency
+  return;
 }
 
 /**
@@ -278,15 +309,27 @@ async function updateStandingsFromResults(result) {
 export async function recalculateRanks() {
   try {
     // 1. Recalculate Driver Ranks
-    // Tie-breaking: Points -> Wins -> Podiums
-    const drivers = await Driver.find().sort({ points: -1, wins: -1, podiums: -1 });
+    let drivers = await Driver.find();
+    // Deterministic sort in JS to avoid index weirdness
+    drivers.sort((a, b) => {
+      if (b.points !== a.points) return b.points - a.points;
+      if (b.wins !== a.wins) return b.wins - a.wins;
+      return b.podiums - a.podiums;
+    });
+
     for (let i = 0; i < drivers.length; i++) {
       drivers[i].rank = i + 1;
       await drivers[i].save();
     }
 
     // 2. Recalculate Constructor Ranks
-    const constructors = await Constructor.find().sort({ points: -1, wins: -1, podiums: -1 });
+    let constructors = await Constructor.find();
+    constructors.sort((a, b) => {
+      if (b.points !== a.points) return b.points - a.points;
+      if (b.wins !== a.wins) return b.wins - a.wins;
+      return b.podiums - a.podiums;
+    });
+
     for (let i = 0; i < constructors.length; i++) {
       constructors[i].rank = i + 1;
       await constructors[i].save();
@@ -360,104 +403,17 @@ export async function syncNews() {
 }
 
 /**
- * Fetch championship standings and update Driver points in DB
+ * Legacy Ergast functions removed (Service Retired)
  */
-export async function syncDriverStandings() {
-  try {
-    const { data } = await axios.get(`${ERGAST_API}/driverStandings.json`);
-    const standingsList = data.MRData.StandingsTable.StandingsLists[0];
-    
-    if (!standingsList || !standingsList.DriverStandings) return;
-
-    for (const st of standingsList.DriverStandings) {
-      const fullName = `${st.Driver.givenName} ${st.Driver.familyName}`;
-      const points = parseFloat(st.points);
-      const wins = parseInt(st.wins);
-      const rank = parseInt(st.position);
-
-      await Driver.findOneAndUpdate(
-        { fullName },
-        { points, wins }, // Remove rank from here, let recalculateRanks handle it
-        { new: true }
-      );
-    }
-    await recalculateRanks();
-    logger.info('Driver standings synced.');
-  } catch (error) {
-    logger.error(`Driver Standings Sync Failed: ${error.message}`);
-  }
-}
-
-/**
- * Fetch constructor standings and update in DB
- */
-export async function syncConstructorStandings() {
-  try {
-    const { data } = await axios.get(`${ERGAST_API}/constructorStandings.json`);
-    const standingsList = data.MRData.StandingsTable.StandingsLists[0];
-    
-    if (!standingsList || !standingsList.ConstructorStandings) return;
-
-    for (const st of standingsList.ConstructorStandings) {
-      const teamName = st.Constructor.name;
-      const points = parseFloat(st.points);
-      const wins = parseInt(st.wins);
-      const rank = parseInt(st.position);
-
-      await Constructor.findOneAndUpdate(
-        { teamName },
-        { points, wins }, // Remove rank from here
-        { new: true }
-      );
-    }
-    await recalculateRanks();
-    logger.info('Constructor standings synced.');
-  } catch (error) {
-    logger.error(`Constructor Standings Sync Failed: ${error.message}`);
-  }
-}
+export async function syncDriverStandings() {}
+export async function syncConstructorStandings() {}
 
 /**
  * Fetch the full season schedule and update Race documents
  */
 export async function syncRaceSchedule() {
-  try {
-    logger.info('Syncing F1 season schedule...');
-    const { data } = await axios.get(`${ERGAST_API}.json`);
-    const races = data.MRData.RaceTable.Races;
-
-    if (!races) return;
-
-    for (const raceData of races) {
-      const round = parseInt(raceData.round);
-      const updateData = {
-        grandPrixName: raceData.raceName,
-        venue: raceData.Circuit.circuitName,
-        date: raceData.date,
-        sessions: {
-          race: raceData.time ? `${raceData.date}T${raceData.time}` : `${raceData.date}T15:00:00Z`
-        }
-      };
-
-      // Add other session times if available (Ergast sometimes provides them)
-      if (raceData.FirstPractice) updateData.sessions.fp1 = `${raceData.FirstPractice.date}T${raceData.FirstPractice.time}`;
-      if (raceData.SecondPractice) updateData.sessions.fp2 = `${raceData.SecondPractice.date}T${raceData.SecondPractice.time}`;
-      if (raceData.ThirdPractice) updateData.sessions.fp3 = `${raceData.ThirdPractice.date}T${raceData.ThirdPractice.time}`;
-      if (raceData.Qualifying) updateData.sessions.qualifying = `${raceData.Qualifying.date}T${raceData.Qualifying.time}`;
-      if (raceData.Sprint) updateData.sessions.sprintRace = `${raceData.Sprint.date}T${raceData.Sprint.time}`;
-
-      await Race.findOneAndUpdate(
-        { round },
-        updateData,
-        { upsert: true, new: true }
-      );
-    }
-    
-    notifyClients('Race schedule updated');
-    logger.info('F1 Schedule sync complete.');
-  } catch (error) {
-    logger.error(`F1 Schedule Sync Failed: ${error.message}`);
-  }
+  // Legacy Ergast schedule sync disabled - using internal 2026 ground truth
+  return;
 }
 
 /**
@@ -474,12 +430,10 @@ function notifyClients(message) {
  * Initialize the cron jobs
  */
 export function initCronJobs() {
-  // 1. Daily Sync (Standings & Schedule) - Runs at midnight
+  // 1. Daily Sync (Schedule) - Runs at midnight
   cron.schedule('0 0 * * *', () => {
     logger.info('Starting daily F1 metadata sync...');
     syncRaceSchedule();
-    syncDriverStandings();
-    syncConstructorStandings();
   });
 
   // 2. Weekend Results Sync - Every hour on Saturday & Sunday
@@ -503,8 +457,6 @@ export function initCronJobs() {
   
   // Initial sync on startup to ensure data is fresh
   syncRaceSchedule();
-  syncDriverStandings();
-  syncConstructorStandings();
   syncLatestRaceResults();
   syncNews();
 
