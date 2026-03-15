@@ -40,6 +40,7 @@ export default function Navbar() {
     { to: '/predictions', label: 'My Predictions' },
     { to: '/leaderboard', label: 'Leaderboard' },
     { to: '/stats', label: 'Stats' },
+    { to: '/news', label: 'Intelligence' },
   ];
 
   return (

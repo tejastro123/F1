@@ -234,7 +234,8 @@ export async function syncLatestRaceResults() {
     }
 
     if (updatedCount > 0) {
-      notifyClients('F1 Results updated from internet streams');
+      await recalculateRanks();
+      notifyClients('F1 Results updated and standings recalculated');
       logger.info(`F1 Results sync complete. ${updatedCount} races updated.`);
     } else {
       logger.info('F1 Results sync complete. No new data.');
@@ -258,7 +259,41 @@ async function updateStandingsFromResults(result) {
       if (i === 0) driver.wins += 1;
       driver.podiums += 1;
       await driver.save();
+      
+      // Also update constructor points
+      const team = await Constructor.findOne({ teamName: driver.team });
+      if (team) {
+        team.points += points[i];
+        if (i === 0) team.wins += 1;
+        team.podiums += 1;
+        await team.save();
+      }
     }
+  }
+}
+
+/**
+ * Re-calculate ranks for both drivers and constructors based on current points
+ */
+export async function recalculateRanks() {
+  try {
+    // 1. Recalculate Driver Ranks
+    const drivers = await Driver.find().sort({ points: -1, wins: -1 });
+    for (let i = 0; i < drivers.length; i++) {
+      drivers[i].rank = i + 1;
+      await drivers[i].save();
+    }
+
+    // 2. Recalculate Constructor Ranks
+    const constructors = await Constructor.find().sort({ points: -1, wins: -1 });
+    for (let i = 0; i < constructors.length; i++) {
+      constructors[i].rank = i + 1;
+      await constructors[i].save();
+    }
+
+    logger.info('Standings ranks recalculated.');
+  } catch (error) {
+    logger.error(`Rank recalculation failed: ${error.message}`);
   }
 }
 
@@ -272,21 +307,39 @@ export async function syncNews() {
     const mockNews = [
       {
         title: 'Kimi Antonelli Claims Maiden Win in Shanghai',
-        summary: 'The Mercedes rookie dominated the Chinese Grand Prix, leading a Silver Arrows 1-2 finish.',
+        summary: 'The Mercedes rookie dominated the Chinese Grand Prix, leading a Silver Arrows 1-2 finish in a masterclass of defensive driving.',
         url: 'https://www.formula1.com/en/latest/article.antonelli-wins-china.html',
         source: 'Formula 1',
-        imageUrl: 'https://media.formula1.com/image/upload/f_auto,c_fill,g_auto,q_auto,w_1320/2026/China/Antonelli_Win',
+        imageUrl: '/news/antonelli_win.png',
         publishedAt: new Date(),
         category: 'Race Report'
       },
       {
         title: 'Hamilton Grabs First Ferrari Podium',
-        summary: 'Lewis Hamilton secured his first podium finish for the Scuderia in a dramatic Chinese GP.',
+        summary: 'Lewis Hamilton secured his first podium finish for the Scuderia in a dramatic Chinese GP, proving the SF-26 has the pace to challenge.',
         url: 'https://www.formula1.com/en/latest/article.hamilton-ferrari-podium.html',
         source: 'Ferrari News',
-        imageUrl: 'https://media.formula1.com/image/upload/f_auto,c_fill,g_auto,q_auto,w_1320/2026/China/Hamilton_Ferrari',
+        imageUrl: '/news/hamilton_podium.png',
         publishedAt: new Date(Date.now() - 3600000),
         category: 'Team News'
+      },
+      {
+        title: 'Audi’s Technical Breakthrough: The 2026 Power Unit',
+        summary: 'Inside look at the Ingolstadt factory where Audi is perfecting their first-ever F1 hybrid power unit for the new regulations.',
+        url: 'https://www.audi-mediacenter.com/en/f1-power-unit-tech',
+        source: 'Tech Analysis',
+        imageUrl: 'https://images.unsplash.com/photo-1547425260-76bcadfb4f2c?auto=format&fit=crop&q=80&w=1000',
+        publishedAt: new Date(Date.now() - 7200000),
+        category: 'Technical'
+      },
+      {
+        title: 'Paddock Rumours: Bearman to Step Up?',
+        summary: 'Speculation grows in the Shanghai paddock that Oliver Bearman is eyeing a senior seat for the 2027 season after impressive Haas performances.',
+        url: 'https://www.motorsport.com/f1/news/bearman-silly-season-rumours/10594321/',
+        source: 'Motorsport.com',
+        imageUrl: 'https://images.unsplash.com/photo-1533130061792-64b345e4a833?auto=format&fit=crop&q=80&w=1000',
+        publishedAt: new Date(Date.now() - 14400000),
+        category: 'Rumours'
       }
     ];
 

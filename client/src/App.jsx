@@ -20,6 +20,7 @@ const Predictions = lazy(() => import('./pages/Predictions.jsx'));
 const Leaderboard = lazy(() => import('./pages/Leaderboard.jsx'));
 const Stats = lazy(() => import('./pages/Stats.jsx'));
 const Live = lazy(() => import('./pages/Live.jsx'));
+const News = lazy(() => import('./pages/News.jsx'));
 const AuthSuccess = lazy(() => import('./pages/AuthSuccess.jsx'));
 
 // Admin pages
@@ -74,6 +75,7 @@ function AnimatedRoutes() {
           <Route path="/leaderboard" element={<PageTransition><Leaderboard /></PageTransition>} />
           <Route path="/stats" element={<PageTransition><Stats /></PageTransition>} />
           <Route path="/live" element={<PageTransition><Live /></PageTransition>} />
+          <Route path="/news" element={<PageTransition><News /></PageTransition>} />
           <Route path="/auth-success" element={<AuthSuccess />} />
 
           {/* Admin Routes */}
