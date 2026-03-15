@@ -4,14 +4,15 @@
 
 @layer base {
   :root {
-    --f1-red: #D40000;
+    --f1-red: #E10600;
     --f1-dark: #0A0A0E;
     --f1-panel: #111116;
     --f1-card: #15151E;
-    --f1-gold: #D4AF37;
-    --f1-silver: #A9A9A9;
-    --f1-bronze: #8C7853;
+    --f1-gold: #FFD700;
+    --f1-silver: #D1D1D1;
+    --f1-bronze: #CD7F32;
     --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-glow: rgba(255, 255, 255, 0.03);
   }
 
   body {
@@ -62,14 +63,25 @@
   }
 
   .bento-card {
-    @apply bg-f1-panel border border-glass-border rounded-2xl shadow-sm transition-all duration-300;
+    @apply bg-[#15151E]/80 backdrop-blur-xl border border-white/5 rounded-2xl shadow-2xl transition-all duration-300;
+    box-shadow: 
+      inset 0 1px 1px 0 rgba(255, 255, 255, 0.05),
+      0 10px 40px -10px rgba(0, 0, 0, 0.5);
   }
 
   .glass-card {
-    @apply bg-white/[0.02] backdrop-blur-3xl border border-glass-border rounded-[2rem] shadow-2xl;
+    @apply bg-white/[0.03] backdrop-blur-[40px] border border-white/10 rounded-[2.5rem] shadow-2xl;
+    box-shadow: 
+      inset 0 1px 1px 0 rgba(255, 255, 255, 0.1),
+      0 30px 60px -15px rgba(0, 0, 0, 0.7);
   }
+
   .premium-gradient {
     background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%);
+  }
+
+  .inner-glow {
+    box-shadow: inset 0 0 20px 0 rgba(225, 6, 0, 0.1);
   }
 }
 

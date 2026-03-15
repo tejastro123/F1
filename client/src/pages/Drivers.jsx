@@ -139,7 +139,7 @@ export default function Drivers() {
                   initial={{ opacity: 0, y: 15 }}
                   animate={{ opacity: 1, y: 0 }}
                   onClick={() => navigate(`/drivers/${driver._id}`)}
-                  className="bg-white/5 border border-white/10 rounded-[2rem] p-6 flex items-center gap-6 relative overflow-hidden group active:scale-[0.98] transition-all"
+                  className="glass-card !p-6 flex items-center gap-6 border border-white/5 overflow-hidden cursor-pointer hover:border-white/20 transition-all group relative active:scale-[0.99]"
                 >
                   <div className="absolute top-0 left-0 bottom-0 w-2" style={{ backgroundColor: getTeamColor(driver.team) }} />
                   

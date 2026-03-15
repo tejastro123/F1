@@ -28,12 +28,12 @@ export function AnimatedCounter({ value, duration = 1.2, className = '' }) {
 export function Button({ children, onClick, variant = 'primary', size = 'md', className = '', disabled = false, ...props }) {
   const base = 'font-bold rounded-2xl transition-all duration-300 inline-flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed';
   const variants = {
-    primary: 'bg-f1-red hover:bg-red-600 text-white shadow-[0_10px_20px_-10px_rgba(225,6,0,0.4)] hover:shadow-[0_15px_30px_-10px_rgba(225,6,0,0.6)]',
-    secondary: 'bg-white/5 hover:bg-white/10 text-white border border-white/10 backdrop-blur-md',
-    gold: 'bg-f1-gold hover:bg-[#FFD700] text-black shadow-[0_10px_20px_-10px_rgba(255,215,0,0.3)]',
-    ghost: 'bg-transparent hover:bg-white/10 text-white',
+    primary: 'bg-f1-red hover:bg-red-600 text-white shadow-[0_10px_30px_-10px_rgba(225,6,0,0.5)] hover:shadow-[0_20px_40px_-10px_rgba(225,6,0,0.7)]',
+    secondary: 'bg-white/[0.03] hover:bg-white/[0.08] text-white border border-white/10 backdrop-blur-2xl shadow-xl',
+    gold: 'bg-f1-gold hover:bg-[#FFD700] text-black shadow-[0_10px_20px_-10px_rgba(255,215,0,0.4)] hover:shadow-[0_15px_30px_-10px_rgba(255,215,0,0.5)]',
+    ghost: 'bg-transparent hover:bg-white/5 text-white',
     admin: 'bg-orange-600 hover:bg-orange-500 text-white shadow-lg shadow-orange-900/40',
-    outline: 'bg-transparent border-2 border-white/20 hover:border-white/40 text-white',
+    outline: 'bg-transparent border-2 border-white/10 hover:border-white/30 text-white backdrop-blur-sm',
   };
   const sizes = {
     sm: 'px-4 py-2 text-xs',
@@ -71,9 +71,9 @@ export function Card({ children, className = '', hover = true, glass = true, ...
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.5, ease: 'easeOut' }}
-      whileHover={hover ? { y: -2, transition: { duration: 0.2 } } : {}}
+      whileHover={hover ? { y: -4, transition: { duration: 0.2, ease: 'easeOut' } } : {}}
       onMouseMove={handleMouseMove}
-      className={`relative group bento-card p-6 md:p-8 overflow-hidden ${className}`}
+      className={`relative group ${glass ? 'glass-card' : 'bento-card'} p-6 md:p-8 overflow-hidden ${className}`}
       {...props}
     >
       {/* Precision Rim Lighting */}
@@ -116,7 +116,7 @@ export function Badge({ children, color = 'red', className = '' }) {
 
 export function StatPill({ label, value, icon, className = '' }) {
   return (
-    <div className={`flex items-center gap-4 bg-white/[0.03] rounded-2xl px-5 py-4 border border-white/5 hover:border-white/10 transition-colors ${className}`}>
+    <div className={`flex items-center gap-4 bg-white/[0.02] backdrop-blur-xl rounded-2xl px-6 py-5 border border-white/5 hover:border-white/10 transition-all duration-300 shadow-xl group ${className}`}>
       {icon && <span className="text-xl drop-shadow-md">{icon}</span>}
       <div>
         <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-0.5">{label}</p>

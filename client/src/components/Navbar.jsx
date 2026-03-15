@@ -47,8 +47,8 @@ export default function Navbar() {
   return (
     <>
       <nav
-        className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-500 ${
-          scrolled ? 'py-3 bg-f1-dark/80 backdrop-blur-2xl border-b border-white/5 shadow-2xl shadow-black/40' : 'py-6 bg-transparent'
+        className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-700 ${
+          scrolled ? 'py-4 bg-[#0A0A0E]/60 backdrop-blur-[40px] border-b border-white/5 shadow-2xl shadow-black/60' : 'py-8 bg-transparent'
         }`}
       >
         <div className="max-w-7xl mx-auto px-6">
@@ -83,7 +83,7 @@ export default function Navbar() {
                       {isActive && (
                         <motion.div
                           layoutId="nav-pill"
-                          className="absolute inset-0 bg-white/5 border border-white/5 rounded-full"
+                          className="absolute inset-0 bg-white/[0.03] border border-white/10 rounded-full shadow-[0_5px_15px_-5px_rgba(255,255,255,0.1)]"
                           transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                         />
                       )}
@@ -109,7 +109,7 @@ export default function Navbar() {
                   }`} />
                   {lastBroadcast && <div className="absolute inset-0 bg-f1-red/50 rounded-full animate-ping" />}
                 </div>
-                <span className="text-[10px] font-black uppercase tracking-widest">Live Grid</span>
+                <span className="text-[10px] font-black uppercase tracking-widest group-hover:text-f1-red transition-colors">Live Grid</span>
               </NavLink>
             </div>
 
@@ -128,13 +128,12 @@ export default function Navbar() {
                   <span className="hidden lg:block text-[10px] font-black text-white uppercase tracking-widest">{user.displayName?.split(' ')[0]}</span>
                 </Link>
               ) : (
-                <motion.button 
-                  whileTap={{ scale: 0.95 }}
+                <Button 
                   onClick={handleGoogleLogin}
-                  className="bg-white text-black px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-f1-red hover:text-white transition-all shadow-xl shadow-white/5"
+                  className="!px-8 !py-2.5 !text-[10px] uppercase tracking-[0.2em]"
                 >
                   Join the Grid
-                </motion.button>
+                </Button>
               )}
 
               {/* Menu Toggle - Mobile Only */}

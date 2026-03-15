@@ -38,8 +38,9 @@ export default function Home() {
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden py-32">
         {/* Professional Technical Background */}
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(212,0,0,0.03),transparent_70%)]" />
-          <div className="absolute inset-0 opacity-[0.15]" style={{ backgroundImage: 'radial-gradient(#ffffff 0.5px, transparent 0.5px)', backgroundSize: '30px 30px' }} />
+          <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(225,6,0,0.08),transparent_70%)]" />
+          <div className="absolute inset-0 opacity-[0.2]" style={{ backgroundImage: 'radial-gradient(#ffffff 0.5px, transparent 0.5px)', backgroundSize: '40px 40px' }} />
+          <div className="absolute inset-x-0 bottom-0 h-96 bg-gradient-to-t from-f1-dark to-transparent" />
         </div>
 
         <div className="relative z-10 text-center px-6 max-w-7xl mx-auto">
@@ -152,7 +153,8 @@ export default function Home() {
                 <Card
                   key={unit.label}
                   className="!p-8 min-w-[140px] md:min-w-[180px] flex flex-col items-center justify-center border-white/5"
-                  hover={false}
+                  hover={true}
+                  glass={true}
                 >
                   <div className="text-4xl md:text-6xl font-black text-white tabular-nums tracking-tighter leading-none mb-3">
                     {String(unit.value).padStart(2, '0')}
@@ -170,7 +172,7 @@ export default function Home() {
         <section className="py-32 px-6">
           <div className="max-w-7xl mx-auto">
             <SectionHeader title="Event Archive" subtitle={`Round ${latestRace.round} · Mission Data Recorded`} align="center" />
-            <Card className="max-w-6xl mx-auto !p-0 overflow-hidden">
+            <Card className="max-w-6xl mx-auto !p-0 overflow-hidden" glass={true}>
               <div className="grid md:grid-cols-2">
                 <div className="p-12 md:p-20 flex flex-col justify-center border-b md:border-b-0 md:border-r border-white/5 bg-white/[0.01]">
                   <span className="text-8xl md:text-9xl mb-8 drop-shadow-2xl">{latestRace.flag}</span>
@@ -240,7 +242,7 @@ export default function Home() {
                   transition={{ delay: idx * 0.1 }}
                   className="group"
                 >
-                  <Card className="h-full border-white/5 transition-colors group-hover:border-f1-red/30 overflow-hidden !p-0">
+                  <Card className="h-full border-white/5 transition-colors group-hover:border-f1-red/30 overflow-hidden !p-0" glass={true}>
                     <div className="relative h-48 overflow-hidden">
                       <img 
                         src={item.imageUrl || 'https://images.unsplash.com/photo-1533130061792-64b345e4a833?auto=format&fit=crop&q=80&w=1000'} 

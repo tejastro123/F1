@@ -1,10 +1,11 @@
 import { Router } from 'express';
 import Constructor from '../models/Constructor.js';
+import { cache } from '../middleware/cacheMiddleware.js';
 
 const router = Router();
 
 // GET /api/v1/constructors — All constructors sorted by points desc
-router.get('/', async (req, res, next) => {
+router.get('/', cache(300), async (req, res, next) => {
   try {
     const constructors = await Constructor.find().sort({ rank: 1 });
     res.json(constructors);

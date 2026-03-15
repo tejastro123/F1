@@ -3,6 +3,7 @@ import { Helmet } from 'react-helmet-async';
 import { useOracle } from '../hooks/useData.js';
 import { SectionHeader, Card, StatPill, SkeletonCard, Button } from '../components/ui.jsx';
 import { getTeamColor } from '../utils/teamColors.js';
+import TrackMap3D from '../components/TrackMap3D.jsx';
 
 export default function StrategicOracle() {
   const { report, loading, error } = useOracle();
@@ -71,31 +72,37 @@ export default function StrategicOracle() {
                 className="relative"
               >
                 <div className="absolute -top-12 -left-12 text-[15rem] font-black text-white/[0.02] italic pointer-events-none select-none uppercase tracking-tighter">TARGET</div>
-                <Card className="!p-0 border-f1-red/20 shadow-[0_0_50px_rgba(225,6,0,0.05)] bg-white/[0.02] overflow-hidden group">
-                  <div className="flex flex-col md:flex-row">
-                    <div className="p-12 flex flex-col justify-center border-b md:border-b-0 md:border-r border-white/5 flex-1">
-                       <span className="text-8xl mb-8 group-hover:scale-110 transition-transform block w-fit">{report.race.flag}</span>
-                       <h2 className="text-5xl font-bold italic tracking-tighter uppercase leading-[0.8] mb-4">{report.race.name}</h2>
-                       <div className="flex items-center gap-2 text-xs font-black text-gray-500 uppercase tracking-[0.2em]">
-                          <span className="w-2 h-2 bg-f1-red rounded-full animate-pulse" />
-                          Round {report.race.round} · {report.race.venue}
-                       </div>
-                    </div>
-                    <div className="p-12 md:w-80 flex flex-col justify-center gap-6 bg-white/[0.01]">
-                       <div className="p-4 border border-white/5 rounded-xl bg-white/[0.02]">
-                          <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest block mb-2">Network Status</span>
-                          <span className="text-xs font-bold text-green-500 uppercase tracking-widest flex items-center gap-2">
-                             <div className="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_8px_#22c55e]" />
-                             Sync Established
-                          </span>
-                       </div>
-                       <div className="p-4 border border-white/5 rounded-xl bg-white/[0.02]">
-                          <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest block mb-2">Data Points</span>
-                          <span className="text-xs font-bold text-white uppercase tracking-widest">4.2M Iterations</span>
-                       </div>
-                    </div>
+                <div className="grid md:grid-cols-12 gap-6 relative">
+                  <div className="md:col-span-12 lg:col-span-7 h-[450px]">
+                    <TrackMap3D predictions={report.predictions} />
                   </div>
-                </Card>
+                  <div className="md:col-span-12 lg:col-span-5 flex flex-col gap-6">
+                    <Card className="flex-1 border-f1-red/20 shadow-[0_0_50px_rgba(225,6,0,0.05)] bg-white/[0.02] overflow-hidden group p-8">
+                       <div className="h-full flex flex-col justify-center">
+                          <span className="text-6xl mb-6 group-hover:scale-110 transition-transform block w-fit">{report.race.flag}</span>
+                          <h2 className="text-4xl font-bold italic tracking-tighter uppercase leading-[0.9] mb-4">{report.race.name}</h2>
+                          <div className="flex items-center gap-2 text-xs font-black text-gray-500 uppercase tracking-[0.2em] mb-8">
+                             <span className="w-2 h-2 bg-f1-red rounded-full animate-pulse" />
+                             Round {report.race.round} · {report.race.venue}
+                          </div>
+                          
+                          <div className="space-y-4">
+                             <div className="p-4 border border-white/5 rounded-xl bg-white/[0.02]">
+                                <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest block mb-2">Network Status</span>
+                                <span className="text-xs font-bold text-green-500 uppercase tracking-widest flex items-center gap-2">
+                                   <div className="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_8px_#22c55e]" />
+                                   Telemetry Sync Active
+                                </span>
+                             </div>
+                             <div className="p-4 border border-white/5 rounded-xl bg-white/[0.02]">
+                                <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest block mb-2">Processing Load</span>
+                                <span className="text-xs font-bold text-white uppercase tracking-widest">Distributed Neural Array</span>
+                             </div>
+                          </div>
+                       </div>
+                    </Card>
+                  </div>
+                </div>
               </motion.div>
 
               {/* Neural Rationales */}

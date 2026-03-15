@@ -3,11 +3,12 @@ import Driver from '../models/Driver.js';
 import Race from '../models/Race.js';
 import Prediction from '../models/Prediction.js';
 import User from '../models/User.js';
+import { cache } from '../middleware/cacheMiddleware.js';
 
 const router = Router();
 
 // GET /api/v1/stats/overview — Computed season stats
-router.get('/overview', async (req, res, next) => {
+router.get('/overview', cache(300), async (req, res, next) => {
   try {
     const drivers = await Driver.find().sort({ rank: 1 });
     const races = await Race.find();
@@ -33,7 +34,7 @@ router.get('/overview', async (req, res, next) => {
 });
 
 // GET /api/v1/stats/leaderboard — Public Prediction Leaderboard
-router.get('/leaderboard', async (req, res, next) => {
+router.get('/leaderboard', cache(600), async (req, res, next) => {
   try {
     const leaderboard = await Prediction.aggregate([
       // 1. Group by User ID and calculate stats
