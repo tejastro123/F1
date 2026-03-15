@@ -6,10 +6,11 @@ const raceSchema = new mongoose.Schema({
   grandPrixName: { type: String, required: true },
   venue: { type: String, required: true },
   date: { type: String, required: true },
-  p1Winner: { type: String, default: null },
+  p1Winner: { type: String, default: null }, // Legacy single fields
   p2: { type: String, default: null },
   p3: { type: String, default: null },
-  sprintWinner: { type: String, default: null },
+  resultsTop10: [{ type: String }], // Full Top 10 for main race
+  sprintTop8: [{ type: String }],    // Full Top 8 for sprint
   status: { type: String, enum: ['completed', 'upcoming'], default: 'upcoming' },
   circuitDetails: {
     history: { type: String, default: '' },

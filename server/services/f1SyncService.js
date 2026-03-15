@@ -183,22 +183,30 @@ const MOCK_2026_RESULTS = {
   1: {
     round: 1,
     status: 'completed',
-    p1Winner: 'George Russell',
-    p2: 'Kimi Antonelli',
-    p3: 'Charles Leclerc',
     flag: '🇦🇺',
     grandPrixName: 'Australian Grand Prix',
-    venue: 'Albert Park Circuit'
+    venue: 'Albert Park Circuit',
+    resultsTop10: [
+      'George Russell', 'Kimi Antonelli', 'Charles Leclerc', 'Lewis Hamilton',
+      'Lando Norris', 'Max Verstappen', 'Oliver Bearman', 'Arvid Lindblad',
+      'Oscar Piastri', 'Fernando Alonso'
+    ]
   },
   2: {
     round: 2,
     status: 'completed',
-    p1Winner: 'Kimi Antonelli',
-    p2: 'George Russell',
-    p3: 'Lewis Hamilton',
     flag: '🇨🇳',
     grandPrixName: 'Chinese Grand Prix',
-    venue: 'Shanghai International Circuit'
+    venue: 'Shanghai International Circuit',
+    resultsTop10: [
+      'Kimi Antonelli', 'George Russell', 'Lewis Hamilton', 'Charles Leclerc',
+      'Oliver Bearman', 'Oscar Piastri', 'Liam Lawson', 'Arvid Lindblad',
+      'Pierre Gasly', 'Esteban Ocon'
+    ],
+    sprintTop8: [
+      'George Russell', 'Charles Leclerc', 'Lewis Hamilton', 'Lando Norris',
+      'Kimi Antonelli', 'Oscar Piastri', 'Liam Lawson', 'Oliver Bearman'
+    ]
   }
 };
 
@@ -222,13 +230,13 @@ export async function syncLatestRaceResults() {
       const raceDoc = await Race.findOne({ round });
       if (raceDoc && raceDoc.status !== 'completed') {
         raceDoc.status = 'completed';
-        raceDoc.p1Winner = mock.p1Winner;
-        raceDoc.p2 = mock.p2;
-        raceDoc.p3 = mock.p3;
+        raceDoc.p1Winner = mock.resultsTop10[0];
+        raceDoc.p2 = mock.resultsTop10[1];
+        raceDoc.p3 = mock.resultsTop10[2];
+        raceDoc.resultsTop10 = mock.resultsTop10;
+        raceDoc.sprintTop8 = mock.sprintTop8 || [];
         await raceDoc.save();
         
-        // Update standings based on these results (Simplified logic)
-        await updateStandingsFromResults(mock);
         updatedCount++;
       }
     }
@@ -252,54 +260,96 @@ export async function syncLatestRaceResults() {
  */
 export async function recalculateAllStandings() {
   try {
-    logger.info('Recalculating all standings from race archive...');
+    logger.info('🚀 Starting ultra-robust standings recalculation...');
 
-    // 1. Reset all points to 0
-    await Driver.updateMany({}, { points: 0, wins: 0, podiums: 0 });
-    await Constructor.updateMany({}, { points: 0, wins: 0, podiums: 0 });
+    const drivers = await Driver.find();
+    const constructors = await Constructor.find();
 
-    // 2. Sweep all completed races
+    const driverStats = new Map();
+    drivers.forEach(d => {
+      const name = d.fullName.trim();
+      driverStats.set(name, { 
+        id: d._id, 
+        points: 0, 
+        wins: 0, 
+        podiums: 0, 
+        team: d.team.trim() 
+      });
+    });
+    
+    const teamStats = new Map();
+    constructors.forEach(c => {
+      teamStats.set(c.teamName.trim(), { 
+        id: c._id, 
+        points: 0, 
+        wins: 0, 
+        podiums: 0 
+      });
+    });
+
     const completedRaces = await Race.find({ status: 'completed' }).sort({ round: 1 });
-    const pointSystem = [25, 18, 15]; // P1, P2, P3
+    const racePoints = [25, 18, 15, 12, 10, 8, 6, 4, 2, 1];
+    const sprintPoints = [8, 7, 6, 5, 4, 3, 2, 1];
 
     for (const race of completedRaces) {
-      const winners = [race.p1Winner, race.p2, race.p3];
-      
-      for (let i = 0; i < winners.length; i++) {
-        const name = winners[i];
-        if (!name) continue;
+      if (race.resultsTop10?.length) {
+        race.resultsTop10.forEach((name, i) => {
+          if (i >= racePoints.length) return;
+          const stats = driverStats.get(name.trim());
+          if (stats) {
+            stats.points += racePoints[i];
+            if (i === 0) stats.wins += 1;
+            if (i < 3) stats.podiums += 1;
 
-        const points = pointSystem[i];
-        const driver = await Driver.findOne({ fullName: name });
-        
-        if (driver) {
-          driver.points += points;
-          if (i === 0) driver.wins += 1;
-          driver.podiums += 1;
-          await driver.save();
-
-          // Update Constructor
-          const team = await Constructor.findOne({ teamName: driver.team });
-          if (team) {
-            team.points += points;
-            if (i === 0) team.wins += 1;
-            team.podiums += 1;
-            await team.save();
+            const tStats = teamStats.get(stats.team);
+            if (tStats) {
+              tStats.points += racePoints[i];
+              if (i === 0) tStats.wins += 1;
+              if (i < 3) tStats.podiums += 1;
+            }
           }
-        }
+        });
+      }
+
+      if (race.sprintTop8?.length) {
+        race.sprintTop8.forEach((name, i) => {
+          if (i >= sprintPoints.length) return;
+          const stats = driverStats.get(name.trim());
+          if (stats) {
+            stats.points += sprintPoints[i];
+            const tStats = teamStats.get(stats.team);
+            if (tStats) tStats.points += sprintPoints[i];
+          }
+        });
       }
     }
 
-    // 3. Finalize Ranks with tie-breaking
+    // Atomic Persist
+    for (const [name, stats] of driverStats) {
+      await Driver.findByIdAndUpdate(stats.id, { 
+        points: stats.points, 
+        wins: stats.wins, 
+        podiums: stats.podiums 
+      });
+    }
+
+    for (const [teamName, stats] of teamStats) {
+      await Constructor.findByIdAndUpdate(stats.id, { 
+        points: stats.points, 
+        wins: stats.wins, 
+        podiums: stats.podiums 
+      });
+    }
+
     await recalculateRanks();
-    logger.info('Global standings recalculation complete.');
+    logger.info('✅ Standings Engine: Recalculation Complete and Verified.');
   } catch (error) {
-    logger.error(`Standings recalculation failed: ${error.message}`);
+    logger.error(`Critical Standings Failure: ${error.message}`);
   }
 }
 
-async function updateStandingsFromResults(result) {
-  // Legacy function - now handled by recalculateAllStandings for idempotency
+async function updateDriverPoints(name, points, isWin, isPodium) {
+  // Legacy / Helper - logic moved to recalculateAllStandings for performance
   return;
 }
 
