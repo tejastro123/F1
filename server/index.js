@@ -32,6 +32,7 @@ import adminRouter from './routes/admin.js';
 import streamRouter from './routes/stream.js';
 import liveRouter from './routes/live.js';
 import newsRouter from './routes/news.js';
+import oracleRouter from './routes/oracle.js';
 
 const app = express();
 app.set('trust proxy', 1); // Enable proxy support for Render/Vercel
@@ -84,6 +85,7 @@ app.use('/api/v1/admin', adminRouter);
 app.use('/api/v1/stream', streamRouter);
 app.use('/api/v1/live', liveRouter);
 app.use('/api/v1/news', newsRouter);
+app.use('/api/v1/oracle', oracleRouter);
 
 // Health check
 app.get('/api/health', (req, res) => {

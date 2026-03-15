@@ -41,6 +41,7 @@ export default function Navbar() {
     { to: '/leaderboard', label: 'Leaderboard' },
     { to: '/stats', label: 'Stats' },
     { to: '/news', label: 'Intelligence' },
+    { to: '/oracle', label: 'Oracle' },
   ];
 
   return (

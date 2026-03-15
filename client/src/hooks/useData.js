@@ -201,3 +201,31 @@ export function useNews() {
 
   return { news, loading, error, refetch: fetchNews };
 }
+
+export function useOracle() {
+  const [report, setReport] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const fetchReport = useCallback(async () => {
+    try {
+      setLoading(true);
+      const { data } = await api.get('/oracle/prediction');
+      setReport(data);
+      setError(null);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchReport();
+    const handler = () => fetchReport();
+    window.addEventListener('f1-data-updated', handler);
+    return () => window.removeEventListener('f1-data-updated', handler);
+  }, [fetchReport]);
+
+  return { report, loading, error, refetch: fetchReport };
+}
