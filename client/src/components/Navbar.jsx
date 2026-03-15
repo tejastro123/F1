@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useSocket } from '../context/SocketContext.jsx';
 import { useTheme } from '../context/ThemeContext.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
+import { Button } from './ui.jsx';
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
