@@ -6,7 +6,7 @@ const router = Router();
 // GET /api/v1/constructors — All constructors sorted by points desc
 router.get('/', async (req, res, next) => {
   try {
-    const constructors = await Constructor.find().sort({ points: -1, wins: -1 });
+    const constructors = await Constructor.find().sort({ rank: 1 });
     res.json(constructors);
   } catch (error) {
     next(error);

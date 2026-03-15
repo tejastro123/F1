@@ -9,7 +9,7 @@ const router = Router();
 // GET /api/v1/stats/overview — Computed season stats
 router.get('/overview', async (req, res, next) => {
   try {
-    const drivers = await Driver.find().sort({ points: -1 });
+    const drivers = await Driver.find().sort({ rank: 1 });
     const races = await Race.find();
 
     const leader = drivers[0] || null;

@@ -278,14 +278,15 @@ async function updateStandingsFromResults(result) {
 export async function recalculateRanks() {
   try {
     // 1. Recalculate Driver Ranks
-    const drivers = await Driver.find().sort({ points: -1, wins: -1 });
+    // Tie-breaking: Points -> Wins -> Podiums
+    const drivers = await Driver.find().sort({ points: -1, wins: -1, podiums: -1 });
     for (let i = 0; i < drivers.length; i++) {
       drivers[i].rank = i + 1;
       await drivers[i].save();
     }
 
     // 2. Recalculate Constructor Ranks
-    const constructors = await Constructor.find().sort({ points: -1, wins: -1 });
+    const constructors = await Constructor.find().sort({ points: -1, wins: -1, podiums: -1 });
     for (let i = 0; i < constructors.length; i++) {
       constructors[i].rank = i + 1;
       await constructors[i].save();
@@ -376,10 +377,11 @@ export async function syncDriverStandings() {
 
       await Driver.findOneAndUpdate(
         { fullName },
-        { points, wins, rank },
+        { points, wins }, // Remove rank from here, let recalculateRanks handle it
         { new: true }
       );
     }
+    await recalculateRanks();
     logger.info('Driver standings synced.');
   } catch (error) {
     logger.error(`Driver Standings Sync Failed: ${error.message}`);
@@ -404,10 +406,11 @@ export async function syncConstructorStandings() {
 
       await Constructor.findOneAndUpdate(
         { teamName },
-        { points, wins, rank },
+        { points, wins }, // Remove rank from here
         { new: true }
       );
     }
+    await recalculateRanks();
     logger.info('Constructor standings synced.');
   } catch (error) {
     logger.error(`Constructor Standings Sync Failed: ${error.message}`);
