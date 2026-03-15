@@ -189,7 +189,7 @@ const MOCK_2026_RESULTS = {
     resultsTop10: [
       'George Russell', 'Kimi Antonelli', 'Charles Leclerc', 'Lewis Hamilton',
       'Lando Norris', 'Max Verstappen', 'Oliver Bearman', 'Arvid Lindblad',
-      'Oscar Piastri', 'Fernando Alonso'
+      'Carlos Sainz Jr.', 'Pierre Gasly'
     ]
   },
   2: {
@@ -200,8 +200,8 @@ const MOCK_2026_RESULTS = {
     venue: 'Shanghai International Circuit',
     resultsTop10: [
       'Kimi Antonelli', 'George Russell', 'Lewis Hamilton', 'Charles Leclerc',
-      'Oliver Bearman', 'Oscar Piastri', 'Liam Lawson', 'Arvid Lindblad',
-      'Pierre Gasly', 'Esteban Ocon'
+      'Oliver Bearman', 'Pierre Gasly', 'Liam Lawson', 'Isack Hadjar',
+      'Gabriel Bortoleto', 'Franco Colapinto'
     ],
     sprintTop8: [
       'George Russell', 'Charles Leclerc', 'Lewis Hamilton', 'Lando Norris',
@@ -228,7 +228,7 @@ export async function syncLatestRaceResults() {
       if (!mock) continue;
 
       const raceDoc = await Race.findOne({ round });
-      if (raceDoc && raceDoc.status !== 'completed') {
+      if (raceDoc) {
         raceDoc.status = 'completed';
         raceDoc.p1Winner = mock.resultsTop10[0];
         raceDoc.p2 = mock.resultsTop10[1];
