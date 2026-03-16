@@ -7,6 +7,11 @@ import TrackMap3D from '../components/TrackMap3D.jsx';
 
 export default function StrategicOracle() {
   const { report, loading, error } = useOracle();
+  // Defensive fallback for report shape
+  const safeReport = report && typeof report === 'object' ? report : {};
+  const safeRace = safeReport.race && typeof safeReport.race === 'object' ? safeReport.race : {};
+  const safePredictions = Array.isArray(safeReport.predictions) ? safeReport.predictions : [];
+  const safeRationale = Array.isArray(safeReport.rationale) ? safeReport.rationale : [];
 
   if (error) return (
     <div className="pt-32 min-h-screen text-center">
@@ -39,11 +44,11 @@ export default function StrategicOracle() {
             <div className="flex flex-col">
               <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">System Confidence</span>
               <div className="flex items-center gap-3">
-                <span className="text-2xl font-black italic text-f1-gold tabular-nums">{loading ? '--' : report?.oracleConfidence}%</span>
+                <span className="text-2xl font-black italic text-f1-gold tabular-nums">{loading ? '--' : (typeof safeReport.oracleConfidence === 'number' ? safeReport.oracleConfidence : '--')}%</span>
                 <div className="w-24 h-1.5 bg-white/5 rounded-full overflow-hidden">
                   <motion.div 
                     initial={{ width: 0 }}
-                    animate={{ width: loading ? '0%' : `${report?.oracleConfidence}%` }}
+                    animate={{ width: loading ? '0%' : `${typeof safeReport.oracleConfidence === 'number' ? safeReport.oracleConfidence : 0}%` }}
                     className="h-full bg-f1-gold shadow-[0_0_10px_#FFD700]"
                   />
                 </div>
@@ -52,22 +57,27 @@ export default function StrategicOracle() {
           </div>
         </div>
 
-        {loading ? (
-          <div className="grid lg:grid-cols-12 gap-10">
-            <div className="lg:col-span-8 space-y-8">
-              <SkeletonCard className="h-96 rounded-3xl" />
-            </div>
-            <div className="lg:col-span-4 gap-6 flex flex-col">
-              <SkeletonCard className="h-40" />
-              <SkeletonCard className="h-40" />
-            </div>
+      {loading ? (
+        <div className="grid lg:grid-cols-12 gap-10">
+          <div className="lg:col-span-8 space-y-8">
+            <SkeletonCard className="h-96 rounded-3xl" />
           </div>
-        ) : report?.error ? (
-          <div className="py-20 text-center">
-            <h2 className="text-f1-red font-black uppercase tracking-widest text-2xl mb-4 italic">Analysis Interrupted</h2>
-            <p className="text-gray-500 uppercase text-xs font-bold tracking-[0.2em]">{report.error}</p>
+          <div className="lg:col-span-4 gap-6 flex flex-col">
+            <SkeletonCard className="h-40" />
+            <SkeletonCard className="h-40" />
           </div>
-        ) : report && (
+        </div>
+      ) : !report ? (
+        <div className="py-20 text-center">
+          <h2 className="text-f1-red font-black uppercase tracking-widest text-2xl mb-4 italic">Neural Link Offline</h2>
+          <p className="text-gray-500 uppercase text-xs font-bold tracking-[0.2em]">Prediction matrix unavailable - retrying synchronization...</p>
+        </div>
+      ) : report && report.error ? (
+        <div className="py-20 text-center">
+          <h2 className="text-f1-red font-black uppercase tracking-widest text-2xl mb-4 italic">Analysis Interrupted</h2>
+          <p className="text-gray-500 uppercase text-xs font-bold tracking-[0.2em]">{report.error}</p>
+        </div>
+      ) : (
           <div className="grid lg:grid-cols-12 gap-10">
             {/* Mission Target Section */}
             <div className="lg:col-span-8 space-y-12">
@@ -79,32 +89,32 @@ export default function StrategicOracle() {
                 <div className="absolute -top-12 -left-12 text-[15rem] font-black text-white/[0.02] italic pointer-events-none select-none uppercase tracking-tighter">TARGET</div>
                 <div className="grid md:grid-cols-12 gap-6 relative">
                   <div className="md:col-span-12 lg:col-span-7 h-[450px]">
-                    <TrackMap3D predictions={report?.predictions || []} />
+                    <TrackMap3D predictions={safePredictions} />
                   </div>
                   <div className="md:col-span-12 lg:col-span-5 flex flex-col gap-6">
                     <Card className="flex-1 border-f1-red/20 shadow-[0_0_50px_rgba(2225,6,0,0.05)] bg-white/[0.02] overflow-hidden group p-8">
-                       <div className="h-full flex flex-col justify-center">
-                          <span className="text-6xl mb-6 group-hover:scale-110 transition-transform block w-fit">{report.race?.flag || '🏁'}</span>
-                          <h2 className="text-4xl font-bold italic tracking-tighter uppercase leading-[0.9] mb-4">{report.race?.name || 'Circuit Unavailable'}</h2>
-                          <div className="flex items-center gap-2 text-xs font-black text-gray-500 uppercase tracking-[0.2em] mb-8">
-                             <span className="w-2 h-2 bg-f1-red rounded-full animate-pulse" />
-                             Round {report.race?.round || '--'} · {report.race?.venue || 'Unknown Location'}
-                          </div>
+                      <div className="h-full flex flex-col justify-center">
+                        <span className="text-6xl mb-6 group-hover:scale-110 transition-transform block w-fit">{safeRace.flag || '🏁'}</span>
+                        <h2 className="text-4xl font-bold italic tracking-tighter uppercase leading-[0.9] mb-4">{safeRace.name || 'Circuit Unavailable'}</h2>
+                        <div className="flex items-center gap-2 text-xs font-black text-gray-500 uppercase tracking-[0.2em] mb-8">
+                          <span className="w-2 h-2 bg-f1-red rounded-full animate-pulse" />
+                          Round {safeRace.round || '--'} · {safeRace.venue || 'Unknown Location'}
+                        </div>
                           
-                          <div className="space-y-4">
-                             <div className="p-4 border border-white/5 rounded-xl bg-white/[0.02]">
-                                <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest block mb-2">Network Status</span>
-                                <span className="text-xs font-bold text-green-500 uppercase tracking-widest flex items-center gap-2">
-                                   <div className="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_8px_#22c55e]" />
-                                   Telemetry Sync Active
-                                </span>
-                             </div>
-                             <div className="p-4 border border-white/5 rounded-xl bg-white/[0.02]">
-                                <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest block mb-2">Processing Load</span>
-                                <span className="text-xs font-bold text-white uppercase tracking-widest">Distributed Neural Array</span>
-                             </div>
+                        <div className="space-y-4">
+                          <div className="p-4 border border-white/5 rounded-xl bg-white/[0.02]">
+                            <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest block mb-2">Network Status</span>
+                            <span className="text-xs font-bold text-green-500 uppercase tracking-widest flex items-center gap-2">
+                              <div className="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_8px_#22c55e]" />
+                              Telemetry Sync Active
+                            </span>
                           </div>
-                       </div>
+                          <div className="p-4 border border-white/5 rounded-xl bg-white/[0.02]">
+                            <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest block mb-2">Processing Load</span>
+                            <span className="text-xs font-bold text-white uppercase tracking-widest">Distributed Neural Array</span>
+                          </div>
+                        </div>
+                      </div>
                     </Card>
                   </div>
                 </div>
@@ -114,7 +124,7 @@ export default function StrategicOracle() {
               <div className="space-y-6">
                  <h3 className="text-[10px] font-black text-f1-red uppercase tracking-[0.5em] italic">Strategic Rationale</h3>
                  <div className="grid md:grid-cols-2 gap-6">
-                    {report.rationale?.map((r, i) => (
+                    {safeRationale.map((r, i) => (
                       <motion.div
                         key={i}
                         initial={{ opacity: 0, y: 10 }}
@@ -127,7 +137,7 @@ export default function StrategicOracle() {
                          <p className="text-sm font-medium text-gray-300 leading-relaxed italic uppercase">"{r}"</p>
                       </motion.div>
                     ))}
-                    {(!report.rationale || report.rationale.length === 0) && (
+                    {safeRationale.length === 0 && (
                       <div className="md:col-span-2 p-8 bg-white/[0.01] border border-dashed border-white/10 rounded-3xl text-center">
                         <p className="text-[10px] font-black text-gray-600 uppercase tracking-widest">No Rationale Available</p>
                       </div>
@@ -140,9 +150,9 @@ export default function StrategicOracle() {
             <div className="lg:col-span-4 space-y-8">
                <h3 className="text-[10px] font-black text-f1-red uppercase tracking-[0.5em] italic">Probability Matrix</h3>
                <div className="space-y-4">
-                  {report.predictions?.map((p, i) => (
+                  {safePredictions.map((p, i) => (
                     <motion.div
-                      key={p._id || i}
+                      key={p && p._id ? p._id : i}
                       initial={{ opacity: 0, x: 20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.3 + (i * 0.1) }}
@@ -151,7 +161,7 @@ export default function StrategicOracle() {
                         <div className="absolute top-0 right-0 p-4 opacity-[0.03] italic font-black text-7xl pointer-events-none uppercase">P{i+1}</div>
                         <div className="flex items-center gap-6">
                            <div className="relative">
-                              {p.photoUrl ? (
+                              {p && p.photoUrl ? (
                                 <img src={p.photoUrl} className="w-16 h-16 rounded-full object-cover border-2 border-white/10" />
                               ) : (
                                 <div className="w-16 h-16 rounded-full bg-white/5 border-2 border-white/10 flex items-center justify-center text-2xl group-hover:rotate-12 transition-transform">👤</div>
@@ -161,26 +171,26 @@ export default function StrategicOracle() {
                               </div>
                            </div>
                            <div className="flex-1 min-w-0">
-                              <h4 className="text-lg font-black italic uppercase tracking-tighter truncate group-hover:text-f1-red transition-colors">{p.fullName || 'Incomplete Profile'}</h4>
-                              <span className="text-[10px] font-black uppercase tracking-widest" style={{ color: getTeamColor(p.team) }}>{p.team || 'Unassigned'}</span>
+                              <h4 className="text-lg font-black italic uppercase tracking-tighter truncate group-hover:text-f1-red transition-colors">{p && p.fullName ? p.fullName : 'Incomplete Profile'}</h4>
+                              <span className="text-[10px] font-black uppercase tracking-widest" style={{ color: getTeamColor(p && p.team ? p.team : '') }}>{p && p.team ? p.team : 'Unassigned'}</span>
                               
                               <div className="mt-4 flex items-center gap-4">
                                  <div className="flex-1 h-1 bg-white/5 rounded-full overflow-hidden">
                                     <motion.div 
                                       initial={{ width: 0 }}
-                                      animate={{ width: `${p.probability || 0}%` }}
+                                      animate={{ width: `${p && typeof p.probability === 'number' ? p.probability : 0}%` }}
                                       className="h-full bg-current"
-                                      style={{ color: getTeamColor(p.team) }}
+                                      style={{ color: getTeamColor(p && p.team ? p.team : '') }}
                                     />
                                  </div>
-                                 <span className="text-xs font-black tabular-nums">{p.probability || 0}%</span>
+                                 <span className="text-xs font-black tabular-nums">{p && typeof p.probability === 'number' ? p.probability : 0}%</span>
                               </div>
                            </div>
                         </div>
                       </Card>
                     </motion.div>
                   ))}
-                  {(!report.predictions || report.predictions.length === 0) && (
+                  {safePredictions.length === 0 && (
                     <div className="p-8 bg-white/[0.01] border border-dashed border-white/10 rounded-3xl text-center">
                       <p className="text-[10px] font-black text-gray-600 uppercase tracking-widest">No Predictions Generated</p>
                     </div>
