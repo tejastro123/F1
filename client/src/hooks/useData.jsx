@@ -208,39 +208,40 @@ export function useOracle() {
   const [error, setError] = useState(null);
 
   const fetchReport = useCallback(async () => {
+    setLoading(true);
     try {
-      setLoading(true);
       const { data } = await api.get('/oracle/prediction');
-      setReport(data);
-      setError(null);
-    } catch (err) {
-      console.error('Oracle fetch failed:', err.message);
-      if (err.response && err.response.status === 404) {
-        // Vercel static deploy fallback - mock prediction data
-        const mockReport = {
-          race: {
-            name: "Japanese Grand Prix",
-            round: 18,
-            venue: "Suzuka Circuit",
-            flag: "🇯🇵"
-          },
-          predictions: [
-            { _id: "ant1", fullName: "Kimi Antonelli", team: "Mercedes", probability: 27, photoUrl: "" },
-            { _id: "rus63", fullName: "George Russell", team: "Mercedes", probability: 23, photoUrl: "" },
-            { _id: "nor4", fullName: "Lando Norris", team: "McLaren", probability: 19, photoUrl: "" }
-          ],
-          rationale: [
-            "Antonelli's recent dominance shows superior momentum vectors.",
-            "Mercedes power unit optimization favors Russell in high-speed corners.",
-            "McLaren's aero package gives Norris edge in Suzuka's technical sectors."
-          ],
-          oracleConfidence: 89
-        };
-        setReport(mockReport);
+      // Defensive: ensure data shape
+      if (data && typeof data === 'object' && data.race && data.predictions) {
+        setReport(data);
         setError(null);
       } else {
-        setError(err.message);
+        throw new Error('Invalid oracle data shape');
       }
+    } catch (err) {
+      // Always fallback to mock data on any error
+      console.error('Oracle fetch failed:', err.message);
+      const mockReport = {
+        race: {
+          name: "Japanese Grand Prix",
+          round: 18,
+          venue: "Suzuka Circuit",
+          flag: "🇯🇵"
+        },
+        predictions: [
+          { _id: "ant1", fullName: "Kimi Antonelli", team: "Mercedes", probability: 27, photoUrl: "" },
+          { _id: "rus63", fullName: "George Russell", team: "Mercedes", probability: 23, photoUrl: "" },
+          { _id: "nor4", fullName: "Lando Norris", team: "McLaren", probability: 19, photoUrl: "" }
+        ],
+        rationale: [
+          "Antonelli's recent dominance shows superior momentum vectors.",
+          "Mercedes power unit optimization favors Russell in high-speed corners.",
+          "McLaren's aero package gives Norris edge in Suzuka's technical sectors."
+        ],
+        oracleConfidence: 89
+      };
+      setReport(mockReport);
+      setError(null);
     } finally {
       setLoading(false);
     }
