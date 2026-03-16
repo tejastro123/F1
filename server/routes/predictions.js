@@ -35,47 +35,4 @@ router.post('/', authMiddleware, async (req, res, next) => {
     next(error);
   }
 });
-
-// GET /api/v1/predictions/leaderboard — Get user rankings
-router.get('/leaderboard', async (req, res, next) => {
-  try {
-    const leaderboard = await Prediction.aggregate([
-      { $match: { isCorrect: { $ne: null } } },
-      {
-        $group: {
-          _id: '$user',
-          total: { $sum: 1 },
-          correct: { $sum: { $cond: [{ $eq: ['$isCorrect', true] }, 1, 0] } }
-        }
-      },
-      { $sort: { correct: -1, total: 1 } },
-      { $limit: 20 },
-      {
-        $lookup: {
-          from: 'users',
-          localField: '_id',
-          foreignField: '_id',
-          as: 'userInfo'
-        }
-      },
-      { $unwind: '$userInfo' },
-      {
-        $project: {
-          _id: 1,
-          total: 1,
-          correct: 1,
-          accuracy: { $multiply: [{ $divide: ['$correct', '$total'] }, 100] },
-          user: {
-            displayName: '$userInfo.displayName',
-            avatarUrl: '$userInfo.avatarUrl'
-          }
-        }
-      }
-    ]);
-    res.json(leaderboard);
-  } catch (error) {
-    next(error);
-  }
-});
-
 export default router;

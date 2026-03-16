@@ -325,22 +325,41 @@ export async function recalculateAllStandings() {
       }
     }
 
-    // Atomic Persist
-    for (const [name, stats] of driverStats) {
-      await Driver.findByIdAndUpdate(stats.id, { 
-        points: stats.points, 
-        wins: stats.wins, 
-        podiums: stats.podiums 
-      });
-    }
 
-    for (const [teamName, stats] of teamStats) {
-      await Constructor.findByIdAndUpdate(stats.id, { 
-        points: stats.points, 
-        wins: stats.wins, 
-        podiums: stats.podiums 
+    // Atomic Bulk Persist
+    const driverOps = [];
+    for (const [name, stats] of driverStats) {
+      driverOps.push({
+        updateOne: {
+          filter: { _id: stats.id },
+          update: { 
+            $set: { 
+              points: stats.points, 
+              wins: stats.wins, 
+              podiums: stats.podiums 
+            }
+          }
+        }
       });
     }
+    if (driverOps.length > 0) await Driver.bulkWrite(driverOps);
+
+    const teamOps = [];
+    for (const [teamName, stats] of teamStats) {
+      teamOps.push({
+        updateOne: {
+          filter: { _id: stats.id },
+          update: { 
+            $set: { 
+              points: stats.points, 
+              wins: stats.wins, 
+              podiums: stats.podiums 
+            }
+          }
+        }
+      });
+    }
+    if (teamOps.length > 0) await Constructor.bulkWrite(teamOps);
 
     await recalculateRanks();
     logger.info('✅ Standings Engine: Recalculation Complete and Verified.');
@@ -360,31 +379,36 @@ async function updateDriverPoints(name, points, isWin, isPodium) {
 export async function recalculateRanks() {
   try {
     // 1. Recalculate Driver Ranks
-    let drivers = await Driver.find();
-    // Deterministic sort in JS to avoid index weirdness
+    const drivers = await Driver.find();
     drivers.sort((a, b) => {
       if (b.points !== a.points) return b.points - a.points;
       if (b.wins !== a.wins) return b.wins - a.wins;
       return b.podiums - a.podiums;
     });
 
-    for (let i = 0; i < drivers.length; i++) {
-      drivers[i].rank = i + 1;
-      await drivers[i].save();
-    }
+    const driverOps = drivers.map((d, i) => ({
+      updateOne: {
+        filter: { _id: d._id },
+        update: { $set: { rank: i + 1 } }
+      }
+    }));
+    if (driverOps.length > 0) await Driver.bulkWrite(driverOps);
 
     // 2. Recalculate Constructor Ranks
-    let constructors = await Constructor.find();
+    const constructors = await Constructor.find();
     constructors.sort((a, b) => {
       if (b.points !== a.points) return b.points - a.points;
       if (b.wins !== a.wins) return b.wins - a.wins;
       return b.podiums - a.podiums;
     });
 
-    for (let i = 0; i < constructors.length; i++) {
-      constructors[i].rank = i + 1;
-      await constructors[i].save();
-    }
+    const constructorOps = constructors.map((c, i) => ({
+      updateOne: {
+        filter: { _id: c._id },
+        update: { $set: { rank: i + 1 } }
+      }
+    }));
+    if (constructorOps.length > 0) await Constructor.bulkWrite(constructorOps);
 
     logger.info('Standings ranks recalculated.');
   } catch (error) {

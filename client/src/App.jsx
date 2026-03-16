@@ -5,6 +5,7 @@ import { HelmetProvider } from 'react-helmet-async';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 import { SocketProvider } from './context/SocketContext.jsx';
 import { ThemeProvider } from './context/ThemeContext.jsx';
+import { DataCacheProvider } from './context/DataCacheContext.jsx';
 import Navbar from './components/Navbar.jsx';
 import LiveBanner from './components/LiveBanner.jsx';
 import { LoadingSpinner } from './components/ui.jsx';
@@ -104,13 +105,15 @@ export default function App() {
       <ThemeProvider>
         <AuthProvider>
           <SocketProvider>
-            <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-              <Navbar />
-              <LiveBanner />
-              <main>
-                <AnimatedRoutes />
-              </main>
-            </BrowserRouter>
+            <DataCacheProvider>
+              <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+                <Navbar />
+                <LiveBanner />
+                <main>
+                  <AnimatedRoutes />
+                </main>
+              </BrowserRouter>
+            </DataCacheProvider>
           </SocketProvider>
         </AuthProvider>
       </ThemeProvider>

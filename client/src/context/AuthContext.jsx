@@ -8,17 +8,15 @@ export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Try to refresh token on mount
+  // Refresh token on mount + set up proactive refresh interval
   useEffect(() => {
     const tryRefresh = async () => {
       try {
         const { data } = await api.post('/auth/refresh');
         setAccessToken(data.accessToken);
         
-        // Fetch full profile (display name, avatar, etc. from DB)
         const meRes = await api.get('/auth/me');
         setUser(meRes.data.user);
-        
         setIsAuthenticated(true);
       } catch (err) {
         console.error('Session refresh failed:', err);
@@ -28,7 +26,21 @@ export const AuthProvider = ({ children }) => {
         setLoading(false);
       }
     };
+
     tryRefresh();
+
+    // Proactive refresh every 12 minutes (token expires in 15m)
+    const interval = setInterval(async () => {
+      try {
+        const { data } = await api.post('/auth/refresh');
+        setAccessToken(data.accessToken);
+        console.info('Access token proactively refreshed');
+      } catch (err) {
+        console.error('Proactive refresh failed:', err);
+      }
+    }, 12 * 60 * 1000);
+
+    return () => clearInterval(interval);
   }, []);
 
   const login = useCallback(async (email, password) => {
