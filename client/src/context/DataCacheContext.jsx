@@ -16,7 +16,9 @@ export const DataCacheProvider = ({ children }) => {
 
   const fetchData = useCallback(async (key, endpoint) => {
     // Prevent redundant fetches within 30 seconds
-    if (Date.now() - cache[key].lastFetched < 30000 && cache[key].data?.length > 0) return;
+    const hasData = Array.isArray(cache[key].data) ? cache[key].data.length > 0 : !!cache[key].data;
+    if (Date.now() - cache[key].lastFetched < 30000 && hasData) return;
+    
     if (cache[key].loading) return;
 
     setCache(prev => ({ ...prev, [key]: { ...prev[key], loading: true } }));

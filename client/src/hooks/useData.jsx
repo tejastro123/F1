@@ -106,22 +106,11 @@ export function useNews() {
 
 export function useOracle() {
   const { cache, fetchData } = useDataCache();
-  const { data, loading } = cache.oracle;
-  const [oracleError, setOracleError] = useState(null);
-
-  // Oracle has a specialized fallback mechanism
-  const fetchOracle = useCallback(async () => {
-    try {
-      await fetchData('oracle', '/oracle/prediction');
-      setOracleError(null);
-    } catch (err) {
-      setOracleError(err.message);
-    }
-  }, [fetchData]);
+  const { data, loading, error } = cache.oracle;
 
   useEffect(() => {
-    fetchOracle();
-  }, [fetchOracle]);
+    fetchData('oracle', '/oracle/prediction');
+  }, [fetchData]);
 
   // Fallback Logic (Mock data if real fetch fails or is empty)
   const report = data || {
@@ -139,5 +128,5 @@ export function useOracle() {
     oracleConfidence: 89
   };
 
-  return { report, loading, error: oracleError, refetch: fetchOracle };
+  return { report, loading, error, refetch: () => fetchData('oracle', '/oracle/prediction') };
 }
