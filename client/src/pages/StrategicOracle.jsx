@@ -62,6 +62,11 @@ export default function StrategicOracle() {
               <SkeletonCard className="h-40" />
             </div>
           </div>
+        ) : report?.error ? (
+          <div className="py-20 text-center">
+            <h2 className="text-f1-red font-black uppercase tracking-widest text-2xl mb-4 italic">Analysis Interrupted</h2>
+            <p className="text-gray-500 uppercase text-xs font-bold tracking-[0.2em]">{report.error}</p>
+          </div>
         ) : report && (
           <div className="grid lg:grid-cols-12 gap-10">
             {/* Mission Target Section */}
@@ -74,16 +79,16 @@ export default function StrategicOracle() {
                 <div className="absolute -top-12 -left-12 text-[15rem] font-black text-white/[0.02] italic pointer-events-none select-none uppercase tracking-tighter">TARGET</div>
                 <div className="grid md:grid-cols-12 gap-6 relative">
                   <div className="md:col-span-12 lg:col-span-7 h-[450px]">
-                    <TrackMap3D predictions={report.predictions} />
+                    <TrackMap3D predictions={report?.predictions || []} />
                   </div>
                   <div className="md:col-span-12 lg:col-span-5 flex flex-col gap-6">
-                    <Card className="flex-1 border-f1-red/20 shadow-[0_0_50px_rgba(225,6,0,0.05)] bg-white/[0.02] overflow-hidden group p-8">
+                    <Card className="flex-1 border-f1-red/20 shadow-[0_0_50px_rgba(2225,6,0,0.05)] bg-white/[0.02] overflow-hidden group p-8">
                        <div className="h-full flex flex-col justify-center">
-                          <span className="text-6xl mb-6 group-hover:scale-110 transition-transform block w-fit">{report.race.flag}</span>
-                          <h2 className="text-4xl font-bold italic tracking-tighter uppercase leading-[0.9] mb-4">{report.race.name}</h2>
+                          <span className="text-6xl mb-6 group-hover:scale-110 transition-transform block w-fit">{report.race?.flag || '🏁'}</span>
+                          <h2 className="text-4xl font-bold italic tracking-tighter uppercase leading-[0.9] mb-4">{report.race?.name || 'Circuit Unavailable'}</h2>
                           <div className="flex items-center gap-2 text-xs font-black text-gray-500 uppercase tracking-[0.2em] mb-8">
                              <span className="w-2 h-2 bg-f1-red rounded-full animate-pulse" />
-                             Round {report.race.round} · {report.race.venue}
+                             Round {report.race?.round || '--'} · {report.race?.venue || 'Unknown Location'}
                           </div>
                           
                           <div className="space-y-4">
@@ -109,7 +114,7 @@ export default function StrategicOracle() {
               <div className="space-y-6">
                  <h3 className="text-[10px] font-black text-f1-red uppercase tracking-[0.5em] italic">Strategic Rationale</h3>
                  <div className="grid md:grid-cols-2 gap-6">
-                    {report.rationale.map((r, i) => (
+                    {report.rationale?.map((r, i) => (
                       <motion.div
                         key={i}
                         initial={{ opacity: 0, y: 10 }}
@@ -122,6 +127,11 @@ export default function StrategicOracle() {
                          <p className="text-sm font-medium text-gray-300 leading-relaxed italic uppercase">"{r}"</p>
                       </motion.div>
                     ))}
+                    {(!report.rationale || report.rationale.length === 0) && (
+                      <div className="md:col-span-2 p-8 bg-white/[0.01] border border-dashed border-white/10 rounded-3xl text-center">
+                        <p className="text-[10px] font-black text-gray-600 uppercase tracking-widest">No Rationale Available</p>
+                      </div>
+                    )}
                  </div>
               </div>
             </div>
@@ -130,9 +140,9 @@ export default function StrategicOracle() {
             <div className="lg:col-span-4 space-y-8">
                <h3 className="text-[10px] font-black text-f1-red uppercase tracking-[0.5em] italic">Probability Matrix</h3>
                <div className="space-y-4">
-                  {report.predictions.map((p, i) => (
+                  {report.predictions?.map((p, i) => (
                     <motion.div
-                      key={p._id}
+                      key={p._id || i}
                       initial={{ opacity: 0, x: 20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.3 + (i * 0.1) }}
@@ -151,25 +161,30 @@ export default function StrategicOracle() {
                               </div>
                            </div>
                            <div className="flex-1 min-w-0">
-                              <h4 className="text-lg font-black italic uppercase tracking-tighter truncate group-hover:text-f1-red transition-colors">{p.fullName}</h4>
-                              <span className="text-[10px] font-black uppercase tracking-widest" style={{ color: getTeamColor(p.team) }}>{p.team}</span>
+                              <h4 className="text-lg font-black italic uppercase tracking-tighter truncate group-hover:text-f1-red transition-colors">{p.fullName || 'Incomplete Profile'}</h4>
+                              <span className="text-[10px] font-black uppercase tracking-widest" style={{ color: getTeamColor(p.team) }}>{p.team || 'Unassigned'}</span>
                               
                               <div className="mt-4 flex items-center gap-4">
                                  <div className="flex-1 h-1 bg-white/5 rounded-full overflow-hidden">
                                     <motion.div 
                                       initial={{ width: 0 }}
-                                      animate={{ width: `${p.probability}%` }}
+                                      animate={{ width: `${p.probability || 0}%` }}
                                       className="h-full bg-current"
                                       style={{ color: getTeamColor(p.team) }}
                                     />
                                  </div>
-                                 <span className="text-xs font-black tabular-nums">{p.probability}%</span>
+                                 <span className="text-xs font-black tabular-nums">{p.probability || 0}%</span>
                               </div>
                            </div>
                         </div>
                       </Card>
                     </motion.div>
                   ))}
+                  {(!report.predictions || report.predictions.length === 0) && (
+                    <div className="p-8 bg-white/[0.01] border border-dashed border-white/10 rounded-3xl text-center">
+                      <p className="text-[10px] font-black text-gray-600 uppercase tracking-widest">No Predictions Generated</p>
+                    </div>
+                  )}
                </div>
 
                {/* Machine Legend */}

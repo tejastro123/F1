@@ -101,22 +101,14 @@ export default function TrackMap3D({ predictions }) {
         <pointLight position={[10, 20, 10]} intensity={1.5} color="#e10600" />
         <spotLight position={[-20, 50, 10]} angle={0.15} penumbra={1} intensity={2} color="#fff" />
         
-        <mesh>
-          <boxGeometry args={[10, 10, 10]} />
-          <meshStandardMaterial color="red" />
-        </mesh>
+        <TrackSpline predictions={predictions} />
 
         <OrbitControls 
-          enableDamping 
-          dampingFactor={0.05} 
-          minDistance={30} 
-          maxDistance={120} 
-          autoRotate 
-          autoRotateSpeed={0.5}
+          enablePan={false}
           maxPolarAngle={Math.PI / 2.1}
+          minDistance={30}
+          maxDistance={100}
         />
-        
-        <gridHelper args={[200, 40, '#ffffff', '#222222']} position={[0, -5, 0]} opacity={0.05} transparent />
       </Canvas>
 
       <div className="absolute bottom-6 right-6 z-10 pointer-events-none flex flex-col items-end">
