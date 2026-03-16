@@ -5,7 +5,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
 } from 'recharts';
-import { useDrivers, useConstructors, useStats } from '../hooks/useData.js';
+import { useDrivers, useConstructors, useStats } from '../hooks/useData.jsx';
 import { Card, SectionHeader, AnimatedCounter, SkeletonCard } from '../components/ui.jsx';
 import { getTeamColor } from '../utils/teamColors.js';
 

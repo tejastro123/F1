@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
-import { useOracle } from '../hooks/useData.js';
+import { useOracle } from '../hooks/useData.jsx';
 import { SectionHeader, Card, StatPill, SkeletonCard, Button } from '../components/ui.jsx';
 import { getTeamColor } from '../utils/teamColors.js';
 import TrackMap3D from '../components/TrackMap3D.jsx';

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
-import { useRaces } from '../hooks/useData.js';
+import { useRaces } from '../hooks/useData.jsx';
 import useCountdown from '../hooks/useCountdown.js';
 import { Card, Badge, RaceStatusBadge, SectionHeader, SkeletonCard, Button } from '../components/ui.jsx';
 import PredictionModal from '../components/PredictionModal.jsx';

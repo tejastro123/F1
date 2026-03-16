@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
-import { useNews } from '../hooks/useData.js';
+import { useNews } from '../hooks/useData.jsx';
 import { SectionHeader, Card, StatPill, SkeletonCard, Button } from '../components/ui.jsx';
 
 const CATEGORIES = ['All', 'Race Report', 'Team News', 'Technical', 'Rumours', 'Analysis'];

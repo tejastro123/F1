@@ -2,7 +2,7 @@ import { useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { useStats, useRaces, useNews } from '../hooks/useData.js';
+import { useStats, useRaces, useNews } from '../hooks/useData.jsx';
 import useCountdown from '../hooks/useCountdown.js';
 import { AnimatedCounter, Card, Button, StatPill, SectionHeader, SkeletonCard } from '../components/ui.jsx';
 

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
-import { useConstructors } from '../hooks/useData.js';
+import { useConstructors } from '../hooks/useData.jsx';
 import { AnimatedCounter, Card, SectionHeader, SkeletonCard } from '../components/ui.jsx';
 import { getTeamColor } from '../utils/teamColors.js';
 

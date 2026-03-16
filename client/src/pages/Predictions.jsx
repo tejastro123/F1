@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
-import { usePredictions } from '../hooks/useData.js';
+import { usePredictions } from '../hooks/useData.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { Card, Badge, SectionHeader, AnimatedCounter, SkeletonLoader, SkeletonCard, Button } from '../components/ui.jsx';
 

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from './ui.jsx';
-import { useDrivers } from '../hooks/useData.js';
+import { useDrivers } from '../hooks/useData.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import api from '../services/api.js';
 import { getTeamColor } from '../utils/teamColors.js';
