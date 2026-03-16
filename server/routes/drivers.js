@@ -1,11 +1,9 @@
 import { Router } from 'express';
 import Driver from '../models/Driver.js';
-import { cache } from '../middleware/cacheMiddleware.js';
-
 const router = Router();
 
 // GET /api/v1/drivers — All drivers sorted by points desc
-router.get('/', cache(300), async (req, res, next) => {
+router.get('/', async (req, res, next) => {
   try {
     const drivers = await Driver.find().sort({ rank: 1 });
     res.json(drivers);

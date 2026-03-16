@@ -1,11 +1,9 @@
 import { Router } from 'express';
 import Race from '../models/Race.js';
-import { cache } from '../middleware/cacheMiddleware.js';
-
 const router = Router();
 
 // GET /api/v1/races — Full 24-race calendar
-router.get('/', cache(1800), async (req, res, next) => {
+router.get('/', async (req, res, next) => {
   try {
     const races = await Race.find().sort({ round: 1 });
     res.json(races);
@@ -15,7 +13,7 @@ router.get('/', cache(1800), async (req, res, next) => {
 });
 
 // GET /api/v1/races/latest — Most recently completed race
-router.get('/latest', cache(600), async (req, res, next) => {
+router.get('/latest', async (req, res, next) => {
   try {
     const race = await Race.findOne({ status: 'completed' }).sort({ round: -1 });
     if (!race) {

@@ -8,7 +8,6 @@ import { getIO } from '../socket/socketManager.js';
 import { logger } from '../middleware/errorHandler.js';
 
 import News from '../models/News.js';
-import { clearCache } from '../middleware/cacheMiddleware.js';
 
 // Jolpi API Base URL (Ergast successor)
 const JOLPI_API = 'http://jolpi.ca/api/f1';
@@ -244,13 +243,6 @@ export async function syncLatestRaceResults() {
 
     if (updatedCount > 0) {
       await recalculateAllStandings();
-      
-      // Clear all stats and standings cache
-      await clearCache('f1:cache:/api/v1/drivers*');
-      await clearCache('f1:cache:/api/v1/constructors*');
-      await clearCache('f1:cache:/api/v1/races*');
-      await clearCache('f1:cache:/api/v1/stats*');
-      await clearCache('f1:cache:/api/v1/oracle*');
 
       notifyClients('F1 Results updated and standings recalculated');
       logger.info(`F1 Results sync complete. ${updatedCount} races updated.`);
@@ -454,7 +446,6 @@ export async function syncNews() {
       );
     }
 
-    await clearCache('f1:cache:/api/v1/news*');
     notifyClients('F1 News sync complete.');
     logger.info('F1 News sync complete.');
   } catch (error) {

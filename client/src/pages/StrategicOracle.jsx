@@ -3,12 +3,11 @@ import { Helmet } from 'react-helmet-async';
 import { useOracle } from '../hooks/useData.jsx';
 import { SectionHeader, Card, StatPill, SkeletonCard, Button } from '../components/ui.jsx';
 import { getTeamColor } from '../utils/teamColors.js';
-import TrackMap3D from '../components/TrackMap3D.jsx';
 
 export default function StrategicOracle() {
   const { report, loading, error } = useOracle();
   // Defensive fallback for report shape
-  const safeReport = report && typeof report === 'object' ? report : {};
+  const safeReport = report && typeof report === 'object' && !Array.isArray(report) ? report : {};
   const safeRace = safeReport.race && typeof safeReport.race === 'object' ? safeReport.race : {};
   const safePredictions = Array.isArray(safeReport.predictions) ? safeReport.predictions : [];
   const safeRationale = Array.isArray(safeReport.rationale) ? safeReport.rationale : [];
@@ -87,12 +86,9 @@ export default function StrategicOracle() {
                 className="relative"
               >
                 <div className="absolute -top-12 -left-12 text-[15rem] font-black text-white/[0.02] italic pointer-events-none select-none uppercase tracking-tighter">TARGET</div>
-                <div className="grid md:grid-cols-12 gap-6 relative">
-                  <div className="md:col-span-12 lg:col-span-7 h-[450px]">
-                    <TrackMap3D predictions={safePredictions} />
-                  </div>
-                  <div className="md:col-span-12 lg:col-span-5 flex flex-col gap-6">
-                    <Card className="flex-1 border-f1-red/20 shadow-[0_0_50px_rgba(2225,6,0,0.05)] bg-white/[0.02] overflow-hidden group p-8">
+                <div className="grid gap-6 relative">
+                  <div className="flex flex-col gap-6">
+                    <Card className="flex-1 border-f1-red/20 shadow-[0_0_50px_rgba(225,6,0,0.05)] bg-white/[0.02] overflow-hidden group p-8">
                       <div className="h-full flex flex-col justify-center">
                         <span className="text-6xl mb-6 group-hover:scale-110 transition-transform block w-fit">{safeRace.flag || '🏁'}</span>
                         <h2 className="text-4xl font-bold italic tracking-tighter uppercase leading-[0.9] mb-4">{safeRace.name || 'Circuit Unavailable'}</h2>
@@ -101,7 +97,7 @@ export default function StrategicOracle() {
                           Round {safeRace.round || '--'} · {safeRace.venue || 'Unknown Location'}
                         </div>
                           
-                        <div className="space-y-4">
+                        <div className="grid md:grid-cols-2 gap-4">
                           <div className="p-4 border border-white/5 rounded-xl bg-white/[0.02]">
                             <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest block mb-2">Network Status</span>
                             <span className="text-xs font-bold text-green-500 uppercase tracking-widest flex items-center gap-2">
