@@ -9,7 +9,6 @@ import Driver from '../models/Driver.js';
 import Race from '../models/Race.js';
 import Prediction from '../models/Prediction.js';
 import { broadcast } from '../socket/socketManager.js';
-import { syncAllFromInternet } from '../services/externalDataService.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -52,35 +51,6 @@ router.post('/upload', upload.single('file'), async (req, res, next) => {
     const results = await seedFromXlsx(req.file.path);
     broadcast('data-updated', { message: 'Data has been updated', results });
     res.json({ message: 'Seed complete', results });
-  } catch (error) {
-    next(error);
-  }
-});
-
-// POST /api/v1/admin/sync-from-internet — Fetch external data
-router.post('/sync-from-internet', upload.single('file'), async (req, res, next) => {
-  try {
-    const options = {
-      syncSchedule: req.body.syncSchedule === 'true',
-      fetchWikiInfo: req.body.fetchWikiInfo === 'true',
-      process2026: req.body.process2026 === 'true',
-      fetchResults: req.body.fetchResults === 'true' // For fastf1 results if needed
-    };
-    
-    // Pass req.file.path if process2026 is true and file exists
-    const xlsxPath = (options.process2026 && req.file) ? req.file.path : null;
-    
-    if (options.process2026 && !xlsxPath) {
-       return res.status(400).json({ error: '2026 data sync requested but no Excel file provided.' });
-    }
-
-    const results = await syncAllFromInternet(options, xlsxPath);
-    
-    res.json({
-      message: 'Internet sync complete',
-      timestamp: new Date().toISOString(),
-      results
-    });
   } catch (error) {
     next(error);
   }

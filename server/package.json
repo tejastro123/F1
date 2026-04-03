@@ -7,7 +7,6 @@
   "scripts": {
     "start": "node index.js",
     "dev": "node --watch index.js",
-    "dev:all": "concurrently \"npm run dev\" \"cd python_service && uvicorn main:app --reload --port 8000\"",
     "seed": "node scripts/seedFromXlsx.js"
   },
   "dependencies": {
@@ -32,8 +31,5 @@
     "socket.io": "^4.8.0",
     "winston": "^3.14.0",
     "xlsx": "^0.18.5"
-  },
-  "devDependencies": {
-    "concurrently": "^9.0.1"
   }
 }

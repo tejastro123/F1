@@ -13,13 +13,6 @@ export const AuthProvider = ({ children }) => {
     const tryRefresh = async () => {
       try {
         const { data } = await api.post('/auth/refresh');
-        if (!data.accessToken) {
-          clearAccessToken();
-          setIsAuthenticated(false);
-          setLoading(false);
-          return;
-        }
-
         setAccessToken(data.accessToken);
         
         const meRes = await api.get('/auth/me');
@@ -40,13 +33,8 @@ export const AuthProvider = ({ children }) => {
     const interval = setInterval(async () => {
       try {
         const { data } = await api.post('/auth/refresh');
-        if (data.accessToken) {
-          setAccessToken(data.accessToken);
-          console.info('Access token proactively refreshed');
-        } else {
-          clearAccessToken();
-          setIsAuthenticated(false);
-        }
+        setAccessToken(data.accessToken);
+        console.info('Access token proactively refreshed');
       } catch (err) {
         console.error('Proactive refresh failed:', err);
       }

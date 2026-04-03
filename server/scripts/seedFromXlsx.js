@@ -43,21 +43,13 @@ const OFFICIAL_NUMBERS = {
 }
 
 /**
- * Helper to safely find a sheet by keyword (ignores emojis and trailing spaces)
- */
-function getSheet(workbook, keyword) {
-  const name = workbook.SheetNames.find(n => n.toLowerCase().includes(keyword.toLowerCase()));
-  return name ? workbook.Sheets[name] : null;
-}
-
-/**
  * Parse drivers from the '🏎 Drivers' sheet
  * Headers at row 4 (0-indexed: 3), data starts row 5 (0-indexed: 4)
  * Columns: [empty, POS, DRIVER, NAT, TEAM, PTS, WINS, PODS, GRID, empty]
  */
 function parseDrivers(workbook) {
-  const sheet = getSheet(workbook, 'driver');
-  if (!sheet) return [];
+  const sheet = workbook.Sheets['🏎 Drivers'];
+  if (!sheet) throw new Error('Drivers sheet not found');
 
   const raw = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: null });
   const drivers = [];
@@ -65,19 +57,19 @@ function parseDrivers(workbook) {
   for (let i = 4; i < raw.length; i++) {
     const row = raw[i];
     if (!row || !row[1] || typeof row[1] !== 'number') continue;
-    const fullName = String(row[2]).trim();
-    if (fullName === 'TOTALS') break;
+    if (row[2] === 'TOTALS') break;
 
     drivers.push({
       rank: row[1],
-      fullName,
-      nationality: row[3] ? String(row[3]).trim() : '',
-      team: row[4] ? String(row[4]).trim() : '',
+      fullName: row[2],
+      nationality: row[3] || '',
+      team: row[4] || '',
       points: row[5] || 0,
       wins: row[6] || 0,
       podiums: row[7] || 0,
       gridPosition: row[8] || 0,
-      driverNumber: row[9] || OFFICIAL_NUMBERS[fullName] || null,
+      driverNumber: row[9] || OFFICIAL_NUMBERS[row[2]] || null,
+      photoUrl: null,
     });
   }
 
@@ -90,8 +82,8 @@ function parseDrivers(workbook) {
  * Columns: [empty, POS, CONSTRUCTOR, POINTS, WINS, PODIUMS, empty]
  */
 function parseConstructors(workbook) {
-  const sheet = getSheet(workbook, 'constructor');
-  if (!sheet) return [];
+  const sheet = workbook.Sheets['🏗 Constructors'];
+  if (!sheet) throw new Error('Constructors sheet not found');
 
   const raw = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: null });
   const constructors = [];
@@ -100,7 +92,7 @@ function parseConstructors(workbook) {
     const row = raw[i];
     if (!row || !row[1] || typeof row[1] !== 'number') continue;
 
-    const teamName = String(row[2]).trim();
+    const teamName = row[2];
     const colors = TEAM_COLORS[teamName] || { primary: '#FFFFFF', secondary: '#000000' };
 
     constructors.push({
@@ -123,8 +115,8 @@ function parseConstructors(workbook) {
  * Columns: [RD, flag, GRAND PRIX, DATE, VENUE, WINNER P1, P2, P3, empty]
  */
 function parseRaces(workbook) {
-  const sheet = getSheet(workbook, 'calendar');
-  if (!sheet) return [];
+  const sheet = workbook.Sheets['🗓 Calendar'];
+  if (!sheet) throw new Error('Calendar sheet not found');
 
   const raw = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: null });
   const races = [];
@@ -133,18 +125,17 @@ function parseRaces(workbook) {
     const row = raw[i];
     if (!row || !row[0] || typeof row[0] !== 'number') continue;
 
-    const grandPrixName = String(row[2]).trim();
-    const p1 = row[5] && row[5] !== '—' ? String(row[5]).trim() : null;
-    const p2 = row[6] && row[6] !== '—' ? String(row[6]).trim() : null;
-    const p3 = row[7] && row[7] !== '—' ? String(row[7]).trim() : null;
+    const p1 = row[5] && row[5] !== '—' ? row[5] : null;
+    const p2 = row[6] && row[6] !== '—' ? row[6] : null;
+    const p3 = row[7] && row[7] !== '—' ? row[7] : null;
     const status = p1 ? 'completed' : 'upcoming';
 
     races.push({
       round: row[0],
-      flag: row[1] ? String(row[1]).trim() : '',
-      grandPrixName,
-      venue: row[4] ? String(row[4]).trim() : '',
-      date: row[3] ? String(row[3]).trim() : '',
+      flag: row[1] || '',
+      grandPrixName: row[2],
+      venue: row[4] || '',
+      date: row[3] || '',
       p1Winner: p1,
       p2,
       p3,
@@ -162,8 +153,8 @@ function parseRaces(workbook) {
  * Columns: [CATEGORY, YOUR PREDICTION, ACTUAL RESULT, STATUS, %, empty]
  */
 function parsePredictions(workbook) {
-  const sheet = getSheet(workbook, 'prediction');
-  if (!sheet) return [];
+  const sheet = workbook.Sheets['🎯 Predictions'];
+  if (!sheet) throw new Error('Predictions sheet not found');
 
   const raw = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: null });
   const predictions = [];
@@ -227,7 +218,7 @@ export async function seedFromXlsx(xlsxPath = DEFAULT_XLSX_PATH) {
     const existing = await Driver.findOne({ fullName: d.fullName });
     const res = await Driver.findOneAndUpdate(
       { fullName: d.fullName },
-      { $set: d },
+      d,
       { upsert: true, new: true, runValidators: true }
     );
     if (!existing) results.drivers.added++;
@@ -239,7 +230,7 @@ export async function seedFromXlsx(xlsxPath = DEFAULT_XLSX_PATH) {
     const existing = await Constructor.findOne({ teamName: c.teamName });
     await Constructor.findOneAndUpdate(
       { teamName: c.teamName },
-      { $set: c },
+      c,
       { upsert: true, new: true, runValidators: true }
     );
     if (!existing) results.constructors.added++;

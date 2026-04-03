@@ -1,7 +1,0 @@
-fastapi
-uvicorn
-fastf1
-beautifulsoup4
-wikipedia
-pandas
-requests
