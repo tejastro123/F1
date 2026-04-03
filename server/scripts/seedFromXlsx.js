@@ -65,19 +65,19 @@ function parseDrivers(workbook) {
   for (let i = 4; i < raw.length; i++) {
     const row = raw[i];
     if (!row || !row[1] || typeof row[1] !== 'number') continue;
-    if (row[2] === 'TOTALS') break;
+    const fullName = String(row[2]).trim();
+    if (fullName === 'TOTALS') break;
 
     drivers.push({
       rank: row[1],
-      fullName: row[2],
-      nationality: row[3] || '',
-      team: row[4] || '',
+      fullName,
+      nationality: row[3] ? String(row[3]).trim() : '',
+      team: row[4] ? String(row[4]).trim() : '',
       points: row[5] || 0,
       wins: row[6] || 0,
       podiums: row[7] || 0,
       gridPosition: row[8] || 0,
-      driverNumber: row[9] || OFFICIAL_NUMBERS[row[2]] || null,
-      photoUrl: null,
+      driverNumber: row[9] || OFFICIAL_NUMBERS[fullName] || null,
     });
   }
 
@@ -100,7 +100,7 @@ function parseConstructors(workbook) {
     const row = raw[i];
     if (!row || !row[1] || typeof row[1] !== 'number') continue;
 
-    const teamName = row[2];
+    const teamName = String(row[2]).trim();
     const colors = TEAM_COLORS[teamName] || { primary: '#FFFFFF', secondary: '#000000' };
 
     constructors.push({
@@ -133,17 +133,18 @@ function parseRaces(workbook) {
     const row = raw[i];
     if (!row || !row[0] || typeof row[0] !== 'number') continue;
 
-    const p1 = row[5] && row[5] !== '—' ? row[5] : null;
-    const p2 = row[6] && row[6] !== '—' ? row[6] : null;
-    const p3 = row[7] && row[7] !== '—' ? row[7] : null;
+    const grandPrixName = String(row[2]).trim();
+    const p1 = row[5] && row[5] !== '—' ? String(row[5]).trim() : null;
+    const p2 = row[6] && row[6] !== '—' ? String(row[6]).trim() : null;
+    const p3 = row[7] && row[7] !== '—' ? String(row[7]).trim() : null;
     const status = p1 ? 'completed' : 'upcoming';
 
     races.push({
       round: row[0],
-      flag: row[1] || '',
-      grandPrixName: row[2],
-      venue: row[4] || '',
-      date: row[3] || '',
+      flag: row[1] ? String(row[1]).trim() : '',
+      grandPrixName,
+      venue: row[4] ? String(row[4]).trim() : '',
+      date: row[3] ? String(row[3]).trim() : '',
       p1Winner: p1,
       p2,
       p3,
@@ -226,7 +227,7 @@ export async function seedFromXlsx(xlsxPath = DEFAULT_XLSX_PATH) {
     const existing = await Driver.findOne({ fullName: d.fullName });
     const res = await Driver.findOneAndUpdate(
       { fullName: d.fullName },
-      d,
+      { $set: d },
       { upsert: true, new: true, runValidators: true }
     );
     if (!existing) results.drivers.added++;
@@ -238,7 +239,7 @@ export async function seedFromXlsx(xlsxPath = DEFAULT_XLSX_PATH) {
     const existing = await Constructor.findOne({ teamName: c.teamName });
     await Constructor.findOneAndUpdate(
       { teamName: c.teamName },
-      c,
+      { $set: c },
       { upsert: true, new: true, runValidators: true }
     );
     if (!existing) results.constructors.added++;
