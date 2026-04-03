@@ -223,6 +223,7 @@ export default function Home() {
                 </div>
               </div>
             </Card>
+            )}
           </div>
         </section>
       )}
