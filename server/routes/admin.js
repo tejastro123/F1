@@ -1,5 +1,4 @@
 import { Router } from 'express';
-import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
@@ -18,43 +17,6 @@ const router = Router();
 // All admin routes require admin privileges
 router.use(adminAuthMiddleware);
 
-// Configure multer for xlsx upload
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const uploadDir = path.resolve(__dirname, '../../data');
-    if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
-    cb(null, uploadDir);
-  },
-  filename: (req, file, cb) => {
-    cb(null, 'F1_2026_PRO.xlsx');
-  },
-});
-
-const upload = multer({
-  storage,
-  fileFilter: (req, file, cb) => {
-    const ext = path.extname(file.originalname).toLowerCase();
-    if (ext !== '.xlsx' && ext !== '.xls') {
-      return cb(new Error('Only Excel files are allowed'));
-    }
-    cb(null, true);
-  },
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
-});
-
-// POST /api/v1/admin/upload — Upload Excel and re-seed
-router.post('/upload', upload.single('file'), async (req, res, next) => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({ error: 'No file uploaded.' });
-    }
-    const results = await seedFromXlsx(req.file.path);
-    broadcast('data-updated', { message: 'Data has been updated', results });
-    res.json({ message: 'Seed complete', results });
-  } catch (error) {
-    next(error);
-  }
-});
 
 // PATCH /api/v1/admin/races/:id — Update a race result
 router.patch('/races/:id', async (req, res, next) => {

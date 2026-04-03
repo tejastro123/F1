@@ -49,7 +49,6 @@ export default function AdminDashboard() {
   }, []);
 
   const links = [
-    { to: '/admin/upload', label: 'Upload Excel', icon: '📤', desc: 'Upload new data file' },
     { to: null, label: downloading ? 'Downloading…' : 'Download Excel', icon: '📥', desc: 'Download current data file', onClick: handleDownload },
     { to: '/admin/races', label: 'Manage Races', icon: '🏁', desc: 'Edit race results' },
     { to: '/admin/drivers', label: 'Manage Drivers', icon: '🏎', desc: 'Edit driver stats' },

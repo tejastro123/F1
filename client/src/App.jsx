@@ -28,7 +28,6 @@ const AuthSuccess = lazy(() => import('./pages/AuthSuccess.jsx'));
 // Admin pages
 const AdminLogin = lazy(() => import('./admin/AdminLogin.jsx'));
 const AdminDashboard = lazy(() => import('./admin/AdminDashboard.jsx'));
-const AdminUpload = lazy(() => import('./admin/AdminUpload.jsx'));
 const AdminRaces = lazy(() => import('./admin/AdminRaces.jsx'));
 const AdminDrivers = lazy(() => import('./admin/AdminDrivers.jsx'));
 const AdminPredictions = lazy(() => import('./admin/AdminPredictions.jsx'));
@@ -84,7 +83,6 @@ function AnimatedRoutes() {
           {/* Admin Routes */}
           <Route path="/admin/login" element={<PageTransition><AdminLogin /></PageTransition>} />
           <Route path="/admin/dashboard" element={<ProtectedRoute><PageTransition><AdminDashboard /></PageTransition></ProtectedRoute>} />
-          <Route path="/admin/upload" element={<ProtectedRoute><PageTransition><AdminUpload /></PageTransition></ProtectedRoute>} />
           <Route path="/admin/races" element={<ProtectedRoute><PageTransition><AdminRaces /></PageTransition></ProtectedRoute>} />
           <Route path="/admin/drivers" element={<ProtectedRoute><PageTransition><AdminDrivers /></PageTransition></ProtectedRoute>} />
           <Route path="/admin/predictions" element={<ProtectedRoute><PageTransition><AdminPredictions /></PageTransition></ProtectedRoute>} />
