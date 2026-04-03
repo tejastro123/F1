@@ -4,12 +4,14 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useStats, useRaces, useNews } from '../hooks/useData.jsx';
 import useCountdown from '../hooks/useCountdown.js';
+import { useDashboard } from '../context/DashboardContext.jsx';
 import { AnimatedCounter, Card, Button, StatPill, SectionHeader, SkeletonCard, SkeletonStatPill, SkeletonRaceCard, SkeletonNewsCard } from '../components/ui.jsx';
 
 export default function Home() {
   const { stats, loading: statsLoading } = useStats();
   const { races, loading: racesLoading } = useRaces();
   const { news, loading: newsLoading } = useNews();
+  const { visibleWidgets } = useDashboard();
   const navigate = useNavigate();
   const clickCountRef = useRef(0);
   const clickTimerRef = useRef(null);
@@ -118,27 +120,29 @@ export default function Home() {
       </motion.div>
 
       {/* Stats Ticker - Professional Bento Style */}
-      <section className="py-32 px-6" data-tour="home-stats">
-        <div className="max-w-7xl mx-auto">
-          <SectionHeader title="System Telemetry" subtitle="Active championship data streams" align="center" />
+      {visibleWidgets.some(w => w.id === 'stats') && (
+        <section className="py-32 px-6" data-tour="home-stats">
+          <div className="max-w-7xl mx-auto">
+            <SectionHeader title="System Telemetry" subtitle="Active championship data streams" align="center" />
 
-          {statsLoading ? (
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-              {Array.from({ length: 4 }).map((_, i) => <SkeletonStatPill key={i} />)}
-            </div>
-          ) : stats && (
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-              <StatPill icon="🏁" label="P1 CHASSIS" value={stats.leaderName} />
-              <StatPill icon="⚡" label="SIGNAL PTS" value={stats.leaderPoints} />
-              <StatPill icon="🏆" label="COMPLETED" value={stats.racesDone} />
-              <StatPill icon="🚦" label="REMAINING" value={stats.racesRemaining} />
-            </div>
-          )}
-        </div>
-      </section>
+            {statsLoading ? (
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+                {Array.from({ length: 4 }).map((_, i) => <SkeletonStatPill key={i} />)}
+              </div>
+            ) : stats && (
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+                <StatPill icon="🏁" label="P1 CHASSIS" value={stats.leaderName} />
+                <StatPill icon="⚡" label="SIGNAL PTS" value={stats.leaderPoints} />
+                <StatPill icon="🏆" label="COMPLETED" value={stats.racesDone} />
+                <StatPill icon="🚦" label="REMAINING" value={stats.racesRemaining} />
+              </div>
+            )}
+          </div>
+        </section>
+      )}
 
       {/* Next Race Countdown - Machined Precision */}
-      {nextRace && (
+      {nextRace && visibleWidgets.some(w => w.id === 'countdown') && (
         <section className="py-32 px-6 relative overflow-hidden bg-white/[0.01] border-y border-white/5" data-tour="home-countdown">
           <div className="max-w-7xl mx-auto text-center relative z-10">
             <SectionHeader title="Next Mission" subtitle={`${nextRace.flag} ${nextRace.grandPrixName} · ${nextRace.venue}`} align="center" />
@@ -168,10 +172,10 @@ export default function Home() {
       )}
 
       {/* Latest Race Result - Technical Ledger */}
-      {latestRace && (
+      {latestRace && visibleWidgets.some(w => w.id === 'latestRace') && (
         <section className="py-32 px-6">
           <div className="max-w-7xl mx-auto">
-            <SectionHeader title="Event Archive" subtitle={latestRace ? `Round ${latestRace.round} · Mission Data Recorded` : 'Event Archive'} align="center" />
+            <SectionHeader title="Event Archive" subtitle={`Round ${latestRace.round} · Mission Data Recorded`} align="center" />
             {racesLoading ? (
               <SkeletonRaceCard />
             ) : (
@@ -224,7 +228,8 @@ export default function Home() {
       )}
 
       {/* Latest Intelligence - News Feed */}
-      <section className="py-32 px-6 bg-white/[0.01]">
+      {visibleWidgets.some(w => w.id === 'news') && (
+        <section className="py-32 px-6 bg-white/[0.01]">
         <div className="max-w-7xl mx-auto">
           <SectionHeader title="Latest Intelligence" subtitle="Real-time F1 operations and updates" align="center" />
           
@@ -280,9 +285,11 @@ export default function Home() {
           )}
         </div>
       </section>
+      )}
 
       {/* Playbook - Engineering Specs */}
-      <section className="py-32 px-6 mb-20">
+      {visibleWidgets.some(w => w.id === 'playbook') && (
+        <section className="py-32 px-6 mb-20">
         <div className="max-w-7xl mx-auto">
           <SectionHeader title="Operation Playbook" subtitle="Tactical protocols for high-stakes competition" />
           
@@ -338,6 +345,7 @@ export default function Home() {
           </Card>
         </div>
       </section>
+      )}
     </>
   );
 }
