@@ -6,7 +6,7 @@ import {
   PieChart, Pie, Cell, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
 } from 'recharts';
 import { useDrivers, useConstructors, useStats } from '../hooks/useData.jsx';
-import { Card, SectionHeader, AnimatedCounter, SkeletonCard } from '../components/ui.jsx';
+import { Card, SectionHeader, AnimatedCounter, SkeletonCard, LastUpdatedChip } from '../components/ui.jsx';
 import { getTeamColor } from '../utils/teamColors.js';
 
 export default function Stats() {
@@ -63,11 +63,22 @@ export default function Stats() {
     <>
       <Helmet>
         <title>Stats & Analytics — F1 2026</title>
-        <meta name="description" content="Deep analytics and statistics for the 2026 Formula 1 season" />
+        <meta name="description" content="Deep analytics and statistics for the 2026 Formula 1 season — points gaps, win share, team performance" />
+        <meta property="og:title" content="Stats & Analytics — F1 2026" />
+        <meta property="og:description" content="Deep analytics for the 2026 Formula 1 season" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://f1tracker.app/stats" />
+        <meta property="og:image" content="https://f1tracker.app/pwa-512.png" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Stats & Analytics — F1 2026" />
+        <meta name="twitter:description" content="Deep analytics for the 2026 Formula 1 season" />
+        <meta name="twitter:image" content="https://f1tracker.app/pwa-512.png" />
       </Helmet>
 
       <div className="pt-24 pb-16 px-6 max-w-7xl mx-auto overflow-x-hidden">
         <SectionHeader title="ANALYTICS" subtitle="Deep-space telemetry and championship trajectories" />
+        {!loading && <LastUpdatedChip timestamp={new Date().toISOString()} className="-mt-8 mb-8 block" />}
+
 
         {loading ? (
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">

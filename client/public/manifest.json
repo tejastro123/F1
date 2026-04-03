@@ -1,27 +1,57 @@
 {
   "name": "F1 2026 Season Tracker",
   "short_name": "F1 Tracker",
+  "description": "Track the 2026 Formula 1 season — live standings, race calendar, predictions and analytics",
+  "categories": ["sports", "entertainment", "news"],
+  "lang": "en",
+  "dir": "ltr",
   "icons": [
     {
       "src": "f1-logo.svg",
-      "sizes": "192x192",
+      "sizes": "any",
       "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "pwa-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "pwa-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Driver Standings",
+      "short_name": "Drivers",
+      "description": "View the 2026 driver championship standings",
+      "url": "/drivers",
+      "icons": [{ "src": "pwa-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Race Calendar",
+      "short_name": "Calendar",
+      "description": "View the 2026 season race calendar",
+      "url": "/calendar",
+      "icons": [{ "src": "pwa-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Live Center",
+      "short_name": "Live",
+      "description": "Watch the live race stream",
+      "url": "/live",
+      "icons": [{ "src": "pwa-192.png", "sizes": "192x192" }]
     }
   ],
   "start_url": "/",
   "display": "standalone",
   "theme_color": "#15151e",
-  "background_color": "#15151e",
-  "orientation": "portrait"
+  "background_color": "#0A0A0E",
+  "orientation": "any",
+  "scope": "/"
 }

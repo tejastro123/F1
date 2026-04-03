@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
 import { useRaces } from '../hooks/useData.jsx';
 import useCountdown from '../hooks/useCountdown.js';
-import { Card, Badge, RaceStatusBadge, SectionHeader, SkeletonCard, Button } from '../components/ui.jsx';
+import { Card, Badge, RaceStatusBadge, SectionHeader, SkeletonCard, Button, LastUpdatedChip } from '../components/ui.jsx';
 import PredictionModal from '../components/PredictionModal.jsx';
 import CircuitImage from '../components/CircuitImage.jsx';
 import CircuitDetailModal from '../components/CircuitDetailModal.jsx';
@@ -33,11 +33,30 @@ export default function Calendar() {
   const completed = races.filter(r => r.status === 'completed');
   const upcoming = races.filter(r => r.status === 'upcoming');
 
+  // Last updated: most recently updated race
+  const lastUpdated = races.length
+    ? races.reduce((latest, r) => {
+        const t = r.updatedAt || r.createdAt;
+        return t > latest ? t : latest;
+      }, races[0]?.updatedAt || races[0]?.createdAt || null)
+    : null;
+
   return (
     <>
       <Helmet>
-        <title>2026 CALENDAR — F1 TRACKER</title>
-        <meta name="description" content="2026 Formula 1 Race Calendar — 24 Grands Prix" />
+        <title>2026 F1 Race Calendar — Season Schedule</title>
+        <meta name="description" content="Complete 2026 Formula 1 race calendar — 24 Grands Prix, circuit info, predictions, and results" />
+        {/* Open Graph */}
+        <meta property="og:title" content="2026 F1 Race Calendar" />
+        <meta property="og:description" content="Complete 2026 Formula 1 season schedule — 24 Grands Prix, circuit info, and results" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://f1tracker.app/calendar" />
+        <meta property="og:image" content="https://f1tracker.app/pwa-512.png" />
+        {/* Twitter Card */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="2026 F1 Race Calendar" />
+        <meta name="twitter:description" content="Complete 2026 Formula 1 season schedule" />
+        <meta name="twitter:image" content="https://f1tracker.app/pwa-512.png" />
       </Helmet>
 
       <div className="pt-24 pb-16 px-6 max-w-7xl mx-auto overflow-x-hidden">
@@ -45,6 +64,7 @@ export default function Calendar() {
           title="Season Timeline"
           subtitle={`${completed.length} races in the books · ${upcoming.length} rounds of glory remaining`}
         />
+        {!loading && <LastUpdatedChip timestamp={lastUpdated} className="-mt-8 mb-8 block" />}
 
         {loading ? (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">

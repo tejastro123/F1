@@ -27,6 +27,16 @@ export default function News() {
     <div className="pt-24 min-h-screen bg-f1-dark text-white">
       <Helmet>
         <title>Intelligence & Analysis | F1 2026</title>
+        <meta name="description" content="Latest Formula 1 news, race reports, technical analysis and team updates for the 2026 season" />
+        <meta property="og:title" content="Intelligence & Analysis | F1 2026" />
+        <meta property="og:description" content="Latest Formula 1 news, race reports and technical analysis" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://f1tracker.app/news" />
+        <meta property="og:image" content="https://f1tracker.app/pwa-512.png" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="F1 2026 Intelligence" />
+        <meta name="twitter:description" content="Latest Formula 1 news and race analysis" />
+        <meta name="twitter:image" content="https://f1tracker.app/pwa-512.png" />
       </Helmet>
 
       <div className="max-w-7xl mx-auto px-6 py-12">

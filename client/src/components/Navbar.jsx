@@ -9,7 +9,7 @@ import { Button } from './ui.jsx';
 import { useTourStatus, OnboardingTour } from './OnboardingTour.jsx';
 import { DashboardConfigButton, DashboardConfigModal } from './DashboardConfig.jsx';
 
-export default function Navbar() {
+export default function Navbar({ onOpenSearch }) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [runTour, setRunTour] = useState(false);
@@ -183,6 +183,19 @@ export default function Navbar() {
 
           {/* Controls & User */}
           <div className="flex items-center justify-end gap-2.5">
+            {/* Search Button */}
+            <button
+              onClick={onOpenSearch}
+              aria-label="Open search (Cmd+K)"
+              title="Search (⌘K)"
+              className="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 border border-white/5 text-gray-400 hover:text-white hover:bg-white/10 hover:border-white/20 transition-all active:scale-90"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <circle cx="11" cy="11" r="7" />
+                <path strokeLinecap="round" d="m21 21-3.5-3.5" />
+              </svg>
+            </button>
+
             {/* Theme Toggle - Squircle update */}
             <button
               onClick={toggleTheme}

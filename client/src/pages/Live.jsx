@@ -55,20 +55,35 @@ export default function Live() {
   if (!livekitUrl) return <div className="pt-32 text-center text-red-400">VITE_LIVEKIT_URL missing in environment</div>;
 
   return (
-    <LiveKitRoom
-      video={false}
-      audio={false}
-      token={token}
-      serverUrl={livekitUrl}
-      connect={true}
-      className="lk-room-container"
-    >
-      <LiveViewerContent viewerName={viewerName} />
-      <RoomAudioRenderer />
-      
-      {/* LiveKit component that only renders if the browser blocks AudioContext autoplay */}
-      <StartAudio label="Click to allow audio & play stream" className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm text-white font-bold text-xl uppercase tracking-widest cursor-pointer hover:bg-black/95 transition-all text-f1-red border-4 border-f1-red" />
-    </LiveKitRoom>
+    <>
+      <Helmet>
+        <title>Live Center — F1 2026</title>
+        <meta name="description" content="F1 2026 live race stream, real-time telemetry, chat and predictions" />
+        <meta property="og:title" content="Live Center — F1 2026" />
+        <meta property="og:description" content="Watch the F1 2026 live race stream with real-time telemetry" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://f1tracker.app/live" />
+        <meta property="og:image" content="https://f1tracker.app/pwa-512.png" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Live Center — F1 2026" />
+        <meta name="twitter:description" content="F1 2026 live race stream and real-time data" />
+        <meta name="twitter:image" content="https://f1tracker.app/pwa-512.png" />
+      </Helmet>
+      <LiveKitRoom
+        video={false}
+        audio={false}
+        token={token}
+        serverUrl={livekitUrl}
+        connect={true}
+        className="lk-room-container"
+      >
+        <LiveViewerContent viewerName={viewerName} />
+        <RoomAudioRenderer />
+        
+        {/* LiveKit component that only renders if the browser blocks AudioContext autoplay */}
+        <StartAudio label="Click to allow audio & play stream" className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm text-white font-bold text-xl uppercase tracking-widest cursor-pointer hover:bg-black/95 transition-all text-f1-red border-4 border-f1-red" />
+      </LiveKitRoom>
+    </>
   );
 }
 

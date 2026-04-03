@@ -36,6 +36,17 @@ export default function Home() {
       <Helmet>
         <title>F1 2026 Season Tracker</title>
         <meta name="description" content="Track the 2026 Formula 1 season — live standings, race calendar, predictions and analytics" />
+        {/* Open Graph */}
+        <meta property="og:title" content="F1 2026 Season Tracker" />
+        <meta property="og:description" content="Track the 2026 Formula 1 season — live standings, race calendar, predictions and analytics" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://f1tracker.app/" />
+        <meta property="og:image" content="https://f1tracker.app/pwa-512.png" />
+        {/* Twitter Card */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="F1 2026 Season Tracker" />
+        <meta name="twitter:description" content="Track the 2026 Formula 1 season — live standings, race calendar, predictions and analytics" />
+        <meta name="twitter:image" content="https://f1tracker.app/pwa-512.png" />
       </Helmet>      {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden py-32">
         {/* Professional Technical Background */}

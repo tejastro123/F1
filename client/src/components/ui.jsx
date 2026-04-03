@@ -494,3 +494,26 @@ export function NoRaceResults() {
     />
   );
 }
+
+export function LastUpdatedChip({ timestamp, className = '' }) {
+  if (!timestamp) return null;
+  const date = new Date(timestamp);
+  const isValid = !isNaN(date.getTime());
+  if (!isValid) return null;
+
+  const formatted = new Intl.DateTimeFormat('en', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  }).format(date);
+
+  return (
+    <span className={`inline-flex items-center gap-1.5 text-[9px] font-black text-gray-600 uppercase tracking-[0.2em] ${className}`}>
+      <span className="w-1.5 h-1.5 bg-green-500/50 rounded-full" />
+      Data refreshed: {formatted}
+    </span>
+  );
+}

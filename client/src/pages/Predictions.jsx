@@ -60,7 +60,16 @@ export default function Predictions() {
     <>
       <Helmet>
         <title>Predictions — F1 2026</title>
-        <meta name="description" content="F1 2026 race prediction tracker" />
+        <meta name="description" content="F1 2026 race prediction tracker — lock in your forecasts, track accuracy and compete on the global leaderboard" />
+        <meta property="og:title" content="Predictions — F1 2026" />
+        <meta property="og:description" content="Lock in your F1 2026 race predictions and track your accuracy" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://f1tracker.app/predictions" />
+        <meta property="og:image" content="https://f1tracker.app/pwa-512.png" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Predictions — F1 2026" />
+        <meta name="twitter:description" content="Lock in your F1 2026 race predictions" />
+        <meta name="twitter:image" content="https://f1tracker.app/pwa-512.png" />
       </Helmet>
 
       <div className="pt-24 pb-16 px-6 max-w-7xl mx-auto overflow-x-hidden">

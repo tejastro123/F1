@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
 import { useDrivers } from '../hooks/useData.jsx';
-import { AnimatedCounter, Badge, SectionHeader, TeamColorStripe, SkeletonLoader, SkeletonCard, SkeletonDriverTableRow, SkeletonDriverCard, NoSearchResults, Card } from '../components/ui.jsx';
+import { AnimatedCounter, Badge, SectionHeader, TeamColorStripe, SkeletonLoader, SkeletonCard, SkeletonDriverTableRow, SkeletonDriverCard, NoSearchResults, Card, LastUpdatedChip } from '../components/ui.jsx';
 import { FavoriteIcon } from '../components/FavoriteButton.jsx';
 import { getTeamColor } from '../utils/teamColors.js';
 
@@ -12,6 +12,15 @@ export default function Drivers() {
   const [search, setSearch] = useState('');
   const [teamFilter, setTeamFilter] = useState('');
   const navigate = useNavigate();
+
+  // Use the most recent updatedAt from the drivers array as "last synced"
+  const lastUpdated = useMemo(() => {
+    if (!drivers.length) return null;
+    return drivers.reduce((latest, d) => {
+      const t = d.updatedAt || d.createdAt;
+      return t > latest ? t : latest;
+    }, drivers[0]?.updatedAt || drivers[0]?.createdAt || null);
+  }, [drivers]);
 
   const teams = useMemo(() => [...new Set(drivers.map(d => d.team))].sort(), [drivers]);
   const maxPoints = useMemo(() => Math.max(...drivers.map(d => d.points), 1), [drivers]);
@@ -30,11 +39,23 @@ export default function Drivers() {
     <>
       <Helmet>
         <title>Driver Standings — F1 2026</title>
-        <meta name="description" content="2026 Formula 1 Driver Championship standings" />
+        <meta name="description" content="2026 Formula 1 World Driver Championship standings — all 20 drivers, points, wins and stats" />
+        {/* Open Graph */}
+        <meta property="og:title" content="Driver Standings — F1 2026" />
+        <meta property="og:description" content="2026 Formula 1 World Driver Championship standings" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://f1tracker.app/drivers" />
+        <meta property="og:image" content="https://f1tracker.app/pwa-512.png" />
+        {/* Twitter Card */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Driver Standings — F1 2026" />
+        <meta name="twitter:description" content="2026 Formula 1 World Driver Championship standings" />
+        <meta name="twitter:image" content="https://f1tracker.app/pwa-512.png" />
       </Helmet>
 
       <div className="pt-24 pb-16 px-6 max-w-7xl mx-auto overflow-x-hidden">
         <SectionHeader title="THE GRID" subtitle="Official 2026 World Driver Championship Standings" />
+        {!loading && <LastUpdatedChip timestamp={lastUpdated} className="-mt-8 mb-8 block" />}
 
         {/* Filters - Command Center Style */}
         <Card glass className="flex flex-col md:flex-row gap-4 mb-12 rounded-3xl p-4 md:p-6 border-white/10">

@@ -4,13 +4,21 @@ import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { useConstructors } from '../hooks/useData.jsx';
-import { AnimatedCounter, Card, SectionHeader, SkeletonCard } from '../components/ui.jsx';
+import { AnimatedCounter, Card, SectionHeader, SkeletonCard, LastUpdatedChip } from '../components/ui.jsx';
 import { getTeamColor } from '../utils/teamColors.js';
 
 export default function Constructors() {
   const { constructors, loading } = useConstructors();
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
+
+  const lastUpdated = useMemo(() => {
+    if (!constructors.length) return null;
+    return constructors.reduce((latest, c) => {
+      const t = c.updatedAt || c.createdAt;
+      return t > latest ? t : latest;
+    }, constructors[0]?.updatedAt || constructors[0]?.createdAt || null);
+  }, [constructors]);
 
   const filtered = useMemo(() => {
     return constructors.filter(c =>
@@ -32,11 +40,23 @@ export default function Constructors() {
     <>
       <Helmet>
         <title>Constructor Standings — F1 2026</title>
-        <meta name="description" content="2026 Formula 1 Constructor Championship standings" />
+        <meta name="description" content="2026 Formula 1 World Constructors' Championship — team standings, points distribution, and performance" />
+        {/* Open Graph */}
+        <meta property="og:title" content="Constructor Standings — F1 2026" />
+        <meta property="og:description" content="2026 Formula 1 World Constructors' Championship standings" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://f1tracker.app/constructors" />
+        <meta property="og:image" content="https://f1tracker.app/pwa-512.png" />
+        {/* Twitter Card */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Constructor Standings — F1 2026" />
+        <meta name="twitter:description" content="2026 Formula 1 World Constructors' Championship standings" />
+        <meta name="twitter:image" content="https://f1tracker.app/pwa-512.png" />
       </Helmet>
 
       <div className="pt-24 pb-16 px-6 max-w-7xl mx-auto overflow-x-hidden">
         <SectionHeader title="CONSTRUCTORS" subtitle="2026 World Constructors' Championship Battle" />
+        {!loading && <LastUpdatedChip timestamp={lastUpdated} className="-mt-8 mb-8 block" />}
 
         {/* Search - Refined */}
         <div className="max-w-md mb-12">
