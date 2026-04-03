@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+
+# Disallow admin routes
+Disallow: /admin/
+
+# Disallow auth callbacks
+Disallow: /auth-success
+
+# Sitemap location
+Sitemap: https://f1tracker.app/sitemap.xml
+
+# Crawl delay (be kind to servers)
+Crawl-delay: 10

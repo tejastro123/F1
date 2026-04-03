@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useState } from 'react';
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { HelmetProvider } from 'react-helmet-async';
@@ -10,6 +10,11 @@ import { FavoritesProvider } from './context/FavoritesContext.jsx';
 import { DashboardProvider } from './context/DashboardContext.jsx';
 import Navbar from './components/Navbar.jsx';
 import LiveBanner from './components/LiveBanner.jsx';
+import ScrollToTop from './components/ScrollToTop.jsx';
+import GlobalSearch from './components/GlobalSearch.jsx';
+import KeyboardShortcutsOverlay from './components/KeyboardShortcutsOverlay.jsx';
+import ErrorBoundary from './components/ErrorBoundary.jsx';
+import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts.js';
 import { LoadingSpinner } from './components/ui.jsx';
 
 // Lazy-loaded pages
@@ -27,6 +32,7 @@ const News = lazy(() => import('./pages/News.jsx'));
 const StrategicOracle = lazy(() => import('./pages/StrategicOracle.jsx'));
 const AuthSuccess = lazy(() => import('./pages/AuthSuccess.jsx'));
 const Favorites = lazy(() => import('./pages/Favorites.jsx'));
+const NotFound = lazy(() => import('./pages/NotFound.jsx'));
 
 // Admin pages
 const AdminLogin = lazy(() => import('./admin/AdminLogin.jsx'));
@@ -93,11 +99,35 @@ function AnimatedRoutes() {
           <Route path="/admin/broadcast" element={<ProtectedRoute><PageTransition><AdminBroadcast /></PageTransition></ProtectedRoute>} />
           <Route path="/admin/live" element={<ProtectedRoute><PageTransition><AdminLiveControl /></PageTransition></ProtectedRoute>} />
 
-          {/* Fallback */}
-          <Route path="*" element={<Navigate to="/" replace />} />
+          {/* 404 */}
+          <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
         </Routes>
       </Suspense>
     </AnimatePresence>
+  );
+}
+
+// Inner app component that uses router context (for the keyboard shortcuts hook)
+function AppInner() {
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
+
+  useKeyboardShortcuts({
+    onOpenSearch: () => setSearchOpen(true),
+    onToggleHelp: () => setShortcutsOpen(prev => !prev),
+  });
+
+  return (
+    <>
+      <Navbar onOpenSearch={() => setSearchOpen(true)} />
+      <LiveBanner />
+      <main>
+        <AnimatedRoutes />
+      </main>
+      <ScrollToTop />
+      <GlobalSearch isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
+      <KeyboardShortcutsOverlay isOpen={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
+    </>
   );
 }
 
@@ -110,14 +140,12 @@ export default function App() {
             <DataCacheProvider>
               <FavoritesProvider>
                 <DashboardProvider>
-                  <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-                  <Navbar />
-                  <LiveBanner />
-                  <main>
-                    <AnimatedRoutes />
-                  </main>
-                </BrowserRouter>
-              </DashboardProvider>
+                  <ErrorBoundary>
+                    <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+                      <AppInner />
+                    </BrowserRouter>
+                  </ErrorBoundary>
+                </DashboardProvider>
               </FavoritesProvider>
             </DataCacheProvider>
           </SocketProvider>
