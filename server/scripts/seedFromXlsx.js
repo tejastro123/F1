@@ -43,13 +43,21 @@ const OFFICIAL_NUMBERS = {
 }
 
 /**
+ * Helper to safely find a sheet by keyword (ignores emojis and trailing spaces)
+ */
+function getSheet(workbook, keyword) {
+  const name = workbook.SheetNames.find(n => n.toLowerCase().includes(keyword.toLowerCase()));
+  return name ? workbook.Sheets[name] : null;
+}
+
+/**
  * Parse drivers from the '🏎 Drivers' sheet
  * Headers at row 4 (0-indexed: 3), data starts row 5 (0-indexed: 4)
  * Columns: [empty, POS, DRIVER, NAT, TEAM, PTS, WINS, PODS, GRID, empty]
  */
 function parseDrivers(workbook) {
-  const sheet = workbook.Sheets['🏎 Drivers'];
-  if (!sheet) throw new Error('Drivers sheet not found');
+  const sheet = getSheet(workbook, 'driver');
+  if (!sheet) return [];
 
   const raw = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: null });
   const drivers = [];
@@ -82,8 +90,8 @@ function parseDrivers(workbook) {
  * Columns: [empty, POS, CONSTRUCTOR, POINTS, WINS, PODIUMS, empty]
  */
 function parseConstructors(workbook) {
-  const sheet = workbook.Sheets['🏗 Constructors'];
-  if (!sheet) throw new Error('Constructors sheet not found');
+  const sheet = getSheet(workbook, 'constructor');
+  if (!sheet) return [];
 
   const raw = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: null });
   const constructors = [];
@@ -115,8 +123,8 @@ function parseConstructors(workbook) {
  * Columns: [RD, flag, GRAND PRIX, DATE, VENUE, WINNER P1, P2, P3, empty]
  */
 function parseRaces(workbook) {
-  const sheet = workbook.Sheets['🗓 Calendar'];
-  if (!sheet) throw new Error('Calendar sheet not found');
+  const sheet = getSheet(workbook, 'calendar');
+  if (!sheet) return [];
 
   const raw = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: null });
   const races = [];
@@ -153,8 +161,8 @@ function parseRaces(workbook) {
  * Columns: [CATEGORY, YOUR PREDICTION, ACTUAL RESULT, STATUS, %, empty]
  */
 function parsePredictions(workbook) {
-  const sheet = workbook.Sheets['🎯 Predictions'];
-  if (!sheet) throw new Error('Predictions sheet not found');
+  const sheet = getSheet(workbook, 'prediction');
+  if (!sheet) return [];
 
   const raw = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: null });
   const predictions = [];

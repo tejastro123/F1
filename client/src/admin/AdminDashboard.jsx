@@ -5,14 +5,16 @@ import { Helmet } from 'react-helmet-async';
 import api from '../services/api.js';
 import { getAccessToken } from '../services/api.js';
 import { Card, SectionHeader, AnimatedCounter, Badge, SkeletonCard } from '../components/ui.jsx';
+import SyncModal from './SyncModal.jsx';
 
 export default function AdminDashboard() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [downloading, setDownloading] = useState(false);
+  const [syncing, setSyncing] = useState(false);
+  const [isSyncModalOpen, setIsSyncModalOpen] = useState(false);
 
-  useEffect(() => {
-    const fetchAll = async () => {
+  const fetchAll = async () => {
       try {
         const [drivers, constructors, races, predictions] = await Promise.all([
           api.get('/drivers'), api.get('/constructors'), api.get('/races'), api.get('/predictions'),
@@ -26,8 +28,37 @@ export default function AdminDashboard() {
         });
       } catch { /* ignore */ } finally { setLoading(false); }
     };
+    
+  useEffect(() => {
     fetchAll();
   }, []);
+
+  const handleSyncFromInternet = async (options) => {
+    setSyncing(true);
+    setIsSyncModalOpen(false);
+    try {
+      const formData = new FormData();
+      formData.append('syncSchedule', options.syncSchedule);
+      formData.append('fetchWikiInfo', options.fetchWikiInfo);
+      formData.append('process2026', options.process2026);
+      
+      if (options.process2026 && options.file) {
+        formData.append('file', options.file);
+      }
+
+      const res = await api.post('/admin/sync-from-internet', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      alert('Sync successful! ' + res.data.message);
+      fetchAll();
+    } catch (err) {
+      alert('Sync failed: ' + (err.response?.data?.error || err.message));
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   const handleDownload = useCallback(async () => {
     setDownloading(true);
@@ -49,7 +80,7 @@ export default function AdminDashboard() {
   }, []);
 
   const links = [
-    { to: '/admin/upload', label: 'Upload Excel', icon: '📤', desc: 'Upload new data file' },
+    { to: null, label: syncing ? 'Syncing...' : 'Sync from Internet', icon: '🌐', desc: 'Fetch latest data & Wikipedia info', onClick: () => setIsSyncModalOpen(true) },
     { to: null, label: downloading ? 'Downloading…' : 'Download Excel', icon: '📥', desc: 'Download current data file', onClick: handleDownload },
     { to: '/admin/races', label: 'Manage Races', icon: '🏁', desc: 'Edit race results' },
     { to: '/admin/drivers', label: 'Manage Drivers', icon: '🏎', desc: 'Edit driver stats' },
@@ -105,6 +136,11 @@ export default function AdminDashboard() {
             );
           })}
         </div>
+        <SyncModal 
+          isOpen={isSyncModalOpen} 
+          onClose={() => setIsSyncModalOpen(false)} 
+          onSync={handleSyncFromInternet} 
+        />
       </div>
     </>
   );

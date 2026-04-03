@@ -62,13 +62,13 @@ router.post('/refresh', async (req, res, next) => {
   try {
     const token = req.cookies?.refreshToken;
     if (!token) {
-      return res.status(401).json({ error: 'No refresh token.' });
+      return res.json({ accessToken: null, message: 'No refresh token.' });
     }
 
     const decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET);
     const user = await User.findById(decoded.id);
     if (!user) {
-      return res.status(401).json({ error: 'User not found.' });
+      return res.json({ accessToken: null, message: 'User not found.' });
     }
 
     const { accessToken, refreshToken } = generateTokens(user);
@@ -83,7 +83,7 @@ router.post('/refresh', async (req, res, next) => {
     res.json({ accessToken });
   } catch (error) {
     if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
-      return res.status(401).json({ error: 'Invalid refresh token.' });
+      return res.json({ accessToken: null, message: 'Invalid refresh token.' });
     }
     next(error);
   }
