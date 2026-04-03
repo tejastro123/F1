@@ -134,7 +134,7 @@ export default function Predictions() {
             </Button>
           </Card>
         ) : filteredRounds.length === 0 ? (
-          <NoPredictions onPredict={() => window.location.href = '/calendar'}} />
+          <NoPredictions onPredict={() => window.location.href = '/calendar'} />
         ) : (
           <div className="space-y-12">
             {filteredRounds.map((roundGroup, idx) => (

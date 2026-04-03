@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
-import Joyride, { STATUS } from 'react-joyride';
+import * as reactJoyride from 'react-joyride';
+const Joyride = reactJoyride.default || reactJoyride.Joyride || reactJoyride;
+const STATUS = reactJoyride.STATUS || { FINISHED: 'finished', SKIPPED: 'skipped' };
 import { useLocation } from 'react-router-dom';
 
 const STORAGE_KEY = 'f1-tour-completed';

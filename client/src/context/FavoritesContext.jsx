@@ -54,7 +54,7 @@ export const FavoritesProvider = ({ children }) => {
       await api.delete(`/favorites/${type}/${id}`);
       setFavorites(prev => ({
         ...prev,
-        [type]: prev[type].filter(favId => favId !== id),
+        [type]: prev[type].filter(fav => (typeof fav === 'string' ? fav : fav._id) !== id),
       }));
       return { success: true };
     } catch (err) {
@@ -63,17 +63,18 @@ export const FavoritesProvider = ({ children }) => {
     }
   }, []);
 
-  const toggleFavorite = useCallback(async (type, id, currentFavorites) => {
-    const isFavorited = currentFavorites.includes(id);
+  const toggleFavorite = useCallback(async (type, id) => {
+    const favoritedList = favorites[type] || [];
+    const isFavorited = favoritedList.some(fav => (typeof fav === 'string' ? fav : fav._id) === id);
     if (isFavorited) {
       return await removeFavorite(type, id);
     } else {
       return await addFavorite(type, id);
     }
-  }, [addFavorite, removeFavorite]);
+  }, [addFavorite, removeFavorite, favorites]);
 
   const isFavorited = useCallback((type, id) => {
-    return favorites[type]?.includes(id) || false;
+    return favorites[type]?.some(fav => (typeof fav === 'string' ? fav : fav._id) === id) || false;
   }, [favorites]);
 
   const favoriteCount = {

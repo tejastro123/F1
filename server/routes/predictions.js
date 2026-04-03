@@ -35,4 +35,44 @@ router.post('/', authMiddleware, async (req, res, next) => {
     next(error);
   }
 });
+// GET /api/v1/predictions/leaderboard — Global prediction leaderboard
+router.get('/leaderboard', async (req, res, next) => {
+  try {
+    const leaderboard = await Prediction.aggregate([
+      { 
+        $group: {
+          _id: '$user',
+          total: { $sum: 1 },
+          correct: { $sum: { $cond: [{ $eq: ['$isCorrect', true] }, 1, 0] } }
+        }
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'user'
+        }
+      },
+      { $unwind: '$user' },
+      {
+        $project: {
+          _id: 1,
+          total: 1,
+          correct: 1,
+          accuracy: {
+             $cond: [{ $gt: ['$total', 0] }, { $multiply: [{ $divide: ['$correct', '$total'] }, 100] }, 0]
+          },
+          'user.displayName': 1,
+          'user.avatarUrl': 1
+        }
+      },
+      { $sort: { correct: -1, accuracy: -1 } }
+    ]);
+    res.json(leaderboard);
+  } catch (error) {
+    next(error);
+  }
+});
+
 export default router;

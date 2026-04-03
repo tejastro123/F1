@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
 import { useDrivers } from '../hooks/useData.jsx';
-import { AnimatedCounter, Badge, SectionHeader, TeamColorStripe, SkeletonLoader, SkeletonCard, SkeletonDriverTableRow, SkeletonDriverCard, NoSearchResults } from '../components/ui.jsx';
+import { AnimatedCounter, Badge, SectionHeader, TeamColorStripe, SkeletonLoader, SkeletonCard, SkeletonDriverTableRow, SkeletonDriverCard, NoSearchResults, Card } from '../components/ui.jsx';
 import { FavoriteIcon } from '../components/FavoriteButton.jsx';
 import { getTeamColor } from '../utils/teamColors.js';
 
