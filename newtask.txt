@@ -172,14 +172,14 @@
   ---
   📊 Quick Wins (Low effort, high impact)
 
-  1. Add SEO meta tags to all pages (Open Graph, Twitter Cards) - 2h
-  2. Implement sitemap.xml and robots.txt - 30m
-  3. Add favicon.ico and PWA icons - 1h
-  4. Create 404 page with navigation - 1h
-  5. Add return-to-top button on long pages - 30m
-  6. Improve loading states with skeleton screens - 2h
-  7. Add "last updated" timestamps on data pages - 1h
-  8. Implement search functionality for drivers/constructors - 3h
-  9. Add keyboard shortcuts for navigation - 2h
-  10. Create a proper 500 error page with error reporting - 1h
+  1. Add SEO meta tags to all pages (Open Graph, Twitter Cards)
+  2. Implement sitemap.xml and robots.txt
+  3. Add favicon.ico and PWA icons
+  4. Create 404 page with navigation
+  5. Add return-to-top button on long pages
+  6. Improve loading states with skeleton screens
+  7. Add "last updated" timestamps on data pages
+  8. Implement search functionality for drivers/constructors
+  9. Add keyboard shortcuts for navigation
+  10. Create a proper 500 error page with error reporting
 
