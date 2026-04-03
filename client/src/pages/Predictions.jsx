@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
 import { usePredictions } from '../hooks/useData.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
-import { Card, Badge, SectionHeader, AnimatedCounter, SkeletonLoader, SkeletonCard, Button } from '../components/ui.jsx';
+import { Card, Badge, SectionHeader, AnimatedCounter, SkeletonLoader, SkeletonCard, SkeletonPredictionCard, Button, NoPredictions } from '../components/ui.jsx';
 
 export default function Predictions() {
   const { isAuthenticated, loading: authLoading } = useAuth();
@@ -67,7 +67,7 @@ export default function Predictions() {
         <SectionHeader title="THE PREDICTOR" subtitle="Real-time accuracy tracking and historical race insights" />
 
         {/* Global Accuracy - Command Center Style */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12" data-tour="predictions-accuracy">
           {[
             { label: 'CRACKED %', value: accuracy.pct, color: 'text-f1-gold', sub: 'OVERALL ACCURACY' },
             { label: 'SECURED', value: accuracy.correct, color: 'text-green-500', sub: 'CORRECT CALLS' },
@@ -108,8 +108,19 @@ export default function Predictions() {
         </div>
 
         {loading ? (
-          <div className="space-y-4">
-            {Array.from({ length: 5 }).map((_, i) => <SkeletonCard key={i} />)}
+          <div className="space-y-12">
+            {Array.from({ length: 2 }).map((_, i) => (
+              <div key={i} className="space-y-6">
+                <div className="flex items-center gap-6">
+                  <div className="text-2xl font-black text-white/5 uppercase italic tracking-tighter">RND {String(i + 1).padStart(2, '0')}</div>
+                  <div className="h-[2px] flex-1 bg-gradient-to-r from-white/5 via-white/5 to-transparent"></div>
+                  <div className="text-[10px] font-black text-f1-red uppercase tracking-[0.3em] italic">LOADING...</div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {Array.from({ length: 4 }).map((_, pIdx) => <SkeletonPredictionCard key={pIdx} />)}
+                </div>
+              </div>
+            ))}
           </div>
         ) : !isAuthenticated ? (
           <Card glass className="rounded-[3rem] p-16 text-center border-white/10 bg-white/[0.01]">
@@ -123,10 +134,7 @@ export default function Predictions() {
             </Button>
           </Card>
         ) : filteredRounds.length === 0 ? (
-          <div className="text-center py-20 opacity-30">
-            <div className="text-6xl mb-6 italic font-black text-white">NO RECORDS</div>
-            <p className="text-[10px] font-black uppercase tracking-[0.4em]">Empty Grid Spotted</p>
-          </div>
+          <NoPredictions onPredict={() => window.location.href = '/calendar'}} />
         ) : (
           <div className="space-y-12">
             {filteredRounds.map((roundGroup, idx) => (

@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
 import { useDrivers } from '../hooks/useData.jsx';
-import { AnimatedCounter, Badge, SectionHeader, TeamColorStripe, SkeletonLoader, Card, SkeletonCard } from '../components/ui.jsx';
+import { AnimatedCounter, Badge, SectionHeader, TeamColorStripe, SkeletonLoader, SkeletonCard, SkeletonDriverTableRow, SkeletonDriverCard, NoSearchResults } from '../components/ui.jsx';
+import { FavoriteIcon } from '../components/FavoriteButton.jsx';
 import { getTeamColor } from '../utils/teamColors.js';
 
 export default function Drivers() {
@@ -58,9 +59,38 @@ export default function Drivers() {
         </Card>
 
         {loading ? (
-          <div className="space-y-4">
-            {Array.from({ length: 10 }).map((_, i) => <SkeletonCard key={i} />)}
-          </div>
+          <>
+            {/* Desktop skeleton */}
+            <div className="hidden lg:block overflow-x-auto">
+              <table className="w-full border-separate border-spacing-y-4 px-2">
+                <thead>
+                  <tr className="text-gray-500 text-[10px] uppercase font-black tracking-[0.2em]">
+                    <th className="py-4 px-6 text-left">Pos</th>
+                    <th className="py-4 px-6 text-left">Driver</th>
+                    <th className="py-4 px-6 text-left">Constructor</th>
+                    <th className="py-4 px-6 text-right">Points</th>
+                    <th className="py-4 px-6 text-right">Progress</th>
+                  </tr>
+                </thead>
+                <tbody className="space-y-4">
+                  {Array.from({ length: 8 }).map((_, i) => <SkeletonDriverTableRow key={i} />)}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile skeleton */}
+            <div className="lg:hidden grid grid-cols-1 md:grid-cols-2 gap-4">
+              {Array.from({ length: 6 }).map((_, i) => <SkeletonDriverCard key={i} />)}
+            </div>
+          </>
+        ) : filtered.length === 0 ? (
+          <NoSearchResults
+            query={search || teamFilter}
+            onClear={() => {
+              setSearch('');
+              setTeamFilter('');
+            }}
+          />
         ) : (
           <>
             {/* Desktop View - Retained but refined */}
@@ -73,6 +103,7 @@ export default function Drivers() {
                     <th className="py-4 px-6 text-left">Constructor</th>
                     <th className="py-4 px-6 text-right">Points</th>
                     <th className="py-4 px-6 text-right">Progress</th>
+                    <th className="py-4 px-6 text-center">Favorite</th>
                   </tr>
                 </thead>
                 <tbody className="space-y-4">
@@ -109,14 +140,14 @@ export default function Drivers() {
                       <td className="bg-white/5 border-y border-white/5 py-5 px-6 text-right">
                         <span className="text-2xl font-black tabular-nums text-white"><AnimatedCounter value={driver.points} /></span>
                       </td>
-                      <td className="bg-white/5 rounded-r-[1.5rem] border-y border-r border-white/5 py-5 px-6 min-w-[200px]">
+                      <td className="bg-white/5 border-y border-white/5 py-5 px-6 min-w-[200px]">
                         <div className="flex flex-col gap-2">
                           <div className="flex justify-between text-[8px] font-black text-gray-600 uppercase tracking-widest">
                             <span>Wins: {driver.wins}</span>
                             <span>Podiums: {driver.podiums}</span>
                           </div>
                           <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
-                            <motion.div 
+                            <motion.div
                               initial={{ width: 0 }}
                               animate={{ width: `${(driver.points / maxPoints) * 100}%` }}
                               className="h-full rounded-full"
@@ -124,6 +155,9 @@ export default function Drivers() {
                             />
                           </div>
                         </div>
+                      </td>
+                      <td className="bg-white/5 rounded-r-[1.5rem] border-y border-r border-white/5 py-5 px-6 text-center" onClick={(e) => e.stopPropagation()}>
+                        <FavoriteIcon type="drivers" id={driver._id} />
                       </td>
                     </motion.tr>
                   ))}
@@ -139,10 +173,10 @@ export default function Drivers() {
                   initial={{ opacity: 0, y: 15 }}
                   animate={{ opacity: 1, y: 0 }}
                   onClick={() => navigate(`/drivers/${driver._id}`)}
-                  className="glass-card !p-6 flex items-center gap-6 border border-white/5 overflow-hidden cursor-pointer hover:border-white/20 transition-all group relative active:scale-[0.99]"
+                  className="glass-card !p-6 flex items-center gap-4 border border-white/5 overflow-hidden cursor-pointer hover:border-white/20 transition-all group relative active:scale-[0.99]"
                 >
                   <div className="absolute top-0 left-0 bottom-0 w-2" style={{ backgroundColor: getTeamColor(driver.team) }} />
-                  
+
                   <div className="flex flex-col items-center justify-center min-w-[40px]">
                     <span className={`text-3xl font-black italic ${idx === 0 ? 'text-f1-gold' : 'text-white/40'}`}>{driver.rank}</span>
                     <span className="text-[8px] font-black text-gray-600 uppercase tracking-[0.2em] -mt-1">POS</span>
@@ -153,15 +187,18 @@ export default function Drivers() {
                       {driver.fullName}
                     </div>
                     <div className="text-[10px] font-black uppercase tracking-widest mt-1 flex items-center gap-2">
-                       <span style={{ color: getTeamColor(driver.team) }}>{driver.team}</span>
-                       <span className="w-1 h-1 bg-white/20 rounded-full" />
-                       <span className="text-gray-500">#{driver.driverNumber || '??'}</span>
+                      <span style={{ color: getTeamColor(driver.team) }}>{driver.team}</span>
+                      <span className="w-1 h-1 bg-white/20 rounded-full" />
+                      <span className="text-gray-500">#{driver.driverNumber || '??'}</span>
                     </div>
                   </div>
 
-                  <div className="text-right">
-                    <div className="text-2xl font-black tabular-nums text-white leading-none">{driver.points}</div>
-                    <div className="text-[8px] font-black text-gray-500 uppercase tracking-[0.2em]">POINTS</div>
+                  <div className="text-right flex items-center gap-2">
+                    <div className="flex flex-col">
+                      <div className="text-xl font-black tabular-nums text-white leading-none">{driver.points}</div>
+                      <div className="text-[8px] font-black text-gray-500 uppercase tracking-[0.2em]">PTS</div>
+                    </div>
+                    <FavoriteIcon type="drivers" id={driver._id} />
                   </div>
                 </motion.div>
               ))}

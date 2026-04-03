@@ -204,3 +204,293 @@ export function SkeletonCard({ className = '' }) {
     </div>
   );
 }
+
+// Specialized skeletons matching actual component shapes
+
+// StatPill component skeleton (used on homepage)
+export function SkeletonStatPill() {
+  return (
+    <div className="flex items-center gap-4 bg-white/[0.02] backdrop-blur-xl rounded-2xl px-6 py-5 border border-white/5">
+      <div className="w-8 h-8 bg-white/10 rounded-full shimmer" />
+      <div className="flex-1">
+        <div className="h-3 w-16 bg-white/10 rounded-full mb-2 shimmer" />
+        <div className="h-6 w-12 bg-white/5 rounded-full shimmer" />
+      </div>
+    </div>
+  );
+}
+
+// Driver card skeleton (mobile view)
+export function SkeletonDriverCard() {
+  return (
+    <div className="glass-card !p-6 flex items-center gap-6 border border-white/5 overflow-hidden">
+      <div className="absolute top-0 left-0 bottom-0 w-2 bg-white/5" />
+      <div className="flex flex-col items-center justify-center min-w-[40px] gap-1">
+        <div className="w-8 h-8 bg-white/10 rounded shimmer" />
+        <div className="w-6 h-2 bg-white/5 rounded shimmer" />
+      </div>
+      <div className="flex-1">
+        <div className="h-5 w-3/4 bg-white/10 rounded mb-2 shimmer" />
+        <div className="h-3 w-1/2 bg-white/5 rounded shimmer" />
+      </div>
+      <div className="text-right">
+        <div className="h-6 w-12 bg-white/10 rounded shimmer" />
+      </div>
+    </div>
+  );
+}
+
+// Prediction card skeleton
+export function SkeletonPredictionCard() {
+  return (
+    <div className="glass-card h-full rounded-[2rem] p-6 border border-white/5">
+      <div className="flex justify-between items-start mb-6">
+        <div className="h-4 w-20 bg-white/10 rounded-full shimmer" />
+        <div className="h-5 w-16 bg-white/5 rounded-full shimmer" />
+      </div>
+      <div className="mb-8">
+        <div className="h-3 w-20 bg-white/10 rounded mb-2 shimmer" />
+        <div className="h-6 w-3/4 bg-white/5 rounded shimmer" />
+      </div>
+      <div className="pt-4 border-t border-white/5 flex justify-between">
+        <div className="w-24">
+          <div className="h-2 w-full bg-white/5 rounded mb-2 shimmer" />
+          <div className="h-5 w-20 bg-white/10 rounded shimmer" />
+        </div>
+        <div className="w-6 h-6 bg-white/5 rounded-full shimmer" />
+      </div>
+    </div>
+  );
+}
+
+// News card skeleton (for news feed)
+export function SkeletonNewsCard() {
+  return (
+    <div className="glass-card h-full border border-white/5 overflow-hidden !p-0">
+      <div className="h-48 bg-white/5 shimmer" />
+      <div className="p-8 space-y-4">
+        <div className="h-4 w-20 bg-white/10 rounded-full shimmer" />
+        <div className="h-6 w-3/4 bg-white/10 rounded shimmer" />
+        <div className="space-y-2">
+          <div className="h-3 w-full bg-white/5 rounded shimmer" />
+          <div className="h-3 w-2/3 bg-white/5 rounded shimmer" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Driver table row skeleton (desktop view)
+export function SkeletonDriverTableRow() {
+  return (
+    <tr className="group">
+      <td className="bg-white/5 rounded-l-[1.5rem] border-y border-l border-white/5 py-5 px-6">
+        <div className="flex items-center gap-4">
+          <div className="w-1.5 h-10 bg-white/10 rounded-full shimmer" />
+          <div className="w-6 h-6 bg-white/10 rounded shimmer" />
+        </div>
+      </td>
+      <td className="bg-white/5 border-y border-white/5 py-5 px-6">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-full bg-white/5 shimmer" />
+          <div className="space-y-2">
+            <div className="h-5 w-40 bg-white/10 rounded shimmer" />
+            <div className="h-3 w-32 bg-white/5 rounded shimmer" />
+          </div>
+        </div>
+      </td>
+      <td className="bg-white/5 border-y border-white/5 py-5 px-6">
+        <div className="h-4 w-24 bg-white/10 rounded shimmer" />
+      </td>
+      <td className="bg-white/5 border-y border-white/5 py-5 px-6 text-right">
+        <div className="h-6 w-16 bg-white/10 rounded-full shimmer ml-auto" />
+      </td>
+      <td className="bg-white/5 rounded-r-[1.5rem] border-y border-r border-white/5 py-5 px-6">
+        <div className="space-y-2">
+          <div className="flex justify-between">
+            <div className="h-3 w-12 bg-white/5 rounded shimmer" />
+            <div className="h-3 w-12 bg-white/5 rounded shimmer" />
+          </div>
+          <div className="h-2 w-full bg-white/5 rounded-full shimmer" />
+        </div>
+      </td>
+    </tr>
+  );
+}
+
+// Race card skeleton (for calendar/races)
+export function SkeletonRaceCard() {
+  return (
+    <div className="glass-card !p-0 overflow-hidden">
+      <div className="grid md:grid-cols-2">
+        <div className="p-12 md:p-20 bg-white/[0.01] space-y-6">
+          <div className="h-20 w-20 bg-white/5 rounded-full shimmer mx-auto" />
+          <div className="h-8 w-3/4 bg-white/10 rounded shimmer mx-auto" />
+          <div className="h-4 w-1/2 bg-white/5 rounded shimmer mx-auto" />
+        </div>
+        <div className="p-12 md:p-20 space-y-6">
+          <div className="h-4 w-full bg-white/5 rounded shimmer" />
+          <div className="h-4 w-5/6 bg-white/5 rounded shimmer" />
+          <div className="h-4 w-4/6 bg-white/5 rounded shimmer" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Creates a shimmer animation for custom elements
+export const shimmerStyle = `
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+  .shimmer {
+    background: linear-gradient(90deg, rgba(255,255,255,0) 25%, rgba(255,255,255,0.03) 50%, rgba(255,255,255,0) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite linear;
+  }
+  .light .shimmer {
+    background: linear-gradient(90deg, rgba(0,0,0,0) 25%, rgba(0,0,0,0.03) 50%, rgba(0,0,0,0) 75%);
+    background-size: 200% 100%;
+  }
+`;
+
+export function EmptyState({
+  icon = '📭',
+  title = 'No Data Available',
+  description = 'There is no data to display at this time.',
+  action,
+  className = ''
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className={`flex flex-col items-center justify-center py-32 px-6 text-center ${className}`}
+    >
+      <div className="relative mb-8">
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="w-48 h-48 bg-white/5 rounded-full blur-3xl" />
+        </div>
+        <span className="relative text-8xl md:text-9xl drop-shadow-2xl opacity-60">{icon}</span>
+      </div>
+
+      <h3 className="text-3xl md:text-4xl font-black text-white uppercase italic tracking-tighter mb-4 max-w-lg">
+        {title}
+      </h3>
+
+      <p className="text-gray-500 text-sm md:text-base font-medium leading-relaxed max-w-md mb-8">
+        {description}
+      </p>
+
+      {action && (
+        <Button
+          variant="primary"
+          size="lg"
+          onClick={action.onClick}
+          className="!px-10 !py-4 text-xs uppercase tracking-[0.3em] font-bold"
+        >
+          {action.label}
+        </Button>
+      )}
+    </motion.div>
+  );
+}
+
+export function ComingSoon({ feature, className = '' }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className={`flex flex-col items-center justify-center py-32 px-6 text-center ${className}`}
+    >
+      <div className="relative mb-8">
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="w-48 h-48 bg-f1-red/10 rounded-full blur-3xl animate-pulse" />
+        </div>
+        <span className="relative text-8xl md:text-9xl">🚧</span>
+      </div>
+
+      <h3 className="text-3xl md:text-4xl font-black text-white uppercase italic tracking-tighter mb-4">
+        UNDER CONSTRUCTION
+      </h3>
+
+      <p className="text-gray-400 text-sm md:text-base font-medium mb-2">
+        {feature}
+      </p>
+
+      <p className="text-gray-600 text-xs uppercase tracking-widest">
+        Deploying Soon
+      </p>
+    </motion.div>
+  );
+}
+
+export function NoFavorites({ onExplore }) {
+  return (
+    <EmptyState
+      icon="❤️"
+      title="NO FAVORITES YET"
+      description="Start building your personal watchlist by bookmarking drivers, teams, and races. Your curated command center awaits."
+      action={
+        onExplore ? {
+          label: 'EXPLORE THE GRID',
+          onClick: onExplore
+        } : undefined
+      }
+      className="py-40"
+    />
+  );
+}
+
+export function NoPredictions({ onPredict }) {
+  return (
+    <EmptyState
+      icon="🔮"
+      title="EMPTY PREDICTION GRID"
+      description="You haven't deployed any race predictions yet. Lock in your forecasts across 11 strategic categories and climb the leaderboard."
+      action={
+        onPredict ? {
+          label: 'VIEW CALENDAR',
+          onClick: onPredict
+        } : undefined
+      }
+    />
+  );
+}
+
+export function NoSearchResults({ query, onClear }) {
+  return (
+    <EmptyState
+      icon="🎯"
+      title="NO MATCHES FOUND"
+      description={`We couldn't find any results matching "${query}". Try adjusting your search criteria.`}
+      action={
+        onClear ? {
+          label: 'CLEAR FILTERS',
+          onClick: onClear
+        } : undefined
+      }
+    />
+  );
+}
+
+export function NoRacesUpcoming() {
+  return (
+    <EmptyState
+      icon="🏁"
+      title="NO UPCOMING RACES"
+      description="The season schedule is currently being updated. Check back soon for the next mission briefing."
+    />
+  );
+}
+
+export function NoRaceResults() {
+  return (
+    <EmptyState
+      icon="📊"
+      title="NO RACE DATA"
+      description="Race results haven't been recorded yet. The first Grand Prix results will appear here once the checkered flag falls."
+    />
+  );
+}

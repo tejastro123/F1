@@ -6,6 +6,8 @@ import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 import { SocketProvider } from './context/SocketContext.jsx';
 import { ThemeProvider } from './context/ThemeContext.jsx';
 import { DataCacheProvider } from './context/DataCacheContext.jsx';
+import { FavoritesProvider } from './context/FavoritesContext.jsx';
+import { DashboardProvider } from './context/DashboardContext.jsx';
 import Navbar from './components/Navbar.jsx';
 import LiveBanner from './components/LiveBanner.jsx';
 import { LoadingSpinner } from './components/ui.jsx';
@@ -24,6 +26,7 @@ const Live = lazy(() => import('./pages/Live.jsx'));
 const News = lazy(() => import('./pages/News.jsx'));
 const StrategicOracle = lazy(() => import('./pages/StrategicOracle.jsx'));
 const AuthSuccess = lazy(() => import('./pages/AuthSuccess.jsx'));
+const Favorites = lazy(() => import('./pages/Favorites.jsx'));
 
 // Admin pages
 const AdminLogin = lazy(() => import('./admin/AdminLogin.jsx'));
@@ -78,6 +81,7 @@ function AnimatedRoutes() {
           <Route path="/live" element={<PageTransition><Live /></PageTransition>} />
           <Route path="/news" element={<PageTransition><News /></PageTransition>} />
           <Route path="/oracle" element={<PageTransition><StrategicOracle /></PageTransition>} />
+          <Route path="/favorites" element={<ProtectedRoute><PageTransition><Favorites /></PageTransition></ProtectedRoute>} />
           <Route path="/auth-success" element={<AuthSuccess />} />
 
           {/* Admin Routes */}
@@ -104,13 +108,17 @@ export default function App() {
         <AuthProvider>
           <SocketProvider>
             <DataCacheProvider>
-              <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-                <Navbar />
-                <LiveBanner />
-                <main>
-                  <AnimatedRoutes />
-                </main>
-              </BrowserRouter>
+              <FavoritesProvider>
+                <DashboardProvider>
+                  <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+                  <Navbar />
+                  <LiveBanner />
+                  <main>
+                    <AnimatedRoutes />
+                  </main>
+                </BrowserRouter>
+              </DashboardProvider>
+              </FavoritesProvider>
             </DataCacheProvider>
           </SocketProvider>
         </AuthProvider>

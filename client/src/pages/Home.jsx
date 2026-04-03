@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useStats, useRaces, useNews } from '../hooks/useData.jsx';
 import useCountdown from '../hooks/useCountdown.js';
-import { AnimatedCounter, Card, Button, StatPill, SectionHeader, SkeletonCard } from '../components/ui.jsx';
+import { AnimatedCounter, Card, Button, StatPill, SectionHeader, SkeletonCard, SkeletonStatPill, SkeletonRaceCard, SkeletonNewsCard } from '../components/ui.jsx';
 
 export default function Home() {
   const { stats, loading: statsLoading } = useStats();
@@ -82,14 +82,14 @@ export default function Home() {
             transition={{ duration: 1, delay: 0.4 }}
             className="flex flex-col sm:flex-row justify-center gap-4 px-4"
           >
-            <Link to="/drivers" className="w-full sm:w-auto">
+            <Link to="/drivers" className="w-full sm:w-auto" data-tour="predictions">
               <Button variant="primary" size="lg" className="w-full h-14 !px-10 text-xs uppercase tracking-[0.3em] font-bold">
                 Deploy Standings
               </Button>
             </Link>
-            <Link to="/live" className="w-full sm:w-auto">
+            <Link to="/leaderboard" className="w-full sm:w-auto" data-tour="leaderboard">
               <Button variant="outline" size="lg" className="w-full h-14 !px-10 text-xs uppercase tracking-[0.3em] font-bold border-white/10 hover:bg-white/5">
-                Terminal Access
+                Global Leaderboard
               </Button>
             </Link>
           </motion.div>
@@ -118,13 +118,13 @@ export default function Home() {
       </motion.div>
 
       {/* Stats Ticker - Professional Bento Style */}
-      <section className="py-32 px-6">
+      <section className="py-32 px-6" data-tour="home-stats">
         <div className="max-w-7xl mx-auto">
           <SectionHeader title="System Telemetry" subtitle="Active championship data streams" align="center" />
 
           {statsLoading ? (
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-              {Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)}
+              {Array.from({ length: 4 }).map((_, i) => <SkeletonStatPill key={i} />)}
             </div>
           ) : stats && (
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
@@ -139,7 +139,7 @@ export default function Home() {
 
       {/* Next Race Countdown - Machined Precision */}
       {nextRace && (
-        <section className="py-32 px-6 relative overflow-hidden bg-white/[0.01] border-y border-white/5">
+        <section className="py-32 px-6 relative overflow-hidden bg-white/[0.01] border-y border-white/5" data-tour="home-countdown">
           <div className="max-w-7xl mx-auto text-center relative z-10">
             <SectionHeader title="Next Mission" subtitle={`${nextRace.flag} ${nextRace.grandPrixName} · ${nextRace.venue}`} align="center" />
             
@@ -171,8 +171,11 @@ export default function Home() {
       {latestRace && (
         <section className="py-32 px-6">
           <div className="max-w-7xl mx-auto">
-            <SectionHeader title="Event Archive" subtitle={`Round ${latestRace.round} · Mission Data Recorded`} align="center" />
-            <Card className="max-w-6xl mx-auto !p-0 overflow-hidden" glass={true}>
+            <SectionHeader title="Event Archive" subtitle={latestRace ? `Round ${latestRace.round} · Mission Data Recorded` : 'Event Archive'} align="center" />
+            {racesLoading ? (
+              <SkeletonRaceCard />
+            ) : (
+              <Card className="max-w-6xl mx-auto !p-0 overflow-hidden" glass={true}>
               <div className="grid md:grid-cols-2">
                 <div className="p-12 md:p-20 flex flex-col justify-center border-b md:border-b-0 md:border-r border-white/5 bg-white/[0.01]">
                   <span className="text-8xl md:text-9xl mb-8 drop-shadow-2xl">{latestRace.flag}</span>
@@ -227,7 +230,7 @@ export default function Home() {
           
           {newsLoading ? (
             <div className="grid md:grid-cols-2 gap-8 mt-16">
-              {Array.from({ length: 2 }).map((_, i) => <SkeletonCard key={i} />)}
+              {Array.from({ length: 2 }).map((_, i) => <SkeletonNewsCard key={i} />)}
             </div>
           ) : (
             <div className="grid md:grid-cols-2 gap-8 mt-16">
@@ -316,15 +319,15 @@ export default function Home() {
             ))}
           </div>
 
-          <Card className="mt-20 border-f1-gold/20 relative overflow-hidden bg-white/[0.01]">
+          <Card className="mt-20 border-f1-gold/20 relative overflow-hidden bg-white/[0.01]" data-tour="tour-end">
             <div className="absolute top-0 right-0 p-8 opacity-5">
               <span className="text-[10rem] font-bold select-none uppercase italic">DATA</span>
             </div>
             <h3 className="text-xl font-bold text-white mb-12 uppercase tracking-[0.4em] text-center italic">ACTIVE SECTORS</h3>
             <div className="flex flex-wrap justify-center gap-2 md:gap-3">
               {[
-                'GP WINNER', 'POLE POSITION', 'PODIUM LOCK', 'FASTEST LAP', 
-                'SPRINT KING', 'MIDFIELD HERO', 'SURPRISE GAIN', 'THE BIG FLOP', 
+                'GP WINNER', 'POLE POSITION', 'PODIUM LOCK', 'FASTEST LAP',
+                'SPRINT KING', 'MIDFIELD HERO', 'SURPRISE GAIN', 'THE BIG FLOP',
                 'PIT ERROR', 'SAFETY CAR', 'THE CRAZY CALL'
               ].map(cat => (
                 <span key={cat} className="px-5 py-3 bg-white/[0.02] border border-white/5 rounded-xl text-[10px] font-bold text-f1-gold uppercase tracking-[0.2em] hover:bg-f1-gold hover:text-black transition-all cursor-default select-none shadow-sm">

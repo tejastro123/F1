@@ -8,6 +8,11 @@ const userSchema = new mongoose.Schema({
   displayName: { type: String },
   avatarUrl: { type: String },
   role: { type: String, enum: ['admin', 'viewer', 'user'], default: 'user' },
+  favorites: {
+    drivers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Driver' }],
+    constructors: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Constructor' }],
+    races: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Race' }],
+  },
   createdAt: { type: Date, default: Date.now },
 });
 
