@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import Joyride, { STATUS, type CallBackProps } from 'react-joyride';
+import Joyride, { STATUS } from 'react-joyride';
 import { useLocation } from 'react-router-dom';
 
 const STORAGE_KEY = 'f1-tour-completed';
@@ -141,7 +141,7 @@ export function OnboardingTour({ isOpen, onClose }) {
     setRun(isOpen);
   }, [isOpen]);
 
-  const handleJoyrideCallback = (data: CallBackProps) => {
+  const handleJoyrideCallback = (data) => {
     const { status, type } = data;
 
     if (type === 'tour:end' || type === 'tour:skip' || status === STATUS.FINISHED || status === STATUS.SKIPPED) {
