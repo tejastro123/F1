@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import { useF1Store } from "@/store/f1Store";
 import { formatDate } from "@/lib/utils";
 
@@ -11,7 +11,7 @@ interface TickItem {
 }
 
 const DEFAULT_ITEMS: TickItem[] = [
-  { sym: "SEASON", val: "2024", pts: "LIVE" },
+  { sym: "SEASON", val: "2026", pts: "LIVE" },
   { sym: "WDC", val: "LOADING...", pts: "--- PTS" },
   { sym: "WCC", val: "LOADING...", pts: "--- PTS" },
   { sym: "NEXT", val: "LOADING...", pts: "---" },
@@ -23,16 +23,15 @@ const DEFAULT_ITEMS: TickItem[] = [
 
 export function Ticker() {
   const { driverStandings, constructorStandings, nextRace } = useF1Store();
-  const [items, setItems] = useState<TickItem[]>(DEFAULT_ITEMS);
 
-  useEffect(() => {
-    if (driverStandings.length === 0) return;
+  const items = useMemo(() => {
+    if (driverStandings.length === 0) return DEFAULT_ITEMS;
 
     const leader = driverStandings[0];
     const teamLeader = constructorStandings[0];
 
-    const updated: TickItem[] = [
-      { sym: "2024 WDC", val: leader.Driver.code, pts: `${leader.points} PTS` },
+    return [
+      { sym: "2026 WDC", val: leader.Driver.code, pts: `${leader.points} PTS` },
       { sym: "WCC", val: teamLeader?.Constructor.name.split(" ").pop()?.toUpperCase() || "---", pts: `${teamLeader?.points || "---"} PTS` },
       { sym: "P1", val: leader.Driver.familyName.toUpperCase(), pts: leader.points + " PTS" },
       { sym: "NEXT RACE", val: nextRace ? nextRace.raceName.split(" ")[0].toUpperCase() : "TBA", pts: nextRace ? formatDate(nextRace.date) : "---" },
@@ -44,8 +43,6 @@ export function Ticker() {
       { sym: "STATUS", val: "LIVE", pts: "AUTO-UPDATE" },
       { sym: "API", val: "ERGAST", pts: "ACTIVE" },
     ];
-
-    setItems(updated);
   }, [driverStandings, constructorStandings, nextRace]);
 
   return (

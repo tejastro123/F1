@@ -1,38 +1,49 @@
 "use client";
 
+import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 import type { DriverStanding } from "@/types/f1";
-import { getTeamColor } from "@/lib/utils";
-
-import { useState, useEffect } from "react";
+import { getDriverColor } from "@/lib/driver-colors";
+import { useFastF1 } from "@/hooks/useFastF1";
+import { useSessionStore } from "@/store/sessionStore";
 
 interface Props {
   drivers: DriverStanding[];
 }
 
 export function SeasonAnalyticsPreview({ drivers }: Props) {
+  const { getSeasonResults } = useFastF1();
+  const { year } = useSessionStore();
+  const [seasonResults, setSeasonResults] = useState<any[]>([]);
   const [mounted, setMounted] = useState(false);
   
   useEffect(() => {
     setMounted(true);
-  }, []);
+    async function loadData() {
+      const data = await getSeasonResults(year);
+      if (data) setSeasonResults(data);
+    }
+    loadData();
+  }, [year, getSeasonResults]);
 
-  if (!mounted) {
+  const top3 = drivers.slice(0, 3).map(d => d.Driver.code);
+
+  const chartData = useMemo(() => {
+    const rounds = Array.from(new Set(seasonResults.map(r => r.round))).sort((a, b) => a - b);
+    return rounds.map(rnd => {
+      const row: any = { round: `R${rnd}` };
+      top3.forEach((drv, i) => {
+        const res = seasonResults.find(r => r.driverCode === drv && r.round === rnd);
+        row[`p${i+1}`] = res ? res.points : 0;
+      });
+      return row;
+    });
+  }, [seasonResults, top3]);
+
+  if (!mounted || seasonResults.length === 0) {
     return <div className="h-[240px] w-full bg-white/[0.02] animate-pulse mb-12" />;
   }
-
-  // Mock trend data for top 3 drivers
-  const data = [
-    { round: 1, p1: 25, p2: 18, p3: 15 },
-    { round: 2, p1: 43, p2: 36, p3: 30 },
-    { round: 3, p1: 68, p2: 51, p3: 45 },
-    { round: 4, p1: 93, p2: 76, p3: 60 },
-    { round: 5, p1: 118, p2: 101, p3: 75 },
-    { round: 6, p1: 143, p2: 119, p3: 93 },
-  ];
-
-  const topDrivers = drivers.slice(0, 3);
 
   return (
     <div className="mb-12">
@@ -54,23 +65,23 @@ export function SeasonAnalyticsPreview({ drivers }: Props) {
               POINTS_ACCUMULATION_CURVE
             </div>
             <div className="flex gap-4">
-              {topDrivers.map((d, i) => (
-                <div key={d.Driver.driverId} className="flex items-center gap-2">
-                  <div className="w-2 h-2" style={{ backgroundColor: getTeamColor(d.Constructors[0]?.constructorId) }} />
-                  <span className="font-mono text-[9px] text-white uppercase">{d.Driver.code}</span>
+              {top3.map((code, i) => (
+                <div key={code} className="flex items-center gap-2">
+                  <div className="w-2 h-2" style={{ backgroundColor: getDriverColor(code) }} />
+                  <span className="font-mono text-[9px] text-white uppercase">{code}</span>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="h-[240px] w-full">
-            <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
-              <AreaChart data={data}>
+          <div className="h-[240px] w-full relative">
+            <ResponsiveContainer width="100%" height="100%" key={seasonResults.length}>
+              <AreaChart data={chartData}>
                 <defs>
-                  {topDrivers.map((d, i) => (
-                    <linearGradient key={d.Driver.driverId} id={`grad${i}`} x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor={getTeamColor(d.Constructors[0]?.constructorId)} stopOpacity={0.3} />
-                      <stop offset="95%" stopColor={getTeamColor(d.Constructors[0]?.constructorId)} stopOpacity={0} />
+                  {top3.map((code, i) => (
+                    <linearGradient key={code} id={`grad${i}`} x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor={getDriverColor(code)} stopOpacity={0.3} />
+                      <stop offset="95%" stopColor={getDriverColor(code)} stopOpacity={0} />
                     </linearGradient>
                   ))}
                 </defs>
@@ -87,12 +98,12 @@ export function SeasonAnalyticsPreview({ drivers }: Props) {
                 <Tooltip
                   contentStyle={{ backgroundColor: "#0a0a0a", border: "1px solid rgba(255,255,255,0.1)", fontSize: "10px", fontFamily: "JetBrains Mono" }}
                 />
-                {topDrivers.map((d, i) => (
+                {top3.map((code, i) => (
                   <Area
-                    key={d.Driver.driverId}
+                    key={code}
                     type="monotone"
                     dataKey={`p${i + 1}`}
-                    stroke={getTeamColor(d.Constructors[0]?.constructorId)}
+                    stroke={getDriverColor(code)}
                     fillOpacity={1}
                     fill={`url(#grad${i})`}
                     strokeWidth={2}

@@ -21,7 +21,7 @@ export default function TeamsPage() {
           CONSTRUCTORS&apos; CHAMPIONSHIP
         </h1>
         <div className="h-px flex-1 bg-gradient-to-r from-[var(--f1-red)] to-transparent" />
-        <span className="font-mono text-[11px] text-[var(--f1-gray-light)] tracking-widest">2024 SEASON</span>
+        <span className="font-mono text-[11px] text-[var(--f1-gray-light)] tracking-widest uppercase">2026 Season</span>
       </div>
 
       {isLoading ? (

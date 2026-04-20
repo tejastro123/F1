@@ -6,13 +6,13 @@ import { Radio, BarChart3, Repeat, Gamepad2, Brain, History, Mic, Users, LayoutD
 
 const LINKS = [
   { href: "/live", label: "LIVE TRACK", icon: Radio, color: "var(--f1-red)", hot: true },
-  { href: "/analysis", label: "INTEL", icon: BarChart3, color: "var(--mclaren)" },
+  { href: "/analysis", label: "TELEMETRY", icon: BarChart3, color: "var(--mclaren)" },
+  { href: "/qualifying", label: "QUALIFYING", icon: Radio, color: "#FCD700" },
+  { href: "/analytics", label: "ANALYTICS", icon: BarChart3, color: "var(--redbull)" },
   { href: "/strategy", label: "STRATEGY", icon: Repeat, color: "var(--mercedes)" },
-  { href: "/drivers", label: "ROSTER", icon: Users, color: "var(--ferrari)" },
+  { href: "/championship", label: "WDC MATH", icon: History, color: "var(--aston)" },
+  { href: "/history", label: "VAULT", icon: History, color: "var(--ferrari)" },
   { href: "/ai", label: "AI PREDICT", icon: Brain, color: "#A855F7" },
-  { href: "/fantasy", label: "FANTASY", icon: Gamepad2, color: "var(--redbull)" },
-  { href: "/history", label: "ARCHIVE", icon: History, color: "var(--aston)" },
-  { href: "/voice", label: "COMMS", icon: Mic, color: "var(--alpine)" },
 ];
 
 export function QuickLinks() {

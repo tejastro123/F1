@@ -20,7 +20,7 @@ export default function DriversPage() {
           DRIVERS&apos; CHAMPIONSHIP
         </h1>
         <div className="h-px flex-1 bg-gradient-to-r from-[var(--f1-red)] to-transparent" />
-        <span className="font-mono text-[11px] text-[var(--f1-gray-light)] tracking-widest">2024 SEASON</span>
+        <span className="font-mono text-[11px] text-[var(--f1-gray-light)] tracking-widest uppercase">2026 Season</span>
       </div>
 
       {isLoading ? (
@@ -74,7 +74,7 @@ export default function DriversPage() {
                     {d.Driver.givenName} {d.Driver.familyName}
                   </div>
                   <div className="font-mono text-[10px] text-[var(--f1-gray-light)] tracking-widest mb-4">
-                    {d.Constructors[0]?.name} · #{d.Driver.permanentNumber || "—"}
+                    {d.Constructors[0]?.name}
                   </div>
 
                   <div className="flex items-end justify-between">

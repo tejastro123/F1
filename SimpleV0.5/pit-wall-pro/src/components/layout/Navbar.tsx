@@ -7,7 +7,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Flag, Gauge, Users, Building2, Trophy, History,
   Bell, Settings, Menu, X, Radio, ChevronRight,
-  Gamepad2, Brain, Mic, BarChart3, Repeat, Calendar as CalendarIcon
+  Gamepad2, Brain, Mic, BarChart3, Repeat, Calendar as CalendarIcon, Activity, Zap,
+  RotateCcw
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUserStore } from "@/store/f1Store";
@@ -16,15 +17,17 @@ import { useLiveRaceStore } from "@/store/f1Store";
 const NAV_ITEMS = [
   { href: "/", label: "DASHBOARD", icon: Gauge },
   { href: "/live", label: "LIVE RACE", icon: Radio, isLive: true },
+  { href: "/analytics", label: "ANALYTICS", icon: BarChart3 },
+  { href: "/analysis", label: "TELEMETRY LAB", icon: Activity },
+  { href: "/qualifying", label: "QUALIFYING", icon: Zap },
+  { href: "/strategy", label: "STRATEGY", icon: Repeat },
+  { href: "/history", label: "SEASON VAULT", icon: History },
+  { href: "/championship", label: "WDC SCENARIOS", icon: Trophy },
+  { href: "/replay", label: "RACE REPLAY", icon: RotateCcw },
   { href: "/drivers", label: "DRIVERS", icon: Users },
   { href: "/teams", label: "TEAMS", icon: Building2 },
-  { href: "/analytics", label: "ANALYTICS", icon: BarChart3 },
-  { href: "/strategy", label: "STRATEGY", icon: Repeat },
-  { href: "/history", label: "HISTORY", icon: History },
-  { href: "/fantasy", label: "FANTASY", icon: Gamepad2 },
   { href: "/calendar", label: "CALENDAR", icon: CalendarIcon },
-  { href: "/replay", label: "REPLAY", icon: History },
-  { href: "/ai", label: "AI INSIGHTS", icon: Brain },
+  { href: "/fantasy", label: "FANTASY", icon: Gamepad2 },
 ];
 
 export function Navbar() {
