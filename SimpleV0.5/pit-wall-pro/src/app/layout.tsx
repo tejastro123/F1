@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import { Suspense } from "react";
 import { Providers } from "@/components/providers/Providers";
 import { Navbar } from "@/components/layout/Navbar";
 import { Ticker } from "@/components/layout/Ticker";
@@ -35,12 +36,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth">
       <body className="antialiased" suppressHydrationWarning>
         <Providers>
-          <CommandCenterOverlay />
-          <Ticker />
-          <Navbar />
+          <Suspense fallback={null}>
+            <CommandCenterOverlay />
+            <Ticker />
+            <Navbar />
+          </Suspense>
           <main className="relative z-10 min-h-[calc(100vh-60px)] pt-12">
             {children}
           </main>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
   Legend, ResponsiveContainer, AreaChart, Area
@@ -26,7 +26,17 @@ function generateSpeedData(drivers: LiveDriver[]) {
 const COLORS = ["#E10600", "#FF8700", "#27F4D2", "#0600EF", "#DC0000"];
 
 export function LiveTelemetryChart({ drivers, height = 260 }: Props) {
+  const [mounted, setMounted] = useState(false);
+  
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const speedData = useMemo(() => generateSpeedData(drivers), [drivers.length]);
+
+  if (!mounted) {
+    return <div className="h-[260px] w-full bg-[rgba(225,6,0,0.06)] animate-pulse mt-6" />;
+  }
 
   return (
     <div className="mt-6 card-base overflow-hidden"

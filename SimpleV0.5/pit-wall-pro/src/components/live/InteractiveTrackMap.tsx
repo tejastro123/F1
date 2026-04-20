@@ -3,110 +3,108 @@
 import { useMemo } from "react";
 import { motion } from "framer-motion";
 import type { LiveDriver } from "@/types/f1";
+import { getCircuitPath } from "@/lib/circuit-data";
 
 interface TrackMapProps {
   drivers: LiveDriver[];
+  circuitId?: string;
 }
 
-// A simplified "Modern Circuit" SVG Path (Generic but looks professional)
-const TRACK_PATH = "M 100 300 C 100 100 300 100 500 100 C 700 100 900 150 900 300 C 900 450 700 500 500 500 C 300 500 100 500 100 300 Z";
+export function InteractiveTrackMap({ drivers, circuitId = "generic" }: TrackMapProps) {
+  const circuit = useMemo(() => getCircuitPath(circuitId), [circuitId]);
+  const TRACK_PATH = circuit.path;
 
-export function InteractiveTrackMap({ drivers }: TrackMapProps) {
-  // Map drivers to positions on the track
   const driverPositions = useMemo(() => {
     return drivers.slice(0, 20).map((d, i) => {
-      // Simulate progress along the track based on position and lap
-      // In a real app, this would come from telemetry (x, y)
       const progress = (1 - (i * 0.05)) % 1;
-      return {
-        ...d,
-        progress,
-      };
+      return { ...d, progress };
     });
   }, [drivers]);
 
   return (
-    <div className="card-base p-6 relative overflow-hidden h-[400px]" style={{ clipPath: "polygon(0 0, 100% 0, 100% 100%, 20px 100%, 0 calc(100% - 20px))" }}>
-      <div className="absolute top-4 left-4 z-10">
-        <h3 className="font-orbitron font-bold text-xs text-white tracking-widest uppercase">TRACK_POSITION_MAP</h3>
-        <p className="font-mono text-[9px] text-[var(--f1-gray-light)] tracking-widest mt-1">REAL-TIME TELEMETRY OVERLAY</p>
+    <div className="card-base p-8 relative overflow-hidden h-[420px]" 
+      style={{ clipPath: "polygon(0 0, 100% 0, 100% 100%, 30px 100%, 0 calc(100% - 30px))" }}>
+      
+      <div className="absolute top-6 left-6 z-10">
+        <div className="font-orbitron font-bold text-[10px] text-[var(--f1-red)] tracking-[0.4em] mb-1 uppercase">TRACK_POSITION_MAP</div>
+        <div className="font-mono text-[9px] text-[var(--f1-gray-light)] tracking-widest uppercase">REAL_TIME_TELEMETRY_UPLINK</div>
       </div>
 
-      <div className="absolute top-4 right-4 z-10 flex gap-2">
-        <div className="flex items-center gap-1.5 px-2 py-1 bg-green-500/10 border border-green-500/30">
-          <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
-          <span className="font-mono text-[8px] text-green-400">TRACK_CLEAR</span>
-        </div>
-      </div>
+      {/* Blueprint Grid Overlay */}
+      <div className="absolute inset-0 opacity-[0.03] pointer-events-none"
+        style={{ backgroundImage: "linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)", backgroundSize: "20px 20px" }} />
 
-      <div className="w-full h-full flex items-center justify-center pt-8">
-        <svg viewBox="0 0 1000 600" className="w-full h-full max-h-[300px]">
-          {/* Track Glow */}
+      <div className="w-full h-full flex items-center justify-center relative z-0 mt-4">
+        <svg viewBox="0 0 1000 600" className="w-full h-full max-h-[320px]">
+          {/* Outer Glow */}
           <path
             d={TRACK_PATH}
             fill="none"
             stroke="var(--f1-red)"
-            strokeWidth="30"
+            strokeWidth="40"
             strokeLinecap="round"
-            style={{ opacity: 0.05, filter: "blur(10px)" }}
+            className="opacity-[0.02]"
           />
 
-          {/* Track Surface */}
+          {/* Track Surface (Blueprint style) */}
           <path
             d={TRACK_PATH}
             fill="none"
-            stroke="#1c1c28"
-            strokeWidth="20"
-            strokeLinecap="round"
+            stroke="white"
+            strokeWidth="2"
+            strokeDasharray="10 5"
+            className="opacity-10"
           />
-
-          {/* Track Outline */}
+          
           <path
             d={TRACK_PATH}
             fill="none"
             stroke="var(--f1-gray)"
-            strokeWidth="22"
+            strokeWidth="20"
             strokeLinecap="round"
-            style={{ opacity: 0.2 }}
+            className="opacity-5"
           />
 
-          {/* Sector Lines (Simulated) */}
-          <circle cx="500" cy="100" r="12" fill="var(--f1-red)" opacity="0.3" />
-          <circle cx="900" cy="300" r="12" fill="var(--f1-red)" opacity="0.3" />
-          <circle cx="100" cy="300" r="12" fill="var(--f1-red)" opacity="0.3" />
+          {/* S1, S2, S3 Split points */}
+          {circuit.splitPoints.map((point) => (
+            <SplitPoint key={point.label} x={point.x} y={point.y} label={point.label} />
+          ))}
 
           {/* Driver Markers */}
           {driverPositions.map((d, i) => (
-            <motion.g
-              key={d.driverCode}
-              initial={false}
-              animate={{
-                // In a real implementation with x,y this would be simple
-                // Here we use a CSS motion path or manual calculation
-              }}
-            >
-              <DriverMarker driver={d} index={i} />
-            </motion.g>
+            <DriverMarker key={d.driverCode} driver={d} index={i} />
           ))}
         </svg>
       </div>
 
-      {/* Legend */}
-      <div className="absolute bottom-4 left-4 right-4 flex justify-center gap-4 flex-wrap">
-        {drivers.slice(0, 5).map((d) => (
-          <div key={d.driverCode} className="flex items-center gap-1.5">
-            <div className="w-2 h-2 rounded-full" style={{ background: d.teamColor }} />
-            <span className="font-mono text-[8px] text-white">{d.driverCode}</span>
-          </div>
-        ))}
+      {/* Legend / Status HUD */}
+      <div className="absolute bottom-6 left-6 right-6 flex justify-between items-end">
+        <div className="flex gap-4">
+          {drivers.slice(0, 3).map((d) => (
+            <div key={d.driverCode} className="flex flex-col gap-1">
+              <div className="h-0.5 w-8" style={{ backgroundColor: d.teamColor }} />
+              <span className="font-mono text-[8px] text-white font-bold">{d.driverCode}</span>
+            </div>
+          ))}
+        </div>
+        <div className="flex items-center gap-2 px-3 py-1 bg-[var(--f1-red)]/10 border border-[var(--f1-red)]/30">
+          <span className="font-mono text-[8px] text-[var(--f1-red)] font-bold">GPS_ACCURACY: 99.8%</span>
+        </div>
       </div>
     </div>
   );
 }
 
+function SplitPoint({ x, y, label }: { x: number; y: number; label: string }) {
+  return (
+    <g transform={`translate(${x},${y})`}>
+      <circle r="4" fill="var(--f1-red)" className="opacity-40" />
+      <text y="-10" textAnchor="middle" className="font-mono text-[10px] fill-[var(--f1-gray-light)] font-bold">{label}</text>
+    </g>
+  );
+}
+
 function DriverMarker({ driver, index }: { driver: LiveDriver & { progress: number }, index: number }) {
-  // Calculate position along the mock path manually for this demonstration
-  // This is a rough approximation of the SVG path above
   const angle = (driver.progress * 2 * Math.PI) - Math.PI / 2;
   const rx = 400;
   const ry = 200;
@@ -118,29 +116,30 @@ function DriverMarker({ driver, index }: { driver: LiveDriver & { progress: numb
       animate={{ x: cx, y: cy }}
       transition={{ duration: 1, ease: "linear" }}
     >
-      <circle r="12" fill={driver.teamColor} stroke="white" strokeWidth="2" />
+      {/* Driver Pointer */}
+      <motion.path
+        d="M 0 -8 L 6 8 L -6 8 Z"
+        fill={driver.teamColor}
+        animate={{ rotate: (angle * 180 / Math.PI) + 90 }}
+      />
+      
+      {/* Driver Tag */}
+      <rect x="8" y="-8" width="28" height="16" fill="black" fillOpacity="0.8" stroke={driver.teamColor} strokeWidth="1" />
       <text
+        x="22"
         y="4"
         textAnchor="middle"
         fill="white"
         fontSize="10"
         fontWeight="bold"
-        fontFamily="Rajdhani"
+        className="font-orbitron"
       >
         {driver.driverCode}
       </text>
 
-      {/* Speed Vector Indicator */}
-      {index < 3 && (
-        <line
-          x1="0"
-          y1="0"
-          x2="20"
-          y2="0"
-          stroke={driver.teamColor}
-          strokeWidth="2"
-          transform={`rotate(${angle * 180 / Math.PI})`}
-        />
+      {/* Lead car glow */}
+      {index === 0 && (
+        <circle r="20" fill={driver.teamColor} className="opacity-10 animate-pulse" />
       )}
     </motion.g>
   );

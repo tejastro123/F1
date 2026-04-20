@@ -201,6 +201,10 @@ body::after {
   background-clip: text;
 }
 
+.mask-gradient-to-l {
+  mask-image: linear-gradient(to left, black 50%, transparent 100%);
+}
+
 .text-gradient-gold {
   background: linear-gradient(135deg, #FCD700 0%, #FF8700 100%);
   -webkit-background-clip: text;

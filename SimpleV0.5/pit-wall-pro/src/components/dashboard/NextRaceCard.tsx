@@ -2,23 +2,24 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { MapPin, Calendar, Clock } from "lucide-react";
+import { MapPin, Calendar, Clock, ChevronRight } from "lucide-react";
 import type { Race } from "@/types/f1";
 import { calculateCountdown, getCountryFlag, formatDate, pad } from "@/lib/utils";
+import Image from "next/image";
 
 interface Props { race: Race | null; isLoading: boolean; }
 
 function CountdownCell({ value, label }: { value: number; label: string }) {
   return (
     <div
-      className="flex flex-col items-center justify-center p-4 md:p-6 border-2 border-[var(--f1-gray)] bg-[var(--f1-darker)] hover:border-[var(--f1-red)] hover:bg-[rgba(225,6,0,0.05)] transition-all group"
+      className="flex flex-col items-center justify-center p-4 md:p-6 border border-white/10 bg-black/40 backdrop-blur-md hover:border-[var(--f1-red)]/50 transition-all group"
       style={{ clipPath: "polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px)" }}
     >
-      <div className="font-orbitron font-black text-[var(--f1-red)] leading-none tabular-nums mb-3"
-        style={{ fontSize: "clamp(28px,5vw,52px)" }}>
+      <div className="font-orbitron font-black text-white group-hover:text-[var(--f1-red)] transition-colors leading-none tabular-nums mb-2"
+        style={{ fontSize: "clamp(24px,4vw,42px)" }}>
         {pad(value)}
       </div>
-      <div className="font-mono text-[9px] tracking-[0.2em] text-[var(--f1-gray-light)] uppercase">
+      <div className="font-mono text-[8px] tracking-[0.3em] text-[var(--f1-gray-light)] uppercase">
         {label}
       </div>
     </div>
@@ -38,7 +39,7 @@ export function NextRaceCard({ race, isLoading }: Props) {
 
   if (isLoading) {
     return (
-      <div className="mb-8 h-64 skeleton rounded" />
+      <div className="mb-8 h-80 skeleton rounded-xl opacity-20" />
     );
   }
 
@@ -49,104 +50,130 @@ export function NextRaceCard({ race, isLoading }: Props) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: 40 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.7, delay: 0.2 }}
-      className="mb-8 p-6 md:p-10 border-2 border-[var(--f1-red)] bg-gradient-to-br from-[var(--f1-dark)] to-[var(--f1-black)] relative overflow-hidden"
-      style={{ clipPath: "polygon(0 0,calc(100% - 30px) 0,100% 30px,100% 100%,30px 100%,0 calc(100% - 30px))" }}
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.8 }}
+      className="mb-12 p-1 border border-white/5 bg-[#0a0a0a] relative overflow-hidden group"
+      style={{ clipPath: "polygon(0 0, calc(100% - 40px) 0, 100% 40px, 100% 100%, 40px 100%, 0 calc(100% - 40px))" }}
     >
-      {/* BG pattern */}
-      <div className="absolute inset-0 opacity-[0.03]"
-        style={{ backgroundImage: "repeating-linear-gradient(45deg,var(--f1-red) 0,var(--f1-red) 1px,transparent 0,transparent 50%)", backgroundSize: "20px 20px" }} />
+      {/* Decorative corners */}
+      <div className="absolute top-0 left-0 w-20 h-20 border-t-2 border-l-2 border-[var(--f1-red)]/30 pointer-events-none" />
+      <div className="absolute bottom-0 right-0 w-20 h-20 border-b-2 border-r-2 border-[var(--f1-red)]/30 pointer-events-none" />
 
-      <div className="relative z-10 grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-8 lg:gap-16">
-        {/* Left */}
-        <div>
-          <div className="flex items-center gap-4 mb-5">
-            <div className="font-mono text-[11px] font-bold tracking-[0.2em] text-[var(--f1-red)] px-4 py-2 border-2 border-[var(--f1-red)] bg-[rgba(225,6,0,0.1)]"
-              style={{ clipPath: "polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px)" }}>
-              ● ROUND {pad(parseInt(race.round))} · UP NEXT
-            </div>
-            <span className="text-4xl">{flag}</span>
-          </div>
-
-          <h2 className="font-orbitron font-black text-white leading-[0.95] uppercase mb-4"
-            style={{ fontSize: "clamp(36px,6vw,76px)" }}>
-            {raceName}
-          </h2>
-
-          <div className="flex flex-col gap-2 mb-6">
-            <div className="flex items-center gap-2 font-rajdhani font-semibold text-base text-[var(--f1-white)]">
-              <MapPin size={14} className="text-[var(--f1-red)]" />
-              <strong>{race.Circuit.circuitName}</strong>
-              <span className="text-[var(--f1-gray-light)]">· {race.Circuit.Location.locality}, {race.Circuit.Location.country}</span>
-            </div>
-            <div className="flex items-center gap-2 font-mono text-[11px] text-[var(--f1-gray-light)]">
-              <Calendar size={12} className="text-[var(--f1-red)]" />
-              {formatDate(race.date)} · Round {race.round} of 24
-              {race.time && (
-                <><Clock size={12} className="ml-2 text-[var(--f1-red)]" /> {race.time.slice(0, 5)} UTC</>
-              )}
-            </div>
-          </div>
-
-          {/* Weekend sessions */}
-          {(race.FirstPractice || race.Qualifying) && (
-            <div className="flex flex-wrap gap-2">
-              {race.FirstPractice && (
-                <SessionBadge label="FP1" date={race.FirstPractice.date} />
-              )}
-              {race.SecondPractice && (
-                <SessionBadge label="FP2" date={race.SecondPractice.date} />
-              )}
-              {race.ThirdPractice && (
-                <SessionBadge label="FP3" date={race.ThirdPractice.date} />
-              )}
-              {race.Sprint && (
-                <SessionBadge label="SPRINT" date={race.Sprint.date} highlight />
-              )}
-              {race.Qualifying && (
-                <SessionBadge label="QUALI" date={race.Qualifying.date} />
-              )}
-              <SessionBadge label="RACE" date={race.date} highlight />
-            </div>
-          )}
+      <div className="relative z-10 p-8 md:p-12 grid grid-cols-1 xl:grid-cols-[1fr_400px] gap-12 items-center">
+        
+        {/* Circuit Visualization Background */}
+        <div className="absolute right-0 top-0 w-full h-full opacity-10 pointer-events-none z-0">
+          <Image 
+            src="/circuit-map.png" 
+            alt="Circuit Map" 
+            fill 
+            className="object-cover opacity-30 grayscale brightness-200"
+            unoptimized
+          />
         </div>
 
-        {/* Countdown */}
-        <div className="flex flex-col justify-center">
-          <div className="flex items-center gap-3 font-mono text-[11px] tracking-[0.3em] text-[var(--f1-gray-light)] mb-6 uppercase">
-            <span className="live-dot" />
-            LIGHTS OUT IN
+        {/* Content Side */}
+        <div className="relative z-10">
+          <div className="flex items-center gap-6 mb-8">
+            <div className="flex flex-col">
+              <div className="font-mono text-[10px] tracking-[0.5em] text-[var(--f1-red)] mb-1 uppercase font-bold">UPCOMING EVENT</div>
+              <div className="h-0.5 w-12 bg-[var(--f1-red)]" />
+            </div>
+            <div className="px-4 py-1.5 border border-white/10 bg-white/5 font-mono text-[11px] tracking-widest text-white">
+              ROUND {pad(parseInt(race.round))}
+            </div>
+          </div>
+
+          <h2 className="font-orbitron font-black text-white leading-[0.9] uppercase mb-8 group-hover:translate-x-2 transition-transform duration-500"
+            style={{ fontSize: "clamp(48px,8vw,90px)" }}>
+            {raceName}<br/>
+            <span className="text-[var(--f1-red)]">GRAND PRIX</span>
+          </h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 flex items-center justify-center border border-white/10 bg-white/5 rounded-full text-2xl">
+                  {flag}
+                </div>
+                <div>
+                  <div className="font-rajdhani font-bold text-white text-lg leading-none mb-1">{race.Circuit.circuitName}</div>
+                  <div className="font-mono text-[10px] text-[var(--f1-gray-light)] uppercase tracking-wider">
+                    {race.Circuit.Location.locality}, {race.Circuit.Location.country}
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-6 pt-4 border-t border-white/5">
+                <div className="flex items-center gap-2 font-mono text-[11px] text-white">
+                  <Calendar size={14} className="text-[var(--f1-red)]" />
+                  {formatDate(race.date)}
+                </div>
+                {race.time && (
+                  <div className="flex items-center gap-2 font-mono text-[11px] text-white">
+                    <Clock size={14} className="text-[var(--f1-red)]" />
+                    {race.time.slice(0, 5)} UTC
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Session Timeline */}
+            <div className="flex flex-col gap-2">
+              <div className="font-mono text-[9px] tracking-[0.3em] text-[var(--f1-gray-light)] mb-2 uppercase">WEEKEND SCHEDULE</div>
+              <div className="flex flex-wrap gap-2">
+                {race.Qualifying && <ScheduleItem label="QUALI" time={race.Qualifying.date} />}
+                {race.Sprint && <ScheduleItem label="SPRINT" time={race.Sprint.date} highlight />}
+                <ScheduleItem label="RACE" time={race.date} active />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Countdown Side */}
+        <div className="relative z-10 flex flex-col items-center xl:items-end justify-center h-full border-l-0 xl:border-l border-white/10 xl:pl-12">
+          <div className="font-mono text-[10px] tracking-[0.4em] text-[var(--f1-gray-light)] mb-8 uppercase text-center xl:text-right w-full">
+            T-MINUS TO LIGHTS OUT
           </div>
 
           {countdown.total > 0 ? (
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-2 gap-4 w-full max-w-[320px]">
               <CountdownCell value={countdown.days} label="DAYS" />
               <CountdownCell value={countdown.hours} label="HRS" />
               <CountdownCell value={countdown.minutes} label="MIN" />
               <CountdownCell value={countdown.seconds} label="SEC" />
             </div>
           ) : (
-            <div className="font-orbitron font-black text-[var(--f1-red)] text-3xl tracking-wider animate-pulse">
-              RACE IN PROGRESS
+            <div className="p-8 border-2 border-[var(--f1-red)] bg-[var(--f1-red)]/10 text-center animate-glow">
+              <div className="font-orbitron font-black text-white text-3xl tracking-tighter mb-2">LIVE SESSION</div>
+              <div className="font-mono text-[10px] text-[var(--f1-red)] tracking-[0.3em] animate-pulse">● TRACK MONITOR ACTIVE</div>
             </div>
           )}
+
+          <button className="mt-10 w-full group/btn flex items-center justify-between px-6 py-4 bg-[var(--f1-red)] text-white font-orbitron font-bold text-xs tracking-[0.2em] hover:bg-white hover:text-black transition-all">
+            VIEW FULL EVENT DETAILS
+            <ChevronRight size={16} className="group-hover/btn:translate-x-1 transition-transform" />
+          </button>
         </div>
       </div>
     </motion.div>
   );
 }
 
-function SessionBadge({ label, date, highlight }: { label: string; date: string; highlight?: boolean }) {
+function ScheduleItem({ label, time, active, highlight }: { label: string; time: string; active?: boolean; highlight?: boolean }) {
   return (
-    <div className={`px-3 py-1.5 border font-mono text-[10px] tracking-widest ${
-      highlight
-        ? "border-[var(--f1-red)] bg-[rgba(225,6,0,0.1)] text-[var(--f1-red)]"
-        : "border-[var(--f1-gray)] text-[var(--f1-gray-light)]"
+    <div className={`px-3 py-2 border font-mono text-[9px] tracking-widest transition-all ${
+      active 
+        ? "border-[var(--f1-red)] bg-[var(--f1-red)] text-white" 
+        : highlight 
+          ? "border-orange-500 bg-orange-500/10 text-orange-500" 
+          : "border-white/10 text-[var(--f1-gray-light)] hover:border-white/30"
     }`}
       style={{ clipPath: "polygon(4px 0,100% 0,100% calc(100% - 4px),calc(100% - 4px) 100%,0 100%,0 4px)" }}>
-      {label} · {formatDate(date)}
+      {label}
     </div>
   );
 }
+
