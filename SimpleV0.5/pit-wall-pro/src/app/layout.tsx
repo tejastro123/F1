@@ -27,6 +27,8 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
+import { CommandCenterOverlay } from "@/components/layout/CommandCenterOverlay";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -36,9 +38,12 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className="antialiased" suppressHydrationWarning>
         <Providers>
+          <CommandCenterOverlay />
           <Ticker />
           <Navbar />
-          <main className="relative z-10 min-h-screen">{children}</main>
+          <main className="relative z-10 min-h-[calc(100vh-60px)] pt-12">
+            {children}
+          </main>
           <Toaster />
         </Providers>
       </body>

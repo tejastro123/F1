@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Flag, Gauge, Users, Building2, Trophy, History,
   Bell, Settings, Menu, X, Radio, ChevronRight,
-  Gamepad2, Brain, Mic, BarChart3, Repeat
+  Gamepad2, Brain, Mic, BarChart3, Repeat, Calendar as CalendarIcon
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUserStore } from "@/store/f1Store";
@@ -22,6 +22,8 @@ const NAV_ITEMS = [
   { href: "/strategy", label: "STRATEGY", icon: Repeat },
   { href: "/history", label: "HISTORY", icon: History },
   { href: "/fantasy", label: "FANTASY", icon: Gamepad2 },
+  { href: "/calendar", label: "CALENDAR", icon: CalendarIcon },
+  { href: "/replay", label: "REPLAY", icon: History },
   { href: "/ai", label: "AI INSIGHTS", icon: Brain },
 ];
 

@@ -8,7 +8,10 @@ import {
 import type { LiveDriver } from "@/types/f1";
 import { BarChart3 } from "lucide-react";
 
-interface Props { drivers: LiveDriver[]; }
+interface Props {
+  drivers: LiveDriver[];
+  height?: number;
+}
 
 function generateSpeedData(drivers: LiveDriver[]) {
   return Array.from({ length: 20 }, (_, i) => {
@@ -22,7 +25,7 @@ function generateSpeedData(drivers: LiveDriver[]) {
 
 const COLORS = ["#E10600", "#FF8700", "#27F4D2", "#0600EF", "#DC0000"];
 
-export function LiveTelemetryChart({ drivers }: Props) {
+export function LiveTelemetryChart({ drivers, height = 260 }: Props) {
   const speedData = useMemo(() => generateSpeedData(drivers), [drivers.length]);
 
   return (
@@ -37,7 +40,7 @@ export function LiveTelemetryChart({ drivers }: Props) {
       </div>
 
       <div className="p-6">
-        <ResponsiveContainer width="100%" height={260}>
+        <ResponsiveContainer width="100%" height={height}>
           <AreaChart data={speedData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
             <defs>
               {drivers.map((d, i) => (

@@ -11,6 +11,10 @@ import { SafetyCarBanner } from "@/components/live/SafetyCarBanner";
 import { RaceProgress } from "@/components/live/RaceProgress";
 import { Radio, Wifi } from "lucide-react";
 
+import { GapSnakeChart } from "@/components/live/GapSnakeChart";
+import { RaceControlFeed } from "@/components/live/RaceControlFeed";
+import { InteractiveTrackMap } from "@/components/live/InteractiveTrackMap";
+
 export default function LivePage() {
   useLiveRace(); // Initializes WS / mock data
   const { liveRace, isConnected, lastUpdate } = useLiveRaceStore();
@@ -41,11 +45,10 @@ export default function LivePage() {
         </div>
 
         <div className="flex items-center gap-4">
-          <div className={`flex items-center gap-2 px-4 py-2 border font-mono text-[11px] tracking-widest ${
-            isConnected
+          <div className={`flex items-center gap-2 px-4 py-2 border font-mono text-[11px] tracking-widest ${isConnected
               ? "border-green-500/40 bg-green-500/5 text-green-400"
               : "border-[var(--f1-gray)] text-[var(--f1-gray-light)]"
-          }`}
+            }`}
             style={{ clipPath: "polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px)" }}>
             <Wifi size={12} />
             {isConnected ? "LIVE FEED ACTIVE" : "CONNECTING..."}
@@ -73,20 +76,31 @@ export default function LivePage() {
             raceStatus={liveRace.raceStatus}
           />
 
-          <div className="grid grid-cols-1 xl:grid-cols-[1fr_360px] gap-6">
-            {/* Main: Leaderboard */}
-            <div>
+          <div className="grid grid-cols-1 xl:grid-cols-[1fr_420px] gap-6 mb-8">
+            {/* Main Content Area */}
+            <div className="space-y-6">
+              {/* Leaderboard */}
               <LiveLeaderboard drivers={liveRace.drivers} />
+
+              {/* Gap Snake Chart */}
+              <GapSnakeChart drivers={liveRace.drivers} />
             </div>
 
             {/* Side panel */}
             <div className="flex flex-col gap-6">
+              {/* Interactive Track Map */}
+              <InteractiveTrackMap drivers={liveRace.drivers} />
+
               <TrackConditions race={liveRace} />
+              <RaceControlFeed />
+
+              {/* Telemetry Chart in sidebar or below */}
+              <div className="card-base p-4">
+                <div className="font-orbitron font-bold text-[10px] text-white tracking-widest mb-4">MINI_TELEMETRY (P1-P3)</div>
+                <LiveTelemetryChart drivers={liveRace.drivers.slice(0, 3)} height={200} />
+              </div>
             </div>
           </div>
-
-          {/* Telemetry Charts */}
-          <LiveTelemetryChart drivers={liveRace.drivers.slice(0, 5)} />
         </>
       )}
     </div>

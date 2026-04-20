@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { Brain, Sparkles, TrendingUp, Cpu, RefreshCw } from "lucide-react";
 import { useF1Store, useLiveRaceStore } from "@/store/f1Store";
+import { useLiveRace } from "@/hooks/useLiveRace";
 
 interface AIInsight {
   type: "prediction" | "analysis" | "comparison" | "strategy";
@@ -27,6 +28,7 @@ const TYPE_ICONS = {
 };
 
 export default function AIInsightsPage() {
+  useLiveRace();
   const { driverStandings, constructorStandings } = useF1Store();
   const { isConnected } = useLiveRaceStore();
   const [loading, setLoading] = useState(false);
@@ -108,7 +110,7 @@ export default function AIInsightsPage() {
             <div className="font-orbitron font-black text-xl text-white tracking-widest">PIT WALL GEMINI ENGINE</div>
             <div className="font-mono text-[10px] text-purple-400 tracking-widest flex items-center gap-2">
               Powered by Google Gemini Flash <span className={`live-dot w-1.5 h-1.5 inline-block ${isConnected ? "" : "opacity-30 grayscale"}`} /> 
-              {isConnected ? "LIVE RAG" : "SYNCING DATA..."}
+              {isConnected ? "LIVE RAG" : "OFFLINE"}
             </div>
           </div>
         </div>

@@ -226,7 +226,15 @@ export type NotificationType =
   | "FASTEST_LAP"
   | "CRASH"
   | "CHAMPIONSHIP_CHANGE"
-  | "WEATHER";
+  | "WEATHER"
+  | "SYSTEM_SUCCESS"
+  | "SYSTEM_ERROR"
+  | "SYSTEM_WARNING"
+  | "SYSTEM_INFO"
+  | "success"
+  | "error"
+  | "warning"
+  | "info";
 
 // App State Types
 export interface UserProfile {

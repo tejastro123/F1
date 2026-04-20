@@ -25,6 +25,7 @@ interface F1DataState {
   
   // Results
   lastRaceResults: RaceResult[];
+  seasonResults: Record<string, RaceResult[]>;
   
   // Metadata
   currentSeason: string;
@@ -37,6 +38,7 @@ interface F1DataState {
   setConstructorStandings: (standings: ConstructorStanding[]) => void;
   setRaces: (races: Race[]) => void;
   setLastRaceResults: (results: RaceResult[]) => void;
+  setSeasonResults: (results: Record<string, RaceResult[]>) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
   computeRaceState: () => void;
@@ -51,6 +53,7 @@ export const useF1Store = create<F1DataState>()(
       nextRace: null,
       lastRace: null,
       lastRaceResults: [],
+      seasonResults: {},
       currentSeason: "2026",
       dataUpdatedAt: null,
       isLoading: false,
@@ -68,6 +71,8 @@ export const useF1Store = create<F1DataState>()(
       },
 
       setLastRaceResults: (results) => set({ lastRaceResults: results }),
+
+      setSeasonResults: (results) => set({ seasonResults: results }),
 
       setLoading: (isLoading) => set({ isLoading }),
 

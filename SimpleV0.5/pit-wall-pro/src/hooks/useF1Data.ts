@@ -7,6 +7,7 @@ import {
   fetchConstructorStandings,
   fetchRaceSchedule,
   fetchRaceResults,
+  fetchSeasonResults,
 } from "@/lib/api";
 import { useF1Store } from "@/store/f1Store";
 
@@ -19,6 +20,7 @@ export function useF1Data() {
     setConstructorStandings,
     setRaces,
     setLastRaceResults,
+    setSeasonResults,
     setLoading,
     setError,
   } = useF1Store();
@@ -91,6 +93,24 @@ export function useF1Data() {
       setLastRaceResults(lastRaceQuery.data.results);
     }
   }, [lastRaceQuery.data, setLastRaceResults]);
+
+  // Season Results Query
+  const seasonResultsQuery = useQuery({
+    queryKey: ["seasonResults"],
+    queryFn: () => fetchSeasonResults(),
+    staleTime: STALE_TIME * 12,
+  });
+
+  useEffect(() => {
+    if (seasonResultsQuery.data) {
+      const resultsMap: Record<string, any[]> = {};
+      const racesWithResults = (seasonResultsQuery.data as any).RaceTable?.Races || [];
+      racesWithResults.forEach((race: any) => {
+        resultsMap[race.round] = race.Results || [];
+      });
+      setSeasonResults(resultsMap);
+    }
+  }, [seasonResultsQuery.data, setSeasonResults]);
 
   const refetchAll = () => {
     queryClient.invalidateQueries({ queryKey: ["driverStandings"] });
