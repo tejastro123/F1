@@ -1,0 +1,254 @@
+@import "tailwindcss";
+
+
+:root {
+  --f1-red: #E10600;
+  --f1-red-bright: #FF1801;
+  --f1-black: #0D0D0D;
+  --f1-dark: #15151E;
+  --f1-darker: #0A0A0F;
+  --f1-gray: #38383F;
+  --f1-gray-light: #8E8E93;
+  --f1-white: #FFFFFF;
+  
+  --mercedes: #27F4D2;
+  --ferrari: #DC0000;
+  --mclaren: #FF8700;
+  --redbull: #0600EF;
+  --williams: #64C4FF;
+  --haas: #B6BABD;
+  --alpine: #0093CC;
+  --audi: #00887C;
+  --racingbulls: #6692FF;
+  --aston: #229971;
+  --cadillac: #8A9099;
+  
+  --gold: #FCD700;
+  --silver: #C0C0C0;
+  --bronze: #CD7F32;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--f1-darker);
+  color: var(--f1-white);
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 400;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* Tech Grid Background */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: 
+    linear-gradient(90deg, rgba(225,6,0,0.025) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(225,6,0,0.025) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Scanline */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent 0%, rgba(225,6,0,0.04) 50%, transparent 100%);
+  height: 120px;
+  animation: scanline 10s linear infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--f1-black); }
+::-webkit-scrollbar-thumb { background: var(--f1-red); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--f1-red-bright); }
+
+/* Animations */
+@keyframes scanline {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100vh); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.3); }
+}
+
+@keyframes ticker {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 5px var(--f1-red); }
+  50% { box-shadow: 0 0 25px var(--f1-red), 0 0 40px var(--f1-red-bright); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -1200px 0; }
+  100% { background-position: 1200px 0; }
+}
+
+@keyframes slideInUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(40px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes countUp {
+  from { opacity: 0; transform: scale(0.5); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes borderGlow {
+  0%, 100% { border-color: var(--f1-gray); }
+  50% { border-color: var(--f1-red); }
+}
+
+@keyframes chartLine {
+  from { stroke-dashoffset: 1000; }
+  to { stroke-dashoffset: 0; }
+}
+
+/* Utility classes */
+.font-orbitron { font-family: 'Orbitron', sans-serif; }
+.font-rajdhani { font-family: 'Rajdhani', sans-serif; }
+.font-mono { font-family: 'JetBrains Mono', monospace; }
+
+.clip-corner-sm {
+  clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+}
+
+.clip-corner-md {
+  clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+}
+
+.clip-corner-lg {
+  clip-path: polygon(20px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%, 0 20px);
+}
+
+.clip-corner-xl {
+  clip-path: polygon(30px 0, 100% 0, 100% 30px, 100% 100%, 30px 100%, 0 calc(100% - 30px));
+}
+
+.text-gradient {
+  background: linear-gradient(135deg, #FFFFFF 0%, var(--f1-red) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-gold {
+  background: linear-gradient(135deg, #FCD700 0%, #FF8700 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.animate-glow { animation: glow 2s ease-in-out infinite; }
+.animate-pulse-dot { animation: pulse 2s ease-in-out infinite; }
+.animate-slide-up { animation: slideInUp 0.6s ease-out; }
+.animate-slide-right { animation: slideInRight 0.6s ease-out; }
+.animate-fade-in { animation: fadeIn 0.4s ease-out; }
+.animate-count { animation: countUp 0.6s ease-out; }
+
+.card-base {
+  background: linear-gradient(135deg, var(--f1-dark) 0%, var(--f1-black) 100%);
+  border: 1.5px solid var(--f1-gray);
+  transition: all 0.3s ease;
+}
+
+.card-base:hover {
+  border-color: var(--f1-red);
+  box-shadow: 0 8px 32px rgba(225, 6, 0, 0.2);
+  transform: translateY(-4px);
+}
+
+.live-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background: var(--f1-red);
+  border-radius: 50%;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.skeleton {
+  background: linear-gradient(90deg, var(--f1-gray) 25%, rgba(255,255,255,0.05) 50%, var(--f1-gray) 75%);
+  background-size: 400% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
+}
+
+/* Ticker */
+.ticker-wrap {
+  overflow: hidden;
+  position: relative;
+  background: var(--f1-black);
+  border-bottom: 2px solid var(--f1-red);
+}
+
+.ticker-track {
+  display: flex;
+  white-space: nowrap;
+  animation: ticker 60s linear infinite;
+  will-change: transform;
+}
+
+.ticker-track:hover { animation-play-state: paused; }
+
+/* Loading shimmer for skeleton screens */
+.shimmer {
+  background: linear-gradient(90deg, var(--f1-dark) 0%, var(--f1-gray) 50%, var(--f1-dark) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Chart styles */
+.recharts-wrapper { font-family: 'JetBrains Mono', monospace !important; }
+.recharts-cartesian-axis-tick-value { fill: var(--f1-gray-light) !important; font-size: 10px !important; }
+.recharts-tooltip-wrapper { outline: none; }
+
+/* Scrollbar for horizontal scroll containers */
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Focus styles */
+*:focus-visible {
+  outline: 2px solid var(--f1-red);
+  outline-offset: 2px;
+}
+
+/* Selection */
+::selection {
+  background: rgba(225, 6, 0, 0.3);
+  color: var(--f1-white);
+}
